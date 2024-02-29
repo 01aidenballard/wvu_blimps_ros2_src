@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-package_name = 'sensors'
+package_name = 'sensors_package'
 
 setup(
     name=package_name,
@@ -13,13 +13,16 @@ setup(
     ],
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='redpi',
-    maintainer_email='scott.blankenship00@outlook.com',
+    maintainer='orangepi',
+    maintainer_email='orangepi@orangepi',
     description='TODO: Package description',
     license='TODO: License declaration',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            "read_altitude = sensors.barometer:main",
+            "read_imu = sensors.imu:main",
+            "balloon_detect = sensors.camera:main"
         ],
     },
 )
