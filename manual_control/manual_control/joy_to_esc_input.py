@@ -2,7 +2,7 @@ import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import Joy
 from blimp_interfaces.msg import EscInput 
-from std_msgs.msg import Float64
+#from std_msgs.msg import Float64
 import time
 
 class FixAxesNode(Node):
@@ -21,18 +21,18 @@ class FixAxesNode(Node):
 		
 		self.publisher = self.create_publisher(EscInput, "ESC_input", 10)
 		
-		self.time_publisher = self.create_publisher(Float64, "time", 10)
+		#self.time_publisher = self.create_publisher(Float64, "time", 10)
 		
 		
 		self.get_logger().info("Data is being sent to the ESC node")
 
 	def callback_manual_esc_input(self, msg):
 		
-		msg3 = Float64()
-		time1 = float(msg.header.stamp.sec + (msg.header.stamp.nanosec)*10^-9)
-		msg3.data = time1
+		#msg3 = Float64()
+		#time1 = float(msg.header.stamp.sec + (msg.header.stamp.nanosec)*10^-9)
+		#msg3.data = time1
 		# ~ self.get_logger.info(str(msg3.data))
-		self.time_publisher.publish(msg3)
+		#self.time_publisher.publish(msg3)
 		
 
 		RM = msg.axes[5]*-100
