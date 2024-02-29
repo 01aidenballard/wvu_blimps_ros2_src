@@ -6,19 +6,17 @@ import cv2
 import numpy as np
 import math
 from blimp_interfaces.msg import CameraCoord
-minimum_radius = 20
+
 
 class CamNode(Node): #Creating a Node
     
     def __init__(self): #initiating node
-        super().__init__('cam_node')
-        
-        self.cam_data = self.create_publisher(CameraCoord,"cam_data",10) #Initializing publisher (message type,name,Qsize(some buffer thing:10 messages before it erases last one)S)
-        
-        self.create_timer(0.2, self.publish_cam_data) #calls function every 0.2 seconds
-	# Minimum radius value for displaying circles
 
-    # Function to detect the color in a video stream
+        super().__init__('cam_node')
+        self.cam_data = self.create_publisher(CameraCoord,"cam_data",10) #Initializing publisher (message type,name,Qsize(some buffer thing:10 messages before it erases last one)S)
+        self.create_timer(0.2, self.publish_cam_data) #calls function every 0.2 seconds
+        self.minimum_radius = 20
+
     def publish_cam_data(self):
 		
         cap = cv2.VideoCapture(0)
@@ -28,6 +26,7 @@ class CamNode(Node): #Creating a Node
         if not cap.isOpened():
             print("Error: Could not open video source.")
             return
+        
         stored_coordinates = [] #List to longterm store detected_coordinates
         frame_count = 0
         total_x = 0
@@ -73,7 +72,7 @@ class CamNode(Node): #Creating a Node
                 (x, y), radius = cv2.minEnclosingCircle(largest_contour)
                 center = (int(x), int(y))
                 radius = int(radius)
-                if radius >= minimum_radius:
+                if radius >= self.minimum_radius:
                     x_direction = "Left" if center[0] > 320 else "Right" if center[0] < 320 else "Center"
                     y_direction = "Up" if center[1] < 240 else "Down" if center[1] > 240 else "Center"
                     detected_coordinates.append((center[0], center[1], x_direction, y_direction))
@@ -94,7 +93,7 @@ class CamNode(Node): #Creating a Node
                     self.get_logger().info("X: " + str(avg_x) + ", Y: " + str(avg_y))
                     msg = CameraCoord()
                     msg.x_pos = avg_x
-                    msg.x_pos = avg_y
+                    msg.y_pos = avg_y
                     self.cam_data.publish(msg)
 
 

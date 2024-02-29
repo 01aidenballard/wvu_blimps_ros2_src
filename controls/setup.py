@@ -20,7 +20,9 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            "esc_driver = controls.esc_driver:main"
+            "esc_driver = controls.esc_driver:main",
+            "balloon_detect_control = controls.balloon_pi:main",
+            "mode_switch = controls.mode_switcher:main"
         ],
     },
 )
