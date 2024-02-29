@@ -9,8 +9,8 @@ class BarometerNode(Node): #Creating a Node
 
 	def __init__(self):
 		super().__init__('barometer_node')
-		self.barometer_data = self.creat_publisher(Float32MultiArray,'barometer_data",10)
-		self.creat_timer(0.2, self.publish_barometer_data)
+		self.barometer_data = self.create_publisher(Float32MultiArray,"barometer_data",10)
+		self.create_timer(0.2, self.publish_barometer_data)
 		i2c = board.I2C() 
 		sensor = adafruit_bmp3xx.BMP3XX_I2C(i2c)
 		sensor.sea_level_pressure = 1019 #hPa, in Morgantown
@@ -18,11 +18,11 @@ class BarometerNode(Node): #Creating a Node
 	def publish_barometer_data(self):
 		
 		while True:
-		msg = Float32MultiArray()
-		msg.data = sensor.altitude
-		self.barometer_data.publish(msg)
+			msg = Float32MultiArray()
+			msg.data = sensor.altitude
+			self.barometer_data.publish(msg)
 		
-		time.sleep(1)
+			time.sleep(1)
 def main(args=None):
 	rclpy.ini(args=args)
 	node = BarometerNode()

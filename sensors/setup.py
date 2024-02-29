@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-package_name = 'sensors_package'
+package_name = 'sensors'
 
 setup(
     name=package_name,
