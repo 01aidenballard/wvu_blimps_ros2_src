@@ -3,6 +3,7 @@ import rclpy
 from rclpy.node import Node
 import time
 import board
+import busio
 import adafruit_bno055
 import numpy as np
 import math
@@ -16,9 +17,8 @@ class ImuNode(Node): #Creating a Node
         self.imu_data = self.create_publisher(Float32MultiArray,"imu_data",10) #Initializing publisher (message type,name,Qsize(some buffer thing:10 messages before it erases last one)S)
         self.create_timer(0.2, self.publish_imu_data) #calls function every 0.2 seconds
         
-    def publish_imu_data(self):
-    #def imu_read(self):    
-        i2c = board.I2C()  # uses board.SCL and board.SDA
+    def publish_imu_data(self): 
+        i2c = busio.I2C(board.SCL, board.SDA)  # uses board.SCL and board.SDA
         # i2c = board.STEMMA_I2C()  # For using the built-in STEMMA QT connector on a microcontroller
         sensor = adafruit_bno055.BNO055_I2C(i2c)
         sensor.mode=adafruit_bno055.M4G_MODE

@@ -17,11 +17,6 @@ def generate_launch_description():
 			package='joy',
 			executable='game_controller_node',
 			name='joy_con'
-		),
-		Node(
-			package='sensors',
-			executable='read_altitude',
-			name='barometer',
         ),
 		Node(
 			package='sensors',
@@ -36,7 +31,7 @@ def generate_launch_description():
 		Node(
 			package='controls',
 			executable='balloon_detect_control',
-			name='balloon_detect PI',
+			name='balloon_detect_PI',
         ),
 		Node(
 			package='controls',
