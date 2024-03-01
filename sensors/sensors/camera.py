@@ -16,7 +16,12 @@ class CamNode(Node): #Creating a Node
         self.cam_data = self.create_publisher(CameraCoord,"cam_data",10) #Initializing publisher (message type,name,Qsize(some buffer thing:10 messages before it erases last one)S)
         self.create_timer(0.2, self.publish_cam_data) #calls function every 0.2 seconds
         self.minimum_radius = 20
+        
+        self.frame_count = 0
+        self.total_x = 0
+        self.total_y = 0
 
+    def publish_cam_data(self):
         self.cap = cv2.VideoCapture(0)
         self.cap.set(3, 640)  # x-axis
         self.cap.set(4, 480)  # y-axis
@@ -25,11 +30,6 @@ class CamNode(Node): #Creating a Node
             print("Error: Could not open video source.")
             return
         
-        self.frame_count = 0
-        self.total_x = 0
-        self.total_y = 0
-
-    def publish_cam_data(self):
         ret, frame = self.cap.read()
         
         if not ret:
