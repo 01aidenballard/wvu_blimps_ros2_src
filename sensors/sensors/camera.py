@@ -34,6 +34,11 @@ class CamNode(Node): #Creating a Node
         
         if not ret:
             print("Error: Could not read frame.")
+            return
+        else:
+            self.callback_read_image(frame)
+
+    def callback_read_image(self,frame):
 
         hsv_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         lower_bound_1 = np.array([56, 41, 155])
