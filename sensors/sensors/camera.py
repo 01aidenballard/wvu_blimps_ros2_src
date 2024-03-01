@@ -22,6 +22,9 @@ class CamNode(Node): #Creating a Node
         self.total_y = 0
 
     def publish_cam_data(self):
+        cam_pipeline_str = 'nvarguscamerasrc sensor-id=0 ! video/x-raw(memory:NVMM),format=NV12,width=1280,height=720,framerate=30/1 ! nvvidconv ! video/x-raw,format=BGRx ! videoconvert ! video/x-raw,format=BGR ! appsink drop=1'
+        cap = cv2.VideoCapture(cam_pipeline_str, cv2.CAP_GSTREAMER)
+        
         self.cap = cv2.VideoCapture(0)
         self.cap.set(3, 640)  # x-axis
         self.cap.set(4, 480)  # y-axis
