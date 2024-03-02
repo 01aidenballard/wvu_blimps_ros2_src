@@ -21,7 +21,7 @@ class CamNode(Node): #Creating a Node
     # Function to detect the color in a video stream
     def publish_cam_data(self):
 		
-        cap = cv2.VideoCapture(0)
+        cap = cv2.VideoCapture(0, cv2.CAP_V4L2)
         cap.set(3, 640)  # x-axis
         cap.set(4, 480)  # y-axis
 
@@ -80,7 +80,7 @@ class CamNode(Node): #Creating a Node
                     stored_coordinates.append((center[0], center[1], x_direction, y_direction))
                     cv2.circle(frame, center, radius, (0, 255, 0), 2)  # Draw a green circle on the frame
             
-            cv2.imshow('Detected Color', frame)
+           # cv2.imshow('Detected Color', frame)
 
             frame_count += 1     
 
