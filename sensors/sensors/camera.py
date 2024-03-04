@@ -21,13 +21,11 @@ class CamNode(Node): #Creating a Node
         self.total_x = 0
         self.total_y = 0
 
-    def publish_cam_data(self):
-        cam_pipeline_str = 'nvarguscamerasrc sensor-id=0 ! video/x-raw(memory:NVMM),format=NV12,width=1280,height=720,framerate=30/1 ! nvvidconv ! video/x-raw,format=BGRx ! videoconvert ! video/x-raw,format=BGR ! appsink drop=1'
-        cap = cv2.VideoCapture(cam_pipeline_str, cv2.CAP_GSTREAMER)
-        
-        self.cap = cv2.VideoCapture(0)
-        self.cap.set(3, 640)  # x-axis
-        self.cap.set(4, 480)  # y-axis
+    def publish_cam_data(self):		
+        cap = cv2.VideoCapture(0, cv2.CAP_V4L2)
+        cap.set(3, 640)  # x-axis
+        cap.set(4, 480)  # y-axis
+
 
         if not self.cap.isOpened():
             print("Error: Could not open video source.")
@@ -78,22 +76,33 @@ class CamNode(Node): #Creating a Node
                 detected_coordinates.append((center[0], center[1], x_direction, y_direction))
                 cv2.circle(frame, center, radius, (0, 255, 0), 2)  # Draw a green circle on the frame
             
-        cv2.imshow('Detected Color', frame)
+
+           # cv2.imshow('Detected Color', frame)
+
 
         self.frame_count += 1     
 
         if self.frame_count % 10 == 0:
-                
-            for idx, (x, y, x_direction, y_direction) in enumerate(detected_coordinates):
-                self.total_x = sum(x for x, _, _, _ in detected_coordinates)
-                self.total_y = sum(y for _, y, _, _ in detected_coordinates)
-                avg_x = self.total_x / len(detected_coordinates)
-                avg_y = self.total_y / len(detected_coordinates)
-                self.get_logger().info("X: " + str(avg_x) + ", Y: " + str(avg_y))
-                msg = CameraCoord()
-                msg.x_pos = avg_x
-                msg.y_pos = avg_y
-                self.cam_data.publish(msg)
+                for idx, (x, y, x_direction, y_direction) in enumerate(detected_coordinates):
+                    total_x = sum(x for x, _, _, _ in detected_coordinates)
+                    total_y = sum(y for _, y, _, _ in detected_coordinates)
+                    avg_x = total_x / len(detected_coordinates)
+                    avg_y = total_y / len(detected_coordinates)
+                    self.get_logger().info("X: " + str(avg_x) + ", Y: " + str(avg_y))
+                    msg = CameraCoord()
+                    msgl = [round(avg_x),round(avg_y)]
+                    msg.x_pos = msgl
+                   # msg.y_pos = round(avg_y)
+                    self.cam_data.publish(msg)
+
+
+
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                cap.release()
+                cv2.destroyAllWindows()
+                break
+
+
 
 
 
