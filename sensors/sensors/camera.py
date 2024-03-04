@@ -14,29 +14,28 @@ class CamNode(Node): #Creating a Node
         super().__init__('cam_node')
         self.cam_data = self.create_publisher(CameraCoord,"cam_data",10) #Initializing publisher (message type,name,Qsize(some buffer thing:10 messages before it erases last one)S)
 
-        cap = cv2.VideoCapture(0, cv2.CAP_V4L2)
-        cap.set(3, 640)  # x-axis
-        cap.set(4, 480)  # y-axis
-        if not cap.isOpened():
+        self.cap = cv2.VideoCapture(0, cv2.CAP_V4L2)
+        self.cap.set(3, 640)  # x-axis
+        self.cap.set(4, 480)  # y-axis
+        if not self.cap.isOpened():
             print("Error: Could not open video source.")
             return
-        
-        self.create_timer(0.2, self.callback_read_image(cap)) #calls function every 0.2 seconds
-        self.minimum_radius = 20
-        
         self.frame_count = 0
         self.total_x = 0
-        self.total_y = 0		
-        
+        self.total_y = 0
+        self.minimum_radius = 20
 
-    def callback_read_image(sel,cap):        
-        
+        self.create_timer(0.2, self.callback_read_image()) #calls function every 0.2 seconds
+        self.get_logger().info("Balloon Detection has Started")
+    def callback_read_image(self):        
+        cap = self.cap
+
         ret, frame = cap.read()
         
         if not ret:
             print("Error: Could not read frame.")
             return
-        
+        self.get_logger().info("pass1")
         hsv_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         lower_bound_1 = np.array([56, 41, 155])
         upper_bound_1 = np.array([76, 81, 255])
@@ -61,7 +60,7 @@ class CamNode(Node): #Creating a Node
                 largest_contour_area = contour_area
 
         detected_coordinates = []  # List to store detected circle coordinates
-
+        self.get_logger().info("pass2")
         if largest_contour is not None:
             (x, y), radius = cv2.minEnclosingCircle(largest_contour)
             center = (int(x), int(y))
@@ -93,7 +92,7 @@ class CamNode(Node): #Creating a Node
             cap.release()
             cv2.destroyAllWindows()
 
-
+        self.get_logger().info("pass3")
 
 
 
