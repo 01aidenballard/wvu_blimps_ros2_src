@@ -22,9 +22,9 @@ class CamNode(Node): #Creating a Node
         self.total_y = 0
 
     def publish_cam_data(self):		
-        cap = cv2.VideoCapture(0, cv2.CAP_V4L2)
-        cap.set(3, 640)  # x-axis
-        cap.set(4, 480)  # y-axis
+        self.cap = cv2.VideoCapture(0, cv2.CAP_V4L2)
+        self.cap.set(3, 640)  # x-axis
+        self.cap.set(4, 480)  # y-axis
 
 
         if not self.cap.isOpened():
@@ -83,24 +83,23 @@ class CamNode(Node): #Creating a Node
         self.frame_count += 1     
 
         if self.frame_count % 10 == 0:
-                for idx, (x, y, x_direction, y_direction) in enumerate(detected_coordinates):
-                    total_x = sum(x for x, _, _, _ in detected_coordinates)
-                    total_y = sum(y for _, y, _, _ in detected_coordinates)
-                    avg_x = total_x / len(detected_coordinates)
-                    avg_y = total_y / len(detected_coordinates)
-                    self.get_logger().info("X: " + str(avg_x) + ", Y: " + str(avg_y))
-                    msg = CameraCoord()
-                    msgl = [round(avg_x),round(avg_y)]
-                    msg.x_pos = msgl
-                   # msg.y_pos = round(avg_y)
-                    self.cam_data.publish(msg)
+            for idx, (x, y, x_direction, y_direction) in enumerate(detected_coordinates):
+                total_x = sum(x for x, _, _, _ in detected_coordinates)
+                total_y = sum(y for _, y, _, _ in detected_coordinates)
+                avg_x = total_x / len(detected_coordinates)
+                avg_y = total_y / len(detected_coordinates)
+                self.get_logger().info("X: " + str(avg_x) + ", Y: " + str(avg_y))
+                msg = CameraCoord()
+                msgl = [round(avg_x),round(avg_y)]
+                msg.x_pos = msgl
+                # msg.y_pos = round(avg_y)
+                self.cam_data.publish(msg)
 
 
 
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                cap.release()
-                cv2.destroyAllWindows()
-                break
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            self.cap.release()
+            cv2.destroyAllWindows()
 
 
 
