@@ -14,33 +14,31 @@ class CamNode(Node): #Creating a Node
 
         super().__init__('cam_node')
         self.cam_data = self.create_publisher(CameraCoord,"cam_data",10) #Initializing publisher (message type,name,Qsize(some buffer thing:10 messages before it erases last one)S)
-        self.create_timer(0.2, self.publish_cam_data) #calls function every 0.2 seconds
+        self.create_timer(0.2, self.callback_read_image) #calls function every 0.2 seconds
         self.minimum_radius = 20
         
         self.frame_count = 0
         self.total_x = 0
-        self.total_y = 0
+        self.total_y = 0		
+        
 
-    def publish_cam_data(self):		
-        self.cap = cv2.VideoCapture(0, cv2.CAP_V4L2)
-        self.cap.set(3, 640)  # x-axis
-        self.cap.set(4, 480)  # y-axis
+    def callback_read_image(self,frame):
+
+        cap = cv2.VideoCapture(0, cv2.CAP_V4L2)
+        cap.set(3, 640)  # x-axis
+        cap.set(4, 480)  # y-axis
 
 
-        if not self.cap.isOpened():
+        if not cap.isOpened():
             print("Error: Could not open video source.")
             return
         
-        ret, frame = self.cap.read()
+        ret, frame = cap.read()
         
         if not ret:
             print("Error: Could not read frame.")
             return
-        else:
-            self.callback_read_image(frame)
-
-    def callback_read_image(self,frame):
-
+        
         hsv_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         lower_bound_1 = np.array([56, 41, 155])
         upper_bound_1 = np.array([76, 81, 255])
@@ -81,7 +79,6 @@ class CamNode(Node): #Creating a Node
 
 
         self.frame_count += 1     
-
         if self.frame_count % 10 == 0:
             for idx, (x, y, x_direction, y_direction) in enumerate(detected_coordinates):
                 total_x = sum(x for x, _, _, _ in detected_coordinates)
@@ -94,11 +91,8 @@ class CamNode(Node): #Creating a Node
                 msg.x_pos = msgl
                 # msg.y_pos = round(avg_y)
                 self.cam_data.publish(msg)
-
-
-
         if cv2.waitKey(1) & 0xFF == ord('q'):
-            self.cap.release()
+            cap.release()
             cv2.destroyAllWindows()
 
 
