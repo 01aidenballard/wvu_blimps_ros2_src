@@ -22,7 +22,7 @@ class CamNode(Node): #Creating a Node
         self.total_y = 0		
         
 
-    def callback_read_image(self,frame):
+    def callback_read_image(self):
 
         cap = cv2.VideoCapture(0, cv2.CAP_V4L2)
         cap.set(3, 640)  # x-axis
