@@ -48,7 +48,6 @@ class FixAxesNode(Node):
 			DM = 0
 		
 		LM_pwm = self.control_to_esc_input(LM)
-		LM_PWM = 1050 + (((LM-0)*(1900-1050))/(100 - 0))
 		UM_pwm = self.control_to_esc_input(UM)
 		DM_pwm = self.control_to_esc_input(DM)
 		RM_pwm = self.control_to_esc_input(RM)

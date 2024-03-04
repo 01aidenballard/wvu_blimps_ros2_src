@@ -1,2 +1,2 @@
-int64[] x_pos
-int64[] y_pos
+# should be a 2 integer array the first position is x and the second position is y.
+int64[2] position

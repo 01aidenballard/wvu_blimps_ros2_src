@@ -32,19 +32,24 @@ class BalloonPI(Node):
 
 	def callback_pi_control_balloon(self, coord):
 		msg2 = EscInput()
-		y = coord.y_pos
-		
+
 		self.x_error = self.x_goal - coord.x_pos
 		self.y_error = self.y_goal - coord.y_pos
+
 		self.x_int_error += self.x_error
 		self.y_int_error += self.y_error
+
 		L_input = 1400 + (self.x_error*self.kpx + self.x_int_error*self.kix)
 		R_input = 1400 - (self.x_error*self.kpx + self.x_int_error*self.kix)
+
 		UD_input = self.y_error*self.kpy + self.y_int_error*self.kiy
+
 		if UD_input > 0:
 			D_input = UD_input
 		elif UD_input < 0:
 			U_input = UD_input
+
+		self.get_logger("PI input").info("L Motor: " + str(L_input) + " R Motor: " + str(R_input) + " U Motor: " + str(U_input) + " D Motor: " + str(D_input))
 		
 		msg2.esc_pins = [self.ESC_pin1, self.ESC_pin2, self.ESC_pin3, self.ESC_pin4]
 		msg2.esc_pwm = [L_input,R_input,U_input,D_input]

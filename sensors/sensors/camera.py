@@ -11,10 +11,17 @@ from blimp_interfaces.msg import CameraCoord
 class CamNode(Node): #Creating a Node
     
     def __init__(self): #initiating node
-
         super().__init__('cam_node')
         self.cam_data = self.create_publisher(CameraCoord,"cam_data",10) #Initializing publisher (message type,name,Qsize(some buffer thing:10 messages before it erases last one)S)
-        self.create_timer(0.2, self.callback_read_image) #calls function every 0.2 seconds
+
+        cap = cv2.VideoCapture(0, cv2.CAP_V4L2)
+        cap.set(3, 640)  # x-axis
+        cap.set(4, 480)  # y-axis
+        if not cap.isOpened():
+            print("Error: Could not open video source.")
+            return
+        
+        self.create_timer(0.2, self.callback_read_image(cap)) #calls function every 0.2 seconds
         self.minimum_radius = 20
         
         self.frame_count = 0
@@ -22,16 +29,7 @@ class CamNode(Node): #Creating a Node
         self.total_y = 0		
         
 
-    def callback_read_image(self):
-
-        cap = cv2.VideoCapture(0, cv2.CAP_V4L2)
-        cap.set(3, 640)  # x-axis
-        cap.set(4, 480)  # y-axis
-
-
-        if not cap.isOpened():
-            print("Error: Could not open video source.")
-            return
+    def callback_read_image(sel,cap):        
         
         ret, frame = cap.read()
         
@@ -86,11 +84,11 @@ class CamNode(Node): #Creating a Node
                 avg_x = total_x / len(detected_coordinates)
                 avg_y = total_y / len(detected_coordinates)
                 self.get_logger().info("X: " + str(avg_x) + ", Y: " + str(avg_y))
+
                 msg = CameraCoord()
-                msgl = [round(avg_x),round(avg_y)]
-                msg.x_pos = msgl
-                # msg.y_pos = round(avg_y)
+                msg.position = [round(avg_x),round(avg_y)]
                 self.cam_data.publish(msg)
+
         if cv2.waitKey(1) & 0xFF == ord('q'):
             cap.release()
             cv2.destroyAllWindows()
