@@ -15,15 +15,19 @@ class ImuNode(Node): #Creating a Node
     def __init__(self): #initiating node
         super().__init__('imu_node') #naming node 'imu_node'
         self.imu_data = self.create_publisher(Float32MultiArray,"imu_data",10) #Initializing publisher (message type,name,Qsize(some buffer thing:10 messages before it erases last one)S)
+        self.i2c = busio.I2C(board.SCL, board.SDA)
+        self.sensor = adafruit_bno055.BNO055_I2C(self.i2c)
+        self.sensor.mode = adafruit_bno055.M4G_MODE
+        self.sensor.mode = adafruit_bno055.NDOF_MODE
         self.create_timer(0.2, self.publish_imu_data) #calls function every 0.2 seconds
         
     def publish_imu_data(self): 
-        i2c = busio.I2C(board.SCL, board.SDA)  # uses board.SCL and board.SDA
+        #i2c = busio.I2C(board.SCL, board.SDA)  # uses board.SCL and board.SDA
         # i2c = board.STEMMA_I2C()  # For using the built-in STEMMA QT connector on a microcontroller
-        sensor = adafruit_bno055.BNO055_I2C(i2c)
-        sensor.mode=adafruit_bno055.M4G_MODE
+        #sensor = adafruit_bno055.BNO055_I2C(i2c)
+        #sensor.mode=adafruit_bno055.M4G_MODE
         #time.sleep(2)
-        sensor.mode=adafruit_bno055.NDOF_MODE
+        #sensor.mode=adafruit_bno055.NDOF_MODE
         # If you are going to use UART uncomment these lines
         # uart = board.UART()
         # sensor = adafruit_bno055.BNO055_UART(uart)
@@ -40,7 +44,8 @@ class ImuNode(Node): #Creating a Node
             #msg = Imu()
             #msg.data = sensor.eulerself.publisher_.publish(msg)
             msg = Float32MultiArray()
-            msg.data = sensor.euler
+            msg.data = self.sensor.euler
+            self.get_logger().info(str(msg))
             self.imu_data.publish(msg)
 
             time.sleep(1)
