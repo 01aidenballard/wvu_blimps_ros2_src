@@ -19,7 +19,7 @@ class FixAxesNode(Node):
 			Joy, "joy", self.callback_manual_esc_input, 10
 		)
 		
-		self.publisher = self.create_publisher(EscInput, "ESC_input", 10)
+		self.publisher = self.create_publisher(EscInput, "ESC_Manual_input", 10)
 		
 		#self.time_publisher = self.create_publisher(Float64, "time", 10)
 		
