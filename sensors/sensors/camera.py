@@ -11,7 +11,7 @@ from blimp_interfaces.msg import CameraCoord
 class CamNode(Node): #Creating a Node
     
     def __init__(self): #initiating node
-        
+
         super().__init__('cam_node')
 
         self.cam_data = self.create_publisher(CameraCoord,"cam_data",10) #Initializing publisher (message type,name,Qsize(some buffer thing:10 messages before it erases last one)S)
@@ -82,8 +82,6 @@ class CamNode(Node): #Creating a Node
             
 
            # cv2.imshow('Detected Color', frame)
-
-
         self.frame_count += 1     
         if self.frame_count % 10 == 0:
             for idx, (x, y, x_direction, y_direction) in enumerate(detected_coordinates):
