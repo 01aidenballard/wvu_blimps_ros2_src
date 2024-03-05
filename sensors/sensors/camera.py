@@ -1,4 +1,5 @@
 
+
 import rclpy
 from rclpy.node import Node
 import time
@@ -20,31 +21,26 @@ class CamNode(Node): #Creating a Node
         self.cap.set(3, 640)  # x-axis
         self.cap.set(4, 480)  # y-axis
 
-        if not self.cap.isOpened():
-            print("Error: Could not open video source.")
-            return
-        
         self.frame_count = 0
         self.total_x = 0
         self.total_y = 0
         self.minimum_radius = 20
 
-        self.create_timer(0.2, self.callback_check_image()) #calls function every 0.2 seconds
-
+        self.create_timer(0.01, self.callback_read_image) #calls function every 0.2 seconds
+        
         self.get_logger().info("Balloon Detection has Started")
 
-    def callback_check_image(self):
+    def callback_read_image(self):
+        if not self.cap.isOpened():
+            self.get_logger().info("Error: Could not open video source.")
+            return
+
         ret, frame = self.cap.read()
         
         if not ret:
-            print("Error: Could not read frame.")
-        else:
-            self.callback_read_image(frame)
-
-    def callback_read_image(self,frame):
-
-        
-        self.get_logger().info("pass1")
+            self.get_logger().info("Error: Could not read frame.")
+            return
+       
         hsv_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         lower_bound_1 = np.array([56, 41, 155])
         upper_bound_1 = np.array([76, 81, 255])
@@ -69,7 +65,6 @@ class CamNode(Node): #Creating a Node
                 largest_contour_area = contour_area
 
         detected_coordinates = []  # List to store detected circle coordinates
-        self.get_logger().info("pass2")
         if largest_contour is not None:
             (x, y), radius = cv2.minEnclosingCircle(largest_contour)
             center = (int(x), int(y))
@@ -89,17 +84,11 @@ class CamNode(Node): #Creating a Node
                 total_y = sum(y for _, y, _, _ in detected_coordinates)
                 avg_x = total_x / len(detected_coordinates)
                 avg_y = total_y / len(detected_coordinates)
-                self.get_logger().info("X: " + str(avg_x) + ", Y: " + str(avg_y))
+                #self.get_logger().info("X: " + str(avg_x) + ", Y: " + str(avg_y))
 
                 msg = CameraCoord()
                 msg.position = [round(avg_x),round(avg_y)]
                 self.cam_data.publish(msg)
-
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            self.cap.release()
-            cv2.destroyAllWindows()
-
-        self.get_logger().info("pass3")
 
 
 

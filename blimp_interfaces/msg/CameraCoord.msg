@@ -1,2 +1,2 @@
 # should be a 2 integer array the first position is x and the second position is y.
-int64[2] position
+int64[] position

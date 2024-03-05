@@ -39,7 +39,7 @@ class BalloonPI(Node):
 		
 		if msg.buttons[0]  == 1:
 			self.Manual_mode is not self.Manual_mode
-		
+			self.get_logger().info("We are switching modes")
 		
 		if self.Manual_mode == True:
 			msg2.esc_pins = self.manual_pins
