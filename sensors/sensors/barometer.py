@@ -19,7 +19,7 @@ class BarometerNode(Node): #Creating a Node
                 while True:
                         msg = Float32MultiArray()
                         msg.data = [self.sensor.altitude]
-                        self.get_logger().info(str(msg))
+                        #self.get_logger().info(str(msg)) # Prints data to command line
                         self.barometer_data.publish(msg)
 
                         time.sleep(1)

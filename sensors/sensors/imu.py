@@ -14,6 +14,10 @@ class ImuNode(Node): #Creating a Node
     
     def __init__(self): #initiating node
         super().__init__('imu_node') #naming node 'imu_node'
+        # If you are going to use UART uncomment these lines
+        # self.uart = self.board.UART()
+        # self.sensor = adafruit_bno055.BNO055_UART(uart)
+        
         self.imu_data = self.create_publisher(Float32MultiArray,"imu_data",10) #Initializing publisher (message type,name,Qsize(some buffer thing:10 messages before it erases last one)S)
         self.i2c = busio.I2C(board.SCL, board.SDA)
         self.sensor = adafruit_bno055.BNO055_I2C(self.i2c)
@@ -22,16 +26,7 @@ class ImuNode(Node): #Creating a Node
         self.create_timer(0.2, self.publish_imu_data) #calls function every 0.2 seconds
         
     def publish_imu_data(self): 
-        #i2c = busio.I2C(board.SCL, board.SDA)  # uses board.SCL and board.SDA
-        # i2c = board.STEMMA_I2C()  # For using the built-in STEMMA QT connector on a microcontroller
-        #sensor = adafruit_bno055.BNO055_I2C(i2c)
-        #sensor.mode=adafruit_bno055.M4G_MODE
-        #time.sleep(2)
-        #sensor.mode=adafruit_bno055.NDOF_MODE
-        # If you are going to use UART uncomment these lines
-        # uart = board.UART()
-        # sensor = adafruit_bno055.BNO055_UART(uart)
-        #linear_acceleration = self.BNO055_I2C.get_linear_acceleration
+        #linear_acceleration = self.sensor.get_linear_acceleration
         #msg.linear_acceleration.x = linear_acceleration[0]
         #self.send_imu_command_pub_.publish(msg)
         while True:
@@ -45,7 +40,7 @@ class ImuNode(Node): #Creating a Node
             #msg.data = sensor.eulerself.publisher_.publish(msg)
             msg = Float32MultiArray()
             msg.data = self.sensor.euler
-            self.get_logger().info(str(msg))
+            # self.get_logger().info(str(msg)) # Displays data on command line
             self.imu_data.publish(msg)
 
             time.sleep(1)
