@@ -7,8 +7,8 @@ from sensor_msgs.msg import Joy
 class BalloonPI(Node):
 	def __init__(self):
 		self.Manual_mode = True
-		self.manual_pins = [0,0,0,0]
-		self.manual_pwm = [0.0,0.0,0.0,0.0]
+		self.manual_pins = [5,6,13,26]
+		self.manual_pwm = [1100.0,1100.0,1100.0,1100.0]
 		self.camera_pins = self.manual_pins
 		self.camera_pwm = self. manual_pwm
 		super().__init__("mode_switcher")
