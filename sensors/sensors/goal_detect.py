@@ -35,9 +35,9 @@ class CamNode(Node): #Creating a Node
         self.total_center_y = 0
         self.total_centers = 0
 
-        self.create_timer(0.2, self.callback_check_image()) #calls function every 0.2 seconds
+        self.create_timer(0.05, self.callback_check_image()) #calls function every 0.2 seconds
 
-        self.get_logger().info("Balloon Detection has Started")
+        self.get_logger().info("Goal Detection has Started")
 
     def callback_check_image(self):
         ret, frame = self.cap.read()
