@@ -7,7 +7,8 @@ import busio
 import adafruit_bno055
 import numpy as np
 import math
-from std_msgs.msg import Float32MultiArray #also have to add dependcy package into package.xml
+#from std_msgs.msg import Float32MultiArray #also have to add dependcy package into package.xml
+from blimp_interfaces.msg import ImuData
 
 
 class ImuNode(Node): #Creating a Node
@@ -18,7 +19,7 @@ class ImuNode(Node): #Creating a Node
         # self.uart = self.board.UART()
         # self.sensor = adafruit_bno055.BNO055_UART(uart)
         
-        self.imu_data = self.create_publisher(Float32MultiArray,"imu_data",10) #Initializing publisher (message type,name,Qsize(some buffer thing:10 messages before it erases last one)S)
+        self.imu_data = self.create_publisher(ImuData,"imu_data",10) #Initializing publisher (message type,name,Qsize(some buffer thing:10 messages before it erases last one)S)
         self.i2c = busio.I2C(board.SCL, board.SDA)
         self.sensor = adafruit_bno055.BNO055_I2C(self.i2c)
         self.sensor.mode = adafruit_bno055.M4G_MODE
@@ -38,9 +39,11 @@ class ImuNode(Node): #Creating a Node
             #print("Magnetometer: {}".format(sensor.magnetic))
             #msg = Imu()
             #msg.data = sensor.eulerself.publisher_.publish(msg)
-            msg = Float32MultiArray()
-            msg.data = self.sensor.euler
-            # self.get_logger().info(str(msg)) # Displays data on command line
+            msg = ImuData()
+            msg.imu_lin_accel = [self.sensor.linear_acceleration]
+            msg.imu_gyro = [self.sensor.gyro]
+            msg.imu_euler = [self.sensor.euler]
+            #self.get_logger().info(str(msg.imu_lin_accel)) # Displays data on command line
             self.imu_data.publish(msg)
 
             time.sleep(1)
