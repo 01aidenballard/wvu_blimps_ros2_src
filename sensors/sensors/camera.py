@@ -26,7 +26,7 @@ class CamNode(Node): #Creating a Node
         self.total_y = 0
         self.minimum_radius = 20
 
-        self.create_timer(0.01, self.callback_read_image) #calls function every 0.2 seconds
+        self.create_timer(0.5, self.callback_read_image) #calls function every 0.2 seconds
         
         self.get_logger().info("Balloon Detection has Started")
 

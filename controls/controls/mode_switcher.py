@@ -9,16 +9,16 @@ class BalloonPI(Node):
 	def __init__(self):
 		self.Manual_mode = True
 		self.manual_pins = [5,6,13,26]
-		self.manual_pwm = [1100.0,1100.0,1100.0,1100.0]
+		self.manual_pwm = [1050.0,1050.0,1050.0,1050.0]
 		self.camera_pins = self.manual_pins
 		self.camera_pwm = self. manual_pwm
 		super().__init__("mode_switcher")
 				
-		self.subscriber = self.create_subscription(
+		self.manual_subscriber = self.create_subscription(
 			EscInput, "ESC_Manual_input", self.callback_manual, 10
 		)
 		
-		self.subscriber = self.create_subscription(
+		self.camera_subscriber = self.create_subscription(
 			EscInput, "ESC_balloon_input", self.callback_camera, 10
 		)
 		
@@ -44,7 +44,7 @@ class BalloonPI(Node):
 		
 		if msg.buttons[0]  == 1:
 			self.Manual_mode is not self.Manual_mode
-			self.get_logger().info("We are switching modes")
+			self.get_logger().info("Manual Mode is " + str(self.Manual_mode))
 			time.sleep(2)
 		
 		if self.Manual_mode == True:

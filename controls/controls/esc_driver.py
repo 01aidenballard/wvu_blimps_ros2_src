@@ -57,6 +57,7 @@ def main(args=None):
 	rclpy.init(args=args)
 	node = EscControl()
 	rclpy.spin(node)
+	os.system("sudo killall pigpiod")
 	rclpy.shutdown()
 
 if __name__ == "__main__":
