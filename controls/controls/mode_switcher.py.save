@@ -15,11 +15,11 @@ class BalloonPI(Node):
 		super().__init__("mode_switcher")
 				
 		self.subscriber = self.create_subscription(
-			EscInput, "ESC_Manual_input", self.callback_manual, 10
+			EscInput, "ESC_Manual_input", self.callback_camera, 10
 		)
 		
 		self.subscriber = self.create_subscription(
-			EscInput, "ESC_balloon_input", self.callback_camera, 10
+			EscInput, "ESC_balloon_input", self.callback_manual, 10
 		)
 		
 		self.subscriber = self.create_subscription(
@@ -34,10 +34,12 @@ class BalloonPI(Node):
 		self.camera_pins = msg.esc_pins
 		self.camera_pwm = msg.esc_pwm
 		self.get_logger().info("Camera")
+		
 	def callback_manual(self,msg):
 		self.manual_pins = msg.esc_pins
 		self.manual_pwm = msg.esc_pwm
-		self.get_logger().info("Manual")
+\
+
 
 	def callback_switch_mode(self, msg):
 		msg2 = EscInput()

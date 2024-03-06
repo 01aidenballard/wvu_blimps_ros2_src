@@ -28,7 +28,7 @@ class EscControl(Node):
 		pins = msg.esc_pins
 		pwm = msg.esc_pwm
 		self.inputs = pwm
-		self.get_logger().info(str(pins[0]))
+		self.get_logger().info(str(pwm))
 
 		self.pi.set_servo_pulsewidth(pins[0], pwm[0])
 		self.pi.set_servo_pulsewidth(pins[1], pwm[1])
