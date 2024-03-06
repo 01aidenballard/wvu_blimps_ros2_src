@@ -40,10 +40,13 @@ class ImuNode(Node): #Creating a Node
             #msg = Imu()
             #msg.data = sensor.eulerself.publisher_.publish(msg)
             msg = ImuData()
-            msg.imu_lin_accel = [self.sensor.linear_acceleration]
-            msg.imu_gyro = [self.sensor.gyro]
-            msg.imu_euler = [self.sensor.euler]
-            #self.get_logger().info(str(msg.imu_lin_accel)) # Displays data on command line
+            lin_accel = self.sensor.linear_acceleration
+            gyro = self.sensor.gyro
+            euler = self.sensor.euler
+            msg.imu_lin_accel = [lin_accel[0],lin_accel[1],lin_accel[2]]
+            msg.imu_gyro = [gyro[0],gyro[1],gyro[2]]
+            msg.imu_euler = [euler[0],euler[1],euler[2]]
+            #self.get_logger().info(str(msg.imu_euler)) # Displays data on command line
             self.imu_data.publish(msg)
 
             time.sleep(1)

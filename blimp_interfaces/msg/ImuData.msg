@@ -1,3 +1,3 @@
-float64[3] imu_lin_accel
-float64[3] imu_gyro
-float64[3] imu_euler
+float32[] imu_lin_accel
+float32[] imu_gyro
+float32[] imu_euler
