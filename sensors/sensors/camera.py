@@ -82,7 +82,7 @@ class CamNode(Node): #Creating a Node
                 total_y = sum(y for _, y in detected_coordinates)
                 avg_x = total_x / len(detected_coordinates)
                 avg_y = total_y / len(detected_coordinates)
-                self.get_logger().info("X: " + str(avg_x) + ", Y: " + str(avg_y))
+                #self.get_logger().info("X: " + str(avg_x) + ", Y: " + str(avg_y))
                 msg = CameraCoord()
                 msg.position = [int(avg_x),int(avg_y)]
                 self.cam_data.publish(msg)
