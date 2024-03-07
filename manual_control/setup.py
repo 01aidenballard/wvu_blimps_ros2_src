@@ -21,7 +21,8 @@ setup(
     entry_points={
         'console_scripts': [
             "joy_to_esc = manual_control.joy_to_esc_input:main",
-            "manual_esc = manual_control.manual_esc_control:main"
+            "manual_esc = manual_control.manual_esc_control:main",
+            "manual_bridge = manual_control.manual_bridge:main"
         ],
     },
 )

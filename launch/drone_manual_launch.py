@@ -9,6 +9,11 @@ def generate_launch_description():
 			executable='joy_to_esc'
 		),
 		Node(
+			package='manual_control',
+			name='bridge',
+			executable='manual_bridge'
+		),
+		Node(
 			package='controls',
 			name='esc_motor_driver',
 			executable='esc_driver'
