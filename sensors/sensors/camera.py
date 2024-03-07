@@ -1,5 +1,4 @@
-
-
+import tracemalloc
 import rclpy
 from rclpy.node import Node
 import time
@@ -10,7 +9,7 @@ from blimp_interfaces.msg import CameraCoord
 
 
 class CamNode(Node): #Creating a Node
-    
+
     def __init__(self): #initiating node
 
         super().__init__('cam_node')
@@ -26,26 +25,27 @@ class CamNode(Node): #Creating a Node
         self.total_y = 0
         self.minimum_radius = 20
 
-        self.create_timer(0.5, self.callback_read_image) #calls function every 0.2 seconds
-        
+        self.create_timer(0.25, self.callback_read_image) #calls function every 0.2 seconds
+
         self.get_logger().info("Balloon Detection has Started")
 
     def callback_read_image(self):
+        #tracemalloc.start()
         if not self.cap.isOpened():
             self.get_logger().info("Error: Could not open video source.")
             return
 
         ret, frame = self.cap.read()
-        
+
         if not ret:
             self.get_logger().info("Error: Could not read frame.")
             return
-       
+
         hsv_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         lower_bound_1 = np.array([56, 41, 155])
         upper_bound_1 = np.array([76, 81, 255])
-            
-        lower_bound_2 = np.array([116, 16, 154]) 
+
+        lower_bound_2 = np.array([116, 16, 154])
         upper_bound_2 = np.array([136, 116, 254])
 
         mask_1 = cv2.inRange(hsv_frame, lower_bound_1, upper_bound_1)
@@ -70,29 +70,28 @@ class CamNode(Node): #Creating a Node
             center = (int(x), int(y))
             radius = int(radius)
             if radius >= self.minimum_radius:
-                x_direction = "Left" if center[0] > 320 else "Right" if center[0] < 320 else "Center"
-                y_direction = "Up" if center[1] < 240 else "Down" if center[1] > 240 else "Center"
-                detected_coordinates.append((center[0], center[1], x_direction, y_direction))
-                cv2.circle(frame, center, radius, (0, 255, 0), 2)  # Draw a green circle on the frame
-            
+                detected_coordinates.append((center[0], center[1]))
+                # cv2.circle(frame, center, radius, (0, 255, 0), 2)  # Draw a green circle on the frame
+
 
            # cv2.imshow('Detected Color', frame)
-        self.frame_count += 1     
+        self.frame_count += 1
         if self.frame_count % 10 == 0:
-            for idx, (x, y, x_direction, y_direction) in enumerate(detected_coordinates):
-                total_x = sum(x for x, _, _, _ in detected_coordinates)
-                total_y = sum(y for _, y, _, _ in detected_coordinates)
+            for idx, (x, y) in enumerate(detected_coordinates):
+                total_x = sum(x for x, _ in detected_coordinates)
+                total_y = sum(y for _, y in detected_coordinates)
                 avg_x = total_x / len(detected_coordinates)
                 avg_y = total_y / len(detected_coordinates)
-                #self.get_logger().info("X: " + str(avg_x) + ", Y: " + str(avg_y))
-
+                self.get_logger().info("X: " + str(avg_x) + ", Y: " + str(avg_y))
                 msg = CameraCoord()
-                msg.position = [round(avg_x),round(avg_y)]
+                msg.position = [int(avg_x),int(avg_y)]
                 self.cam_data.publish(msg)
+        #snapshot = tracemalloc.take_snapshot()
+        #top_stats = snapshot.statistics('lineno')
+        #for stat in top_stats[:10]:
+        #    print(stat)
 
 
-
-        
 def main(args=None):
     rclpy.init(args=args)
     node = CamNode()
@@ -102,4 +101,3 @@ def main(args=None):
 if __name__ == '__main__': #this allows us to run script from terminal directly
     main()
 
- 

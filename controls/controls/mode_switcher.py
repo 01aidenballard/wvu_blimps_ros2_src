@@ -33,19 +33,20 @@ class BalloonPI(Node):
 	def callback_camera(self,msg):
 		self.camera_pins = msg.esc_pins
 		self.camera_pwm = msg.esc_pwm
-		self.get_logger().info("Camera")
+		
 	def callback_manual(self,msg):
 		self.manual_pins = msg.esc_pins
 		self.manual_pwm = msg.esc_pwm
-		self.get_logger().info("Manual")
+		
 
 	def callback_switch_mode(self, msg):
 		msg2 = EscInput()
 		
 		if msg.buttons[0]  == 1:
-			self.Manual_mode is not self.Manual_mode
-			self.get_logger().info("Manual Mode is " + str(self.Manual_mode))
+			self.Manual_mode = not self.Manual_mode
 			time.sleep(2)
+			self.get_logger().info("Manual Mode is " + str(self.Manual_mode))
+			
 		
 		if self.Manual_mode == True:
 			msg2.esc_pins = self.manual_pins

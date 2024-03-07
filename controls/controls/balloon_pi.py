@@ -54,7 +54,7 @@ class BalloonPI(Node):
 		
 		msg2.esc_pins = [self.ESC_pin1, self.ESC_pin2, self.ESC_pin3, self.ESC_pin4]
 		msg2.esc_pwm = [L_input,R_input,U_input,D_input]
-		
+		self.get_logger().info(str(coord))
 		self.publisher.publish(msg2)
 
 
