@@ -11,7 +11,7 @@ class ManualBridgeNode(Node):
 			EscInput, "ESC_Manual_input", self.callback_manual_bridge, 10
 		)
 		
-		self.publisher = self.create_publisher(EscInput, "ESC__input", 10)
+		self.publisher = self.create_publisher(EscInput, "ESC_input", 10)
 		
 		#self.time_publisher = self.create_publisher(Float64, "time", 10)
 		
