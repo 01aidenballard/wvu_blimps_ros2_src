@@ -23,6 +23,11 @@ def generate_launch_description():
 			executable='game_controller_node',
 			name='joy_con'
 		),
+		Node(
+			package ='sensors',
+			executable = 'read_imu',
+			name = 'imu'
+		),
 	])
 def main(args=None):
 	generate_launch_description()

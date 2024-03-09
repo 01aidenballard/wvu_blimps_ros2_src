@@ -51,7 +51,7 @@ class ImuNode(Node): #Creating a Node
         f = open("imu_data_1.txt", 'a')
         f.write("Euler Angles: {}".format(sensor.euler) + " Lin Acceleration: {}".format(sensor.acceleration) +
          " Gyro: {}".format(sensor.gyro) + " Lin Acceleration NoG: {}".format(sensor.linear_acceleration) + " Gravity: {}".format(sensor.gravity) + " Time: {}".format(dt) + "\n")
-
+        f.close()
 def main(args=None):
     rclpy.init(args=args)
     node = ImuNode()

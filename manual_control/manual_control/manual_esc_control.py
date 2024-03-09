@@ -29,25 +29,26 @@ class EscControl(Node):
 		pins = msg.esc_pins
 		pwm = msg.esc_pwm
 		self.inputs = pwm
-		# ~ self.get_logger().info(str(pwm[0]))
+		self.get_logger().info(str(pwm[0]))
 
 		# ~ self.pi.set_servo_pulsewidth(pins[0], pwm[0])
 		# ~ self.pi.set_servo_pulsewidth(pins[1], pwm[1])
 		# ~ self.pi.set_servo_pulsewidth(pins[2], pwm[2])
 		# ~ self.pi.set_servo_pulsewidth(pins[3], pwm[3])
 		
+
 	def callback_time(self, msg):
 		time1 = msg.data
 		time2 = time.time()
 		
-		dtime = time2 - time1
+		dtime = time2
 		self.get_logger().info("Left Motor: " + str(self.inputs[0]) + " Right Motor: " + str(self.inputs[1]) + 
 		" Up Motor: " + str(self.inputs[2]) + " Down Motor: " + str(self.inputs[3]) + " Time:" + str(dtime))
 		
-		f = open("time_latency_test2.txt", 'a')
-		f.write("Left Motor: " + str(self.inputs[0]) + " Right Motor: " + str(self.inputs[1]) + 
+		f2 = open("time_latency_test2.txt", 'a')
+		f2.write("Left Motor: " + str(self.inputs[0]) + " Right Motor: " + str(self.inputs[1]) + 
 		" Up Motor: " + str(self.inputs[2]) + " Down Motor: " + str(self.inputs[3]) + " Time:" + str(dtime) + "\n")
-		
+		f2.close()
 		
 
 

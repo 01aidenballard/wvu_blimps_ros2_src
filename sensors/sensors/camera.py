@@ -16,7 +16,7 @@ class CamNode(Node): #Creating a Node
         self.cam_data = self.create_publisher(CameraCoord,"cam_data",10) #Initializing publisher (message type,name,Qsize(some buffer thing:10 messages before it erases last one)S)
 
         self.cap = cv2.VideoCapture(0, cv2.CAP_V4L2)
-        self.cap.set(3, 640)  # x-axis
+        self.cap.set(3,480 )  # x-axis
         self.cap.set(4, 480)  # y-axis
 
         self.frame_count = 0
@@ -24,7 +24,7 @@ class CamNode(Node): #Creating a Node
         self.total_y = 0
         self.minimum_radius = 20
 
-        self.create_timer(0.1, self.callback_read_image) #calls function every 0.2 seconds
+        self.create_timer(0.2, self.callback_read_image) #calls function every 0.2 seconds
 
         self.get_logger().info("Balloon Detection has Started")
 
