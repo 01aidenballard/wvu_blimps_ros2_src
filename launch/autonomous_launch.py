@@ -4,11 +4,6 @@ from launch_ros.actions import Node
 def generate_launch_description():
 	return LaunchDescription([
 		Node(
-			package='manual_control',
-			name='axesfixer',
-			executable='joy_to_esc'
-		),
-		Node(
 			package='controls',
 			name='esc_motor_driver',
 			executable='esc_driver'
@@ -17,11 +12,6 @@ def generate_launch_description():
 			package='joy',
 			executable='game_controller_node',
 			name='joy_con'
-        ),
-		Node(
-			package='sensors',
-			executable='read_imu',
-			name='imu',
         ),
 		Node(
 			package='sensors',
