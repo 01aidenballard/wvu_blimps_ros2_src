@@ -4,11 +4,6 @@ from launch_ros.actions import Node
 def generate_launch_description():
 	return LaunchDescription([
 		Node(
-			package='manual_control',
-			name='Manual_Joy',
-			executable='joy_to_esc'
-		),
-		Node(
 			package='controls',
 			name='esc_motor_driver',
 			executable='esc_driver'
