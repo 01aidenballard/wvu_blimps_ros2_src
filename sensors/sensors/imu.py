@@ -38,36 +38,27 @@ class ImuNode(Node): #Creating a Node
         # uart = board.UART()
         # sensor = adafruit_bno055.BNO055_UART(uart)
         #linear_acceleration = self.BNO055_I2C.get_linear_acceleration
-    def publish_imu_data(self): 
         #linear_acceleration = self.sensor.get_linear_acceleration
         #msg.linear_acceleration.x = linear_acceleration[0]
         #self.send_imu_command_pub_.publish(msg)
-        while True:
-            #M_yaw = math.atan2(-sensor.magnetic[0],sensor.magnetic[1])
-            #print("Temperature: {}".format(sensor.temperature))
-            #print("Euler Angles: {}".format(sensor.euler)) #prints (Heading,Roll,Pitch)
-            #print("Quaternion: {}".format(sensor.quaternion))
-            #print("Temperature: {}".format(sensor.temperature))
-            #print("Magnetometer: {}".format(sensor.magnetic))
-            #msg = Imu()
-            #msg.data = sensor.eulerself.publisher_.publish(msg)
-            msg = ImuData()
-            lin_accel = self.sensor.linear_acceleration
-            gyro = self.sensor.gyro
-            euler = self.sensor.euler
-            msg.imu_lin_accel = [lin_accel[0],lin_accel[1],lin_accel[2]]
-            msg.imu_gyro = [gyro[0],gyro[1],gyro[2]]
-            msg.imu_euler = [euler[0],euler[1],euler[2]]
-            #self.get_logger().info(str(msg.imu_euler)) # Displays data on command line
-            self.imu_data.publish(msg)
-            self.record_imu(sensor)
-            time.sleep(0.1)
-    def record_imu(self,sensor):
-        dt = time.time() - self.start_time
-        f = open("imu_data_1.txt", 'a')
-        f.write("Euler Angles: {}".format(sensor.euler) + " Lin Acceleration: {}".format(sensor.acceleration) +
-         " Gyro: {}".format(sensor.gyro) + " Lin Acceleration NoG: {}".format(sensor.linear_acceleration) + " Gravity: {}".format(sensor.gravity) + " Time: {}".format(dt) + "\n")
-        f.close()
+        #M_yaw = math.atan2(-sensor.magnetic[0],sensor.magnetic[1])
+        #print("Temperature: {}".format(sensor.temperature))
+        #print("Euler Angles: {}".format(sensor.euler)) #prints (Heading,Roll,Pitch)
+        #print("Quaternion: {}".format(sensor.quaternion))
+        #print("Temperature: {}".format(sensor.temperature))
+        #print("Magnetometer: {}".format(sensor.magnetic))
+        #msg = Imu()
+        #msg.data = sensor.eulerself.publisher_.publish(msg)
+        msg = ImuData()
+        lin_accel = self.sensor.linear_acceleration
+        gyro = self.sensor.gyro
+        euler = self.sensor.euler
+        msg.imu_lin_accel = [lin_accel[0],lin_accel[1],lin_accel[2]]
+        msg.imu_gyro = [gyro[0],gyro[1],gyro[2]]
+        msg.imu_euler = [euler[0],euler[1],euler[2]]
+        #self.get_logger().info(str(msg.imu_euler)) # Displays data on command line
+        self.imu_data.publish(msg)
+        
 def main(args=None):
     rclpy.init(args=args)
     node = ImuNode()

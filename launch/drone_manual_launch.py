@@ -28,6 +28,11 @@ def generate_launch_description():
 			executable = 'read_imu',
 			name = 'imu'
 		),
+		Node(
+			package='sensors',
+			executable='record_data',
+			name='recording_data',
+        )
 	])
 def main(args=None):
 	generate_launch_description()
