@@ -75,7 +75,7 @@ class CamNode(Node): #Creating a Node
 
            # cv2.imshow('Detected Color', frame)
         self.frame_count += 1
-        if self.frame_count % 10 == 0:
+        if self.frame_count % 5 == 0:
             for idx, (x, y) in enumerate(detected_coordinates):
                 total_x = sum(x for x, _ in detected_coordinates)
                 total_y = sum(y for _, y in detected_coordinates)

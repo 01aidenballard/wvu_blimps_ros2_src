@@ -38,7 +38,7 @@ class RecordDataNode(Node): #Creating a Node
 
     def callback_record_data(self):
         dt = time.time() - self.start_time
-        f = open("data_record_1.txt", 'a')
+        f = open("data_record_6.txt", 'a')
         f.write("Euler Angles: {},{},{}".format(self.euler[0],self.euler[1],self.euler[2]) + " " + "Gyro: {},{},{}".format(self.gyro[0],self.gyro[1],self.gyro[2]) + " " + 
                 "Linear Accel: {},{},{}".format(self.accel[0],self.accel[1],self.accel[2]) + " " + "L Motor: {}".format(self.motor[0]) + " " +
                 "R Motor: {}".format(self.motor[1]) + " " + "U Motor: {}".format(self.motor[2]) + " " + 

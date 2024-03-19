@@ -8,8 +8,8 @@ class BalloonPI(Node):
 		self.kpx = 0
 		self.kix = 0
 		
-		self.kpy = 0.60
-		self.kiy = 0
+		self.kpy = 1
+		self.kiy = 0.1
 		
 		self.x_goal = 320
 		self.y_goal = 240
@@ -46,15 +46,16 @@ class BalloonPI(Node):
 		D_input = 0.0
 		U_input = 0.0
 		if UD_input < 0:
-			D_input = float(1100 + abs(UD_input))
+			D_input = float(1200 + abs(UD_input))
 		elif UD_input > 0:
-			U_input = float(1100 + abs(UD_input))
+			U_input = float(1200 + abs(UD_input))
 		string = "L M: " +str(L_input) + " R M: " + str(R_input) + " U M: " + str(U_input) + "D M: " + str(D_input)
-		self.get_logger().info(string)
+		#self.get_logger().info(string)
 		
 		msg2.esc_pins = [self.ESC_pin1, self.ESC_pin2, self.ESC_pin3, self.ESC_pin4]
 		msg2.esc_pwm = [L_input,R_input,U_input,D_input]
-		self.get_logger().info(str(coord))
+		#self.get_logger().info(str(coord))
+		self.get_logger().info(str(UD_input))
 		self.publisher.publish(msg2)
 
 
