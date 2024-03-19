@@ -21,23 +21,13 @@ class FixAxesNode(Node):
 			Joy, "joy", self.callback_manual_esc_input, 10
 		)
 		
-		self.publisher = self.create_publisher(EscInput, "ESC_Manual_input", 10)
-		
-		self.time_publisher = self.create_publisher(Float64, "time", 10)
-		
+		self.publisher = self.create_publisher(EscInput, "ESC_Manual_input", 10)		
 		
 		self.get_logger().info("Data is being sent to the ESC node")
 
 
 	def callback_manual_esc_input(self, msg):
 		
-		#msg3 = Float64()
-		#time1 = float(msg.header.stamp.sec + (msg.header.stamp.nanosec)*10^-9)
-		#msg3.data = time1
-		# ~ self.get_logger.info(str(msg3.data))
-		#self.time_publisher.publish(msg3)
-		
-
 		RM = msg.axes[5]*-100
 		LM = ((msg.axes[3]-1)*-100)/2
 		if msg.axes[1] > 0.05:
