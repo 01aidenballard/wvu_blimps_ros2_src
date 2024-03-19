@@ -3,6 +3,7 @@ import rclpy
 from rclpy.node import Node
 import time
 import board
+import busio
 import adafruit_bno055
 import numpy as np
 import math
