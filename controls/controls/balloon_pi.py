@@ -5,7 +5,7 @@ from blimp_interfaces.msg import CameraCoord
 
 class BalloonPI(Node):
 	def __init__(self):
-		self.kpx = 1
+		self.kpx = 0
 		self.kix = 0
 		
 		self.kpy = 1
@@ -40,28 +40,36 @@ class BalloonPI(Node):
 		self.x_int_error += self.x_error
 		self.y_int_error += self.y_error
 
-		L_input = float(1050 - abs(self.x_error*self.kpx + self.x_int_error*self.kix))
-		R_input = float(1050 + abs(self.x_error*self.kpx + self.x_int_error*self.kix))
+		LR_input = self.x_error*self.kpx + self.x_int_error*self.kix
 
-		if L_input < 1050:
-			L_input = 1050
-		elif R_input < 1050:
-			R_input = 1050
+		L_input = 1050.0
+		R_input = 1050.0
+
+		if LR_input < 0:
+			L_input = 1050.0 + abs(LR_input)
+			R_input = 1050.0
+		elif LR_input > 0:
+			R_input = 1050.0 + abs(LR_input)
+			L_input = 1050.0
 
 		UD_input = self.y_error*self.kpy + self.y_int_error*self.kiy
 		D_input = 0.0
 		U_input = 0.0
+
 		if UD_input < 0:
 			D_input = float(1200 + abs(UD_input))
+			U_input = 1050.0
 		elif UD_input > 0:
 			U_input = float(1200 + abs(UD_input))
-		string = "L M: " +str(L_input) + " R M: " + str(R_input) + " U M: " + str(U_input) + "D M: " + str(D_input)
+			D_input = 1050.0
+
+		#string = "L M: " +str(L_input) + " R M: " + str(R_input) + " U M: " + str(U_input) + "D M: " + str(D_input)
 		#self.get_logger().info(string)
 		
 		msg2.esc_pins = [self.ESC_pin1, self.ESC_pin2, self.ESC_pin3, self.ESC_pin4]
 		msg2.esc_pwm = [L_input,R_input,U_input,D_input]
 		#self.get_logger().info(str(coord))
-		self.get_logger().info("L Input: " + str(L_input) + " R Input: " + str(R_input))
+		self.get_logger().info("UD Input: " + str(UD_input) + " U Input: " + str(U_input) + " D Input: " + str(D_input))
 		self.publisher.publish(msg2)
 
 
