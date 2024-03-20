@@ -8,8 +8,8 @@ class BalloonPI(Node):
 		self.kpx = 0
 		self.kix = 0
 		
-		self.kpy = 1
-		self.kiy = 0
+		self.kpy = 0.5
+		self.kiy = 0.00001
 		
 		self.x_goal = 640
 		self.y_goal = 360
@@ -57,10 +57,10 @@ class BalloonPI(Node):
 		U_input = 0.0
 
 		if UD_input < 0:
-			D_input = float(1200 + abs(UD_input))
+			D_input = float(1050 + abs(UD_input))
 			U_input = 1050.0
 		elif UD_input > 0:
-			U_input = float(1200 + abs(UD_input))
+			U_input = float(1050 + abs(UD_input))
 			D_input = 1050.0
 
 		#string = "L M: " +str(L_input) + " R M: " + str(R_input) + " U M: " + str(U_input) + "D M: " + str(D_input)
