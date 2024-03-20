@@ -21,16 +21,6 @@ def generate_launch_description():
 			executable='balloon_detect',
 			name='balloon_detection',
         ),
-		Node(
-			package='sensors',
-			executable='read_imu',
-			name='imu',
-        ),
-		Node(
-			package='sensors',
-			executable='read_altitude',
-			name='barometer',
-        ),
 		#Control Package Executables:
 		Node(
 			package='controls',
