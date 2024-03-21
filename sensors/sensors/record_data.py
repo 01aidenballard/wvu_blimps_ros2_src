@@ -37,7 +37,7 @@ class RecordDataNode(Node): #Creating a Node
 
 		if self.Manual_mode is False:
 			dt = time.time() - self.start_time
-			f = open("PI_Data_1.txt", 'a')
+			f = open("PI_Data_3.txt", 'a')
 			f.write("Position: {},{}".format(self.cam[0],self.cam[1])  + " L Motor: {}".format(self.motor[0]) + " " +
 				"R Motor: {}".format(self.motor[1]) + " " + "U Motor: {}".format(self.motor[2]) + " " + 
 				"D Motor: {}".format(self.motor[3]) + " " + "time: {}".format(dt) + "\n")

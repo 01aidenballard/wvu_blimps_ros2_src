@@ -32,11 +32,11 @@ def generate_launch_description():
 			name='esc_motor_driver',
 			executable='esc_driver'
 		),
-		Node(
-			package = 'sensors',
-			name = 'record_data',
-			executable = 'record_data'
-		),
+#		Node(
+#			package = 'sensors',
+#			name = 'record_data',
+#			executable = 'record_data'
+#		),
 		Node(
 			package='controls',
 			executable='mode_switch',

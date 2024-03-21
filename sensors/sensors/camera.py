@@ -13,7 +13,7 @@ class CamNode(Node): #Creating a Node
 
         super().__init__('cam_node')
 
-        self.cam_data = self.create_publisher(CameraCoord,"cam_data",10) #Initializing publisher (message type,name,Qsize(some buffer thing:10 messages before it erases last one)S)
+        self.cam_data = self.create_publisher(CameraCoord,"cam_data",3) #Initializing publisher (message type,name,Qsize(some buffer thing:10 messages before it erases last one)S)
 
         self.cap = cv2.VideoCapture(0, cv2.CAP_V4L2)
         self.cap.set(3,1280)  # x-axis
@@ -22,7 +22,7 @@ class CamNode(Node): #Creating a Node
         self.frame_count = 0
         self.total_x = 0
         self.total_y = 0
-        self.minimum_radius = 20
+        self.minimum_radius = 30
 
         self.create_timer(0.2, self.callback_read_image) #calls function every 0.2 seconds
 
@@ -75,7 +75,7 @@ class CamNode(Node): #Creating a Node
 
            # cv2.imshow('Detected Color', frame)
         self.frame_count += 1
-        if self.frame_count % 5 == 0:
+        if self.frame_count % 3 == 0:
             for idx, (x, y) in enumerate(detected_coordinates):
                 total_x = sum(x for x, _ in detected_coordinates)
                 total_y = sum(y for _, y in detected_coordinates)
