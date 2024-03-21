@@ -1,3 +1,4 @@
+
 import rclpy
 from rclpy.node import Node
 from blimp_interfaces.msg import EscInput
@@ -9,11 +10,11 @@ class BalloonPI(Node):
 		self.kix = 0.0005
 		
 		self.kpy = 0.0 #0.205
-		self.kiy = 0.0
+		self.kiy = 0.0 #0.0005
 		
-		self.x_goal = 640
-		self.y_goal = 360
-		
+		self.x_goal = 320
+		self.y_goal = 240
+		self.coord = [320,240]
 		self.x_int_error = 0
 		self.y_int_error = 0
 		
@@ -24,18 +25,20 @@ class BalloonPI(Node):
 		
 		super().__init__("balloon_pi")
 		self.subscriber = self.create_subscription(
-			CameraCoord, "cam_data", self.callback_pi_control_balloon, 3
+			CameraCoord, "cam_data", self.callback_camera_data, 3
 		)
 		self.publisher = self.create_publisher(EscInput, "ESC_balloon_input", 10)
-				
+		self.create_timer(0.3, self.callback_pi_control_balloon)
 		self.get_logger().info("Started pi control for balloon detection.")
+	def callback_camera_data(self,msg):
+		self.coord = msg.position
 
-	def callback_pi_control_balloon(self, coord):
+	def callback_pi_control_balloon(self):
 		msg2 = EscInput()
+		coord = self.coord
+		self.x_error = self.x_goal - coord[0]
 
-		self.x_error = self.x_goal - coord.position[0]
-
-		self.y_error = self.y_goal - coord.position[1]
+		self.y_error = self.y_goal - coord[1]
 
 		self.x_int_error += self.x_error
 		self.y_int_error += self.y_error
@@ -70,7 +73,7 @@ class BalloonPI(Node):
 		msg2.esc_pwm = [L_input,R_input,U_input,D_input]
 		#self.get_logger().info(str(coord))
 		self.get_logger().info("LR Input: " + str(LR_input) + " L Input: " + str(L_input) + " R Input: " + str(R_input) + " X: " + 
-			str(coord.position[0]))
+			str(coord[0]))
 		self.publisher.publish(msg2)
 
 

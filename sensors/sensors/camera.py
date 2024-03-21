@@ -16,13 +16,13 @@ class CamNode(Node): #Creating a Node
         self.cam_data = self.create_publisher(CameraCoord,"cam_data",3) #Initializing publisher (message type,name,Qsize(some buffer thing:10 messages before it erases last one)S)
 
         self.cap = cv2.VideoCapture(0, cv2.CAP_V4L2)
-        self.cap.set(3,1280)  # x-axis
-        self.cap.set(4,720)  # y-axis
+        self.cap.set(3,640)  # x-axis
+        self.cap.set(4,480)  # y-axis
 
         self.frame_count = 0
         self.total_x = 0
         self.total_y = 0
-        self.minimum_radius = 30
+        self.minimum_radius = 20
 
         self.create_timer(0.2, self.callback_read_image) #calls function every 0.2 seconds
 
