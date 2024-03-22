@@ -13,11 +13,11 @@ class CamNode(Node): #Creating a Node
 
         super().__init__('cam_node')
 
-        self.cam_data = self.create_publisher(CameraCoord,"cam_data",10) #Initializing publisher (message type,name,Qsize(some buffer thing:10 messages before it erases last one)S)
+        self.cam_data = self.create_publisher(CameraCoord,"cam_data",3) #Initializing publisher (message type,name,Qsize(some buffer thing:10 messages before it erases last one)S)
 
         self.cap = cv2.VideoCapture(0, cv2.CAP_V4L2)
-        self.cap.set(3,480 )  # x-axis
-        self.cap.set(4, 480)  # y-axis
+        self.cap.set(3,640)  # x-axis
+        self.cap.set(4,480)  # y-axis
 
         self.frame_count = 0
         self.total_x = 0
@@ -41,41 +41,58 @@ class CamNode(Node): #Creating a Node
             return
 
         hsv_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-        lower_bound_1 = np.array([56, 41, 155])
-        upper_bound_1 = np.array([76, 81, 255])
+        
+        lower_bound_purple = np.array([115, 50, 50])
+        upper_bound_purple = np.array([160, 255, 255])
 
-        lower_bound_2 = np.array([116, 16, 154])
-        upper_bound_2 = np.array([136, 116, 254])
+        lower_bound_green = np.array([33, 50, 50])  # Adjusted for light green
+        upper_bound_green = np.array([90, 255, 255])  # Adjusted for dark green
 
-        mask_1 = cv2.inRange(hsv_frame, lower_bound_1, upper_bound_1)
-        mask_2 = cv2.inRange(hsv_frame, lower_bound_2, upper_bound_2)
+        mask_green = cv2.inRange(hsv_frame, lower_bound_green, upper_bound_green)
+        mask_purple = cv2.inRange(hsv_frame, lower_bound_purple, upper_bound_purple)
 
-        contours_1, _ = cv2.findContours(mask_1, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        contours_2, _ = cv2.findContours(mask_2, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        all_contours = contours_1 + contours_2
+        full_mask = mask_green + mask_purple
 
-        largest_contour = None
-        largest_contour_area = 0
+        frame = cv2.bitwise_and(frame, frame, mask=full_mask)
+        
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+	
+	    # apply bilateralFilter to reduce noise. medianBlur is also added for smoothening, reducing noise.
+        gray = cv2.bilateralFilter(gray,15,75,75)
+        
+        gray = cv2.medianBlur(gray,5)
 
-        for contour in all_contours:
-            contour_area = cv2.contourArea(contour)
-            if contour_area > largest_contour_area:
-                largest_contour = contour
-                largest_contour_area = contour_area
+	    # Adaptive Guassian Threshold is to detect sharp edges in the Image. For more information Google it.
+        gray = cv2.adaptiveThreshold(gray,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY,13,3.5)
 
+        kernel = np.ones((5,5),np.uint8)
+        
+        gray = cv2.erode(gray,kernel,iterations = 1)
+        # gray = erosion
+	
+        gray = cv2.dilate(gray,kernel,iterations = 1)
+	    # gray = dilation
+	    # detect circles in the image
+        circles = cv2.HoughCircles(gray, cv2.HOUGH_GRADIENT, 1, 500, param1=75, param2=25, minRadius=10, maxRadius=500)
+               
         detected_coordinates = []  # List to store detected circle coordinates
-        if largest_contour is not None:
-            (x, y), radius = cv2.minEnclosingCircle(largest_contour)
-            center = (int(x), int(y))
-            radius = int(radius)
-            if radius >= self.minimum_radius:
-                detected_coordinates.append((center[0], center[1]))
-                # cv2.circle(frame, center, radius, (0, 255, 0), 2)  # Draw a green circle on the frame
+        largest_area = 0
+        # ensure at least some circles were found
+        if circles is not None:
+	        # convert the (x, y) coordinates and radius of the circles to integers
+            circles = np.round(circles[0, :]).astype("int")
+            frame_count += 1
+            # loop over the (x, y) coordinates and radius of the circles
+            for (x, y, r) in circles:
+                area = r * r * 3.14
+                if area > largest_area:
+                    detected_coordinates.append((int(x), int(y)))
+                    # cv2.circle(output, (x, y), r, (0, 255, 0), 4)
 
 
            # cv2.imshow('Detected Color', frame)
         self.frame_count += 1
-        if self.frame_count % 10 == 0:
+        if self.frame_count % 3 == 0:
             for idx, (x, y) in enumerate(detected_coordinates):
                 total_x = sum(x for x, _ in detected_coordinates)
                 total_y = sum(y for _, y in detected_coordinates)
@@ -99,4 +116,3 @@ def main(args=None):
 
 if __name__ == '__main__': #this allows us to run script from terminal directly
     main()
-
