@@ -23,15 +23,16 @@ def generate_launch_description():
 			executable='game_controller_node',
 			name='joy_con'
 		),
-		Node(
-			package ='sensors',
-			executable = 'read_imu',
-			name = 'imu'
-		),
+#		Node(
+#			package ='sensors',
+#			executable = 'read_imu',
+#			name = 'imu'
+#		),
 		Node(
 			package='sensors',
 			executable='record_data',
 			name='recording_data',
+			parameters = [{'file_name': 'vicom_test_4'}]
         )
 	])
 def main(args=None):

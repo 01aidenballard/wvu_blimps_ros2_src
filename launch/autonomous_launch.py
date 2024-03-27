@@ -7,7 +7,8 @@ def generate_launch_description():
 		Node(
 			package='joy',
 			executable='game_controller_node',
-			name='joy_con'
+			name='joy_con',
+			parameters = [{"autorepeat_rate": 5.0}]
         ),
 		#Manual Control Package Excecutable
 		Node(

@@ -6,8 +6,9 @@ from blimp_interfaces.msg import CameraCoord
 
 class BalloonPI(Node):
 	def __init__(self):
-		self.kpx = 0.1
-		self.kix = 0.0005
+		self.kpx = 0.2
+		#self.kdx = 0.03
+		self.kix = 0.001
 		
 		self.kpy = 0.0 #0.205
 		self.kiy = 0.0 #0.0005
@@ -72,8 +73,8 @@ class BalloonPI(Node):
 		msg2.esc_pins = [self.ESC_pin1, self.ESC_pin2, self.ESC_pin3, self.ESC_pin4]
 		msg2.esc_pwm = [L_input,R_input,U_input,D_input]
 		#self.get_logger().info(str(coord))
-		self.get_logger().info("LR Input: " + str(LR_input) + " L Input: " + str(L_input) + " R Input: " + str(R_input) + " X: " + 
-			str(coord[0]))
+		#self.get_logger().info("LR Input: " + str(LR_input) + " L Input: " + str(L_input) + " R Input: " + str(R_input) + " X: " + 
+		#	str(coord[0]))
 		self.publisher.publish(msg2)
 
 
