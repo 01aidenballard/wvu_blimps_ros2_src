@@ -18,8 +18,8 @@ def generate_launch_description():
         ),
 		#Sensors Package Excecutable
 		Node(
-			package='sensors',
-			executable='balloon_detect',
+			package='sensors_cpp',
+			executable='balloon_detect_cpp',
 			name='balloon_detection',
         ),
 		#Control Package Executables:

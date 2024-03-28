@@ -9,7 +9,7 @@ public:
 
     BalloonDetectNode(): Node("Ball_detect_cpp") {
 
-        cap.open(0);
+        cap.open(0, cv::CAP_V4L2);
         cap.set(cv::CAP_PROP_FRAME_WIDTH, 640);  // x-axis
         cap.set(cv::CAP_PROP_FRAME_HEIGHT, 480);  // y-axis
 
@@ -19,8 +19,8 @@ public:
             return;
         }
 
-        cam_data_publisher = this->create_publisher<blimp_interfaces::msg::CameraCoord>("number", 10);
-        timer_ = this->create_wall_timer(std::chrono::seconds(1),std::bind(&BalloonDetectNode::timerCallback, this));
+        cam_data_publisher = this->create_publisher<blimp_interfaces::msg::CameraCoord>("cam_data", 10);
+        timer_ = this->create_wall_timer(std::chrono::milliseconds(30),std::bind(&BalloonDetectNode::timerCallback, this));
         RCLCPP_INFO(this->get_logger(), "Balloon Detection CPP has Started!");
     }
 
@@ -90,17 +90,18 @@ private:
                 total_y += coord.y;
             }
             if (!detected_coords.empty()) {
-                //std::cout << "Average X: " << total_x / detected_coords.size() << ", Average Y: " << total_y / detected_coords.size() << std::endl;
+                //RCLCPP_INFO(this->get_logger(),  "Average X: " << total_x / detected_coords.size() << ", Average Y: " << total_y / detected_coords.size());
                 auto msg = blimp_interfaces::msg::CameraCoord();
-                msg.position[0] = total_x/detected_coords.size();
-                msg.position[1] = total_y/detected_coords.size();
+                avg_x = std::round(total_x/detected_coords.size());
+                avg_y = std::round(total_y/detected_coords.size());
+                msg.position = {avg_x,avg_y};
                 cam_data_publisher->publish(msg);
             }
             // Clear the detected coordinates for the next 10 frames
             detected_coords.clear();
         }
 
-        cv::imshow("Detected Color", frame);
+        //cv::imshow("Detected Color", frame);
     }
 
 
@@ -109,11 +110,12 @@ private:
     rclcpp::TimerBase::SharedPtr timer_;
 
     cv::VideoCapture cap;
-
+    int avg_x;
+    int avg_y;
     int frame_count = 0;
     std::vector<cv::Point2f> detected_coords;
-    double total_x = 0;
-    double total_y = 0;
+    float total_x = 0;
+    float total_y = 0;
 
 };
 
