@@ -8,7 +8,7 @@ def generate_launch_description():
 			package='joy',
 			executable='game_controller_node',
 			name='joy_con',
-			parameters = [{"autorepeat_rate": 5.0}]
+			parameters = [{"autorepeat_rate": 10.0}]
         ),
 		#Manual Control Package Excecutable
 		Node(
@@ -27,17 +27,25 @@ def generate_launch_description():
 			package='controls',
 			executable='balloon_detect_control',
 			name='balloon_detect_PI',
+			#kpx = 0.3 without forward motors
+			parameters = [{
+				"kpx": 0.35,
+				"kix": 0.0,
+				"kpy": 0.0,
+				"kiy": 0.0
+			}]
         ),
 		Node(
 			package='controls',
 			name='esc_motor_driver',
 			executable='esc_driver'
 		),
-#		Node(
-#			package = 'sensors',
-#			name = 'record_data',
-#			executable = 'record_data'
-#		),
+		Node(
+			package = 'sensors',
+			name = 'record_data',
+			executable = 'record_data',
+			parameters = [{"file_name":"vicom_test_7"}]
+		),
 		Node(
 			package='controls',
 			executable='mode_switch',

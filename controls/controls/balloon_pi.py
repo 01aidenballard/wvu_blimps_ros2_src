@@ -1,4 +1,3 @@
-
 import rclpy
 from rclpy.node import Node
 from blimp_interfaces.msg import EscInput
@@ -25,6 +24,13 @@ class BalloonPI(Node):
 		self.ESC_pin4 = 26
 		
 		super().__init__("balloon_pi")
+		self.declare_parameter('kpx', 0.0)
+		self.declare_parameter('kix', 0.0)
+		self.declare_parameter('kpy', 0.0)
+		self.declare_parameter('kiy', 0.0)
+		
+		
+
 		self.subscriber = self.create_subscription(
 			CameraCoord, "cam_data", self.callback_camera_data, 3
 		)
@@ -35,6 +41,11 @@ class BalloonPI(Node):
 		self.coord = msg.position
 
 	def callback_pi_control_balloon(self):
+		self.kpx = self.get_parameter('kpx').value
+		self.kix = self.get_parameter('kix').value
+		self.kpy = self.get_parameter('kpy').value
+		self.kiy = self.get_parameter('kiy').value
+
 		msg2 = EscInput()
 		coord = self.coord
 		self.x_error = self.x_goal - coord[0]
@@ -50,11 +61,16 @@ class BalloonPI(Node):
 		R_input = 1050.0
 
 		if LR_input < 0:
-			L_input = 1100.0 + abs(LR_input)
-			R_input = 1050.0
+			L_input = 1200.0 + abs(LR_input/2)
+			R_input = 1200.0 - abs(LR_input/2)
 		elif LR_input > 0:
-			R_input = 1100.0 + abs(LR_input)
+			R_input = 1200.0 + abs(LR_input/2)
+			L_input = 1200.0 - abs(LR_input/2)
+
+		if L_input < 1050.0:
 			L_input = 1050.0
+		elif R_input < 1050.0:
+			R_input = 1050.0
 
 		UD_input = self.y_error*self.kpy + self.y_int_error*self.kiy
 		D_input = 0.0
@@ -73,8 +89,8 @@ class BalloonPI(Node):
 		msg2.esc_pins = [self.ESC_pin1, self.ESC_pin2, self.ESC_pin3, self.ESC_pin4]
 		msg2.esc_pwm = [L_input,R_input,U_input,D_input]
 		#self.get_logger().info(str(coord))
-		#self.get_logger().info("LR Input: " + str(LR_input) + " L Input: " + str(L_input) + " R Input: " + str(R_input) + " X: " + 
-		#	str(coord[0]))
+		self.get_logger().info("LR Input: " + str(LR_input) + " L Input: " + str(L_input) + " R Input: " + str(R_input) + " X: " + 
+			str(coord[0]))
 		self.publisher.publish(msg2)
 
 
