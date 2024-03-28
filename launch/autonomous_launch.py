@@ -40,12 +40,12 @@ def generate_launch_description():
 			name='esc_motor_driver',
 			executable='esc_driver'
 		),
-		Node(
-			package = 'sensors',
-			name = 'record_data',
-			executable = 'record_data',
-			parameters = [{"file_name":"vicom_test_7"}]
-		),
+#		Node(
+#			package = 'sensors',
+#			name = 'record_data',
+#			executable = 'record_data',
+#			parameters = [{"file_name":"test_data"}]
+#		),
 		Node(
 			package='controls',
 			executable='mode_switch',
