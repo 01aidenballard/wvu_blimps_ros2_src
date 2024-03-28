@@ -3,13 +3,13 @@ from rclpy.node import Node
 import time
 import board
 import adafruit_bmp3xx # libraries for barometer, adafruit_bmp3xx
-from std_msgs.msg import Float32MultiArray
+from blimp_interfaces.msg import BaroData
 
 class BarometerNode(Node): #Creating a Node
 
         def __init__(self):
                 super().__init__('barometer_node')
-                self.barometer_data = self.create_publisher(Float32MultiArray,"barometer_data",10)
+                self.barometer_data = self.create_publisher(BaroData,"barometer_data",10)
                 self.i2c = board.I2C()
                 self.sensor = adafruit_bmp3xx.BMP3XX_I2C(self.i2c)
                 self.sensor.sea_level_pressure = 1019 #hPa, in Morgantown. Change for location.
@@ -17,8 +17,8 @@ class BarometerNode(Node): #Creating a Node
 
         def publish_barometer_data(self):
                 while True:
-                        msg = Float32MultiArray()
-                        msg.data = [self.sensor.altitude]
+                        msg = BaroData()
+                        msg.height = [self.sensor.altitude]
                         #self.get_logger().info(str(msg)) # Prints data to command line
                         self.barometer_data.publish(msg)
 
