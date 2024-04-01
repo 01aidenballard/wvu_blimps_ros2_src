@@ -5,15 +5,7 @@ from blimp_interfaces.msg import CameraCoord
 
 class BalloonPI(Node):
 	def __init__(self):
-		self.kpx = 0.2
-		#self.kdx = 0.03
-		self.kix = 0.001
 		
-		self.kpy = 0.0 #0.205
-		self.kiy = 0.0 #0.0005
-		
-		self.x_goal = 320
-		self.y_goal = 240
 		self.coord = [320,240]
 		self.x_int_error = 0
 		self.y_int_error = 0
@@ -24,12 +16,21 @@ class BalloonPI(Node):
 		self.ESC_pin4 = 26
 		
 		super().__init__("balloon_pi")
+		
 		self.declare_parameter('kpx', 0.0)
 		self.declare_parameter('kix', 0.0)
 		self.declare_parameter('kpy', 0.0)
 		self.declare_parameter('kiy', 0.0)
-		
-		
+		self.declare_parameter('x_goal', 320)
+		self.declare_parameter('y_goal', 240)
+
+		self.x_goal = self.get_parameter('x_goal').value
+		self.y_goal = self.get_parameter('y_goal').value
+
+		self.kpx = self.get_parameter('kpx').value
+		self.kix = self.get_parameter('kix').value
+		self.kpy = self.get_parameter('kpy').value
+		self.kiy = self.get_parameter('kiy').value
 
 		self.subscriber = self.create_subscription(
 			CameraCoord, "cam_data", self.callback_camera_data, 3
@@ -37,14 +38,11 @@ class BalloonPI(Node):
 		self.publisher = self.create_publisher(EscInput, "ESC_balloon_input", 10)
 		self.create_timer(0.3, self.callback_pi_control_balloon)
 		self.get_logger().info("Started pi control for balloon detection.")
+
 	def callback_camera_data(self,msg):
 		self.coord = msg.position
 
 	def callback_pi_control_balloon(self):
-		self.kpx = self.get_parameter('kpx').value
-		self.kix = self.get_parameter('kix').value
-		self.kpy = self.get_parameter('kpy').value
-		self.kiy = self.get_parameter('kiy').value
 
 		msg2 = EscInput()
 		coord = self.coord

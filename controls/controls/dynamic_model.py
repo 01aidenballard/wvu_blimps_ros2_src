@@ -9,6 +9,7 @@ import time
 from blimp_interfaces.msg import ImuData
 from blimp_interfaces.msg import CartCoord
 from blimp_interfaces.msg import BaroData
+from blimp_interfaces.msg import EscInput
 
 # inertial frame of the balloon:
 	# x-axis points to the front of balloon when the system is powered on or started
@@ -52,10 +53,10 @@ class DynamicModel(Node):
 		# Drag Coeeficients
 		CD = 0.083136
 		CL = 0.209683
-		CY=0.440926
-		Cl=0.0019314
-		Cm=0.212134
-		Cn=0.458387
+		CY = 0.440926
+		Cl = 0.0019314
+		Cm = 0.212134
+		Cn = 0.458387
 
 		self.M_matrix(a, b, c, rho_air, Ix, Iy, Iz)
 		self.D_matrix(CD, CY, CL, Cl, Cm, Cn, rho_air, V_balloon)
@@ -97,7 +98,7 @@ class DynamicModel(Node):
 							(       0,        0,        0,        0,        0, self.Iz_prime)])
 		
 	def D_matrix(self, CD, CY, CL, Cl, Cm, Cn, rho, V):
-		Du = 0.5*CD*rho*V**(2/3)                                         % Damping Coefficients
+		Du = 0.5*CD*rho*V**(2/3)         # Damping Coefficients
 		Dv = 0.5*CY*rho*V**(2/3)
 		Dw = 0.5*CL*rho*V**(2/3)
 		Dp = 0.5*Cl*rho*V
