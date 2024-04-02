@@ -1,1 +1,1 @@
-float32[] height
+float64 height
