@@ -73,7 +73,7 @@ public:
     }
 
     void D_matrix() {
-        D = Eigen::DiagonalMatrix<double, 6>(-0.0254, 0.0771, 0.0216, -0.1820, 0.3280, 0.0116);
+        D = Eigen::DiagonalMatrix<double, 6>(-0.0220, -0.1745, -0.6321, -0.1291, -0.4332, -0.0281);
     }
 
 private:
@@ -96,9 +96,10 @@ private:
 
     void callback_dynamic_model(const blimp_interfaces::msg::CartCoord::SharedPtr msg) {
         time(&finish);
-        double dt = difftime(finish, start);
+        //double dt = difftime(finish, start);
         time(&start);
-        vz = (height_old - height)/dt;
+        //vz = (height_old - height)/dt;
+        vz = 0;
         vx = 1.0;
         vy = 0.0;
         vel << vx, vy, vz, gyro(0), gyro(1), gyro(2);
@@ -131,7 +132,11 @@ private:
         msg2.phi = tau(4);
         msg2.psy = tau(5);
         kine_publisher->publish(msg2);
-        RCLCPP_INFO(this->get_logger(), "Start time: %ld", start);
+        //RCLCPP_INFO(this->get_logger(), "taux: %f  tauy: %f  tauz: %f  tauth: %f  tauxphi: %f  tauxpsy: %f", tau(0), tau(1), tau(2), tau(3), tau(4), tau(5));
+        //RCLCPP_INFO(this->get_logger(), "taux: %f  height: %f  height_old: %f", tau(0), height, height_old);
+        //RCLCPP_INFO(this->get_logger(), "euler1: %f  euler2: %f  euler3: %f", euler(0), euler(1), euler(2));
+        //RCLCPP_INFO(this->get_logger(), "gyro1 : %f  gyro 2: %f  gyro 3: %f", gyro(0), gyro(1), gyro(2));
+        //RCLCPP_INFO(this->get_logger(), "Start time: %ld", start);
     }
 
 

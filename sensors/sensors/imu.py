@@ -29,6 +29,7 @@ class ImuNode(Node): #Creating a Node
 		self.imu_lin_accel = [0 ,0 ,0]
 		self.imu_gyro = [0 ,0 ,0]
 		self.imu_euler = [0 ,0 ,0]
+		self.get_logger().info("imu has Started")
 
 		self.start_time = time.time()
 
@@ -37,28 +38,55 @@ class ImuNode(Node): #Creating a Node
 		lin_accel = self.sensor.linear_acceleration
 		gyro = self.sensor.gyro
 		euler = self.sensor.euler
-		#Check accelerations for NaNs
-		for i in enumerate(lin_accel):
-			if math.isnan(i[1]):
-				self.imu_lin_accel[i[0]] = self.prev_lin_accel[i[0]]
+		# #Check accelerations for NaNs
+		# for i in enumerate(lin_accel):
+		# 	if math.isnan(i[1]):
+		# 		self.imu_lin_accel[i[0]] = self.prev_lin_accel[i[0]]
+		# 	else:
+		# 		self.imu_lin_accel[i[0]] = lin_accel[i[0]]
+		# 		self.prev_lin_accel[i[0]] = lin_accel[i[0]]
+		# #Check gyros for NaNs
+		# for i in enumerate(gyro):
+		# 	if math.isnan(i[1]):
+		# 		self.imu_gyro[i[0]] = self.prev_gyro[i[0]]
+		# 	else:
+		# 		self.imu_gyro[i[0]] = gyro[i[0]]
+		# 		self.prev_gyro[i[0]] = gyro[i[0]]
+		# #Check Eulers for NaNs
+		# for i in enumerate(euler):
+		# 	if math.isnan(i[1]):
+		# 		self.imu_euler[i[0]] = self.prev_euler[i[0]]
+		# 	else:
+		# 		self.imu_euler[i[0]] = euler[i[0]]
+		# 		self.prev_euler[i[0]] = euler[i[0]]
+		# Check accelerations for None and NaNs
+		for index, value in enumerate(lin_accel):
+			if value is None or math.isnan(value):
+				self.imu_lin_accel[index] = self.prev_lin_accel[index]
 			else:
-				self.imu_lin_accel[i[0]] = lin_accel(i[0])
-				self.prev_lin_accel[i[0]] = lin_accel(i[0])
-		#Check gyros for NaNs
-		for i in enumerate(gyro):
-			if math.isnan(i[1]):
-				self.imu_gyro[i[0]] = self.prev_gyro[i[0]]
+				self.imu_lin_accel[index] = value
+				self.prev_lin_accel[index] = value
+
+		# Check gyros for None and NaNs
+		for index, value in enumerate(gyro):
+			if value is None or math.isnan(value):
+				self.imu_gyro[index] = self.prev_gyro[index]
 			else:
-				self.imu_gyro[i[0]] = gyro(i[0])
-				self.prev_gyro[i[0]] = gyro(i[0])
-		#Check Eulers for NaNs
-		for i in enumerate(euler):
-			if math.isnan(i[1]):
-				self.imu_euler[i[0]] = self.prev_euler[i[0]]
+				self.imu_gyro[index] = value
+				self.prev_gyro[index] = value
+
+		# Check Eulers for None and NaNs
+		for index, value in enumerate(euler):
+			if value is None or math.isnan(value):
+				self.imu_euler[index] = self.prev_euler[index]
 			else:
-				self.imu_euler[i[0]] = euler(i[0])
-				self.prev_euler[i[0]] = euler(i[0])
-		
+				self.imu_euler[index] = value
+				self.prev_euler[index] = value
+			
+			self.imu_euler[0] = self.imu_euler[0]*(np.pi/180)
+			self.imu_euler[1] = self.imu_euler[1]*(np.pi/180)
+			self.imu_euler[2] = self.imu_euler[2]*(np.pi/180)
+
 		msg.imu_lin_accel = self.imu_lin_accel
 		msg.imu_gyro = self.imu_gyro
 		msg.imu_euler = self.imu_euler

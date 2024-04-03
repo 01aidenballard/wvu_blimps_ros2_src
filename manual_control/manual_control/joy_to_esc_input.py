@@ -47,7 +47,10 @@ class FixAxesNode(Node):
 		
 		msg2 = EscInput()
 		msg2.esc_pins = [self.ESC_pin1, self.ESC_pin2, self.ESC_pin3, self.ESC_pin4]
-		msg2.esc_pwm = [LM_pwm,RM_pwm,UM_pwm,DM_pwm]
+		msg2.pwm_l = LM_pwm
+		msg2.pwm_r = RM_pwm
+		msg2.pwm_u = UM_pwm
+		msg2.pwm_d = DM_pwm
 
 		self.publisher.publish(msg2)
 		time.sleep(0.1)

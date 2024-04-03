@@ -50,6 +50,16 @@ def generate_launch_description():
 			name='esc_motor_driver',
 			executable='esc_driver'
 		),
+		Node(
+			package='sensors',
+			name='read_altitude',
+			executable='read_altitude'
+		),
+		Node(
+			package='sensors',
+			name='read_imu',
+			executable='read_imu'
+		),
 #		Node(
 #			package = 'sensors',
 #			name = 'record_data',
