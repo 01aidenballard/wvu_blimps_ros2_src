@@ -40,6 +40,14 @@ def generate_launch_description():
 			name='esc_motor_driver',
 			executable='esc_driver'
 		),
+		Node(
+			package='sensors'
+			name='read_altitude'
+			executable='read_altitude'
+			parameters = [{
+				"sea_level_pressure": 1019.0 #hPa. Morgantown, WV
+			}]
+		),
 #		Node(
 #			package = 'sensors',
 #			name = 'record_data',
