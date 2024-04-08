@@ -36,45 +36,45 @@ public:
 
         K_inv = K.inverse();
 
-        // Assuming you're inside a class method, and you have an `Eigen::IOFormat` declared
-        Eigen::IOFormat CleanFmt(4, 0, ", ", "\n", "[", "]");
+        // // Assuming you're inside a class method, and you have an `Eigen::IOFormat` declared
+        // Eigen::IOFormat CleanFmt(4, 0, ", ", "\n", "[", "]");
 
-        // Get the logger
-        auto logger = this->get_logger();
+        // // Get the logger
+        // auto logger = this->get_logger();
 
-        // Stringstream for converting matrices to strings
-        std::stringstream ss;
+        // // Stringstream for converting matrices to strings
+        // std::stringstream ss;
 
-        // Printing K (DiagonalMatrix)
-        ss << K.toDenseMatrix().format(CleanFmt);
-        RCLCPP_INFO(logger, "Matrix K:\n%s", ss.str().c_str());
-        ss.str(""); // Clearing the stringstream
+        // // Printing K (DiagonalMatrix)
+        // ss << K.toDenseMatrix().format(CleanFmt);
+        // RCLCPP_INFO(logger, "Matrix K:\n%s", ss.str().c_str());
+        // ss.str(""); // Clearing the stringstream
 
-        // Printing B (Matrix)
-        ss << B.format(CleanFmt);
-        RCLCPP_INFO(logger, "Matrix B:\n%s", ss.str().c_str());
-        ss.str("");
+        // // Printing B (Matrix)
+        // ss << B.format(CleanFmt);
+        // RCLCPP_INFO(logger, "Matrix B:\n%s", ss.str().c_str());
+        // ss.str("");
 
-        // Printing Q (Matrix)c
+        // // Printing Q (Matrix)c
 
-        ss << Q.format(CleanFmt);
-        RCLCPP_INFO(logger, "Matrix Q:\n%s", ss.str().c_str());
-        ss.str("");
+        // ss << Q.format(CleanFmt);
+        // RCLCPP_INFO(logger, "Matrix Q:\n%s", ss.str().c_str());
+        // ss.str("");
 
-        // Printing T (Matrix)
-        ss << T.format(CleanFmt);
-        RCLCPP_INFO(logger, "Matrix T:\n%s", ss.str().c_str());
-        ss.str("");
+        // // Printing T (Matrix)
+        // ss << T.format(CleanFmt);
+        // RCLCPP_INFO(logger, "Matrix T:\n%s", ss.str().c_str());
+        // ss.str("");
 
-        // Printing Qp (Matrix)
-        ss << Qp.format(CleanFmt);
-        RCLCPP_INFO(logger, "Matrix Qp:\n%s", ss.str().c_str());
-        ss.str("");
+        // // Printing Qp (Matrix)
+        // ss << Qp.format(CleanFmt);
+        // RCLCPP_INFO(logger, "Matrix Qp:\n%s", ss.str().c_str());
+        // ss.str("");
 
-        // Printing K_inv (DiagonalMatrix)
-        ss << K_inv.toDenseMatrix().format(CleanFmt);
-        RCLCPP_INFO(logger, "Matrix K_inv:\n%s", ss.str().c_str());
-        ss.str("");
+        // // Printing K_inv (DiagonalMatrix)
+        // ss << K_inv.toDenseMatrix().format(CleanFmt);
+        // RCLCPP_INFO(logger, "Matrix K_inv:\n%s", ss.str().c_str());
+        // ss.str("");
 
         subscriber_ = this->create_subscription<blimp_interfaces::msg::CartCoord>(
             "forces", 10, std::bind(&BalloonEscInput::callback_force_to_esc, this, std::placeholders::_1));
@@ -88,7 +88,8 @@ public:
 
 private:
     void callback_force_to_esc(const blimp_interfaces::msg::CartCoord::SharedPtr msg) {
-        tau << msg->x,
+        //msg->x
+        tau << msg->x+0.15,
                   msg->y,
                   msg->z,
                   msg->theta,
@@ -97,65 +98,65 @@ private:
     }
     void callback_timer() {
 
-        F = K_inv*Qp*tau - K_inv*B;
+        Eigen::Matrix<double, 4,1> F = K_inv*Qp*tau - K_inv*B;
         
-        if (F(0) > 1900) {
-            F(0) = 1900;
+        if (F(0,0) > 1900) {
+            F(0,0) = 1900;
         }
-        else if (F(0) < 1050) {
-            F(0) = 1050;
-        }
-
-        if (F(1) > 1900) {
-            F(1) = 1900;
-        }
-        else if (F(1) < 1050) {
-            F(1) = 1050;
+        else if (F(0,0) < 1050) {
+            F(0,0) = 1050;
         }
 
-        if (F(2) > 1900) {
-            F(2) = 1900;
+        if (F(1,0) > 1900) {
+            F(1,0) = 1900;
         }
-        else if (F(2) < 1050) {
-            F(2) = 1050;
+        else if (F(1,0) < 1050) {
+            F(1,0) = 1050;
         }
 
-        if (F(3) > 1900) {
-            F(3) = 1900;
+        if (F(2,0) > 1900) {
+            F(2,0) = 1900;
         }
-        else if (F(3) < 1050) {
-            F(3) = 1050;
+        else if (F(2,0) < 1050) {
+            F(2,0) = 1050;
         }
+
+        if (F(3,0) > 1900) {
+            F(3,0) = 1900;
+        }
+        else if (F(3,0) < 1050) {
+            F(3,0) = 1050;
+        }
+
+        // F(0,0) = F(0,0) + 100;
+        // F(1,0) = F(1,0) + 100;
         // F(0) = std::max(1050.0, std::min(F(0), 1900.0)); // Clamp F(0) between 1050 and 1900
         // F(1) = std::max(1050.0, std::min(F(1), 1900.0)); // Clamp F(1)
         // F(2) = std::max(1050.0, std::min(F(2), 1900.0)); // Clamp F(2)
         // F(3) = std::max(1050.0, std::min(F(3), 1900.0)); // Clamp F(3)
 
-        Eigen::IOFormat CleanFmt(4, 0, ", ", "\n", "[", "]");
+        // Eigen::IOFormat CleanFmt(4, 0, ", ", "\n", "[", "]");
 
-        // Get the logger
-        auto logger = this->get_logger();
+        // // Get the logger
+        // auto logger = this->get_logger();
 
-        // Stringstream for converting matrices to strings
-        std::stringstream ss;
+        // // Stringstream for converting matrices to strings
+        // std::stringstream ss;
 
-        // Assuming F is already computed and ready to print
+        // // Assuming F is already computed and ready to print
 
-        // Printing F (Matrix)
-        ss << F.format(CleanFmt);
-        RCLCPP_INFO(logger, "Matrix F:\n%s", ss.str().c_str());
-        ss.str(""); // Clearing the stringstream
+        // // Printing F (Matrix)
+        // ss << F.format(CleanFmt);
+        // RCLCPP_INFO(logger, "Matrix F:\n%s", ss.str().c_str());
+        // ss.str(""); // Clearing the stringstream
         
         auto msg2 = blimp_interfaces::msg::EscInput();
         msg2.esc_pins = {5,6,13,26};
-        F(0) = 1400;
-        F(1) = 1300;
-        F(2) = 1600;
-        F(3) = 1700;
-        msg2.pwm_l = F(0);
-        msg2.pwm_r = F(1);
-        msg2.pwm_u = F(2);
-        msg2.pwm_d = F(3);
+        msg2.pwm_l = F(1,0); 
+        msg2.pwm_r = F(0,0);
+        msg2.pwm_u = F(3,0);
+        msg2.pwm_d = F(2,0);
+        RCLCPP_INFO(this->get_logger(), "M1: %f  M2: %f  M3: %f  M4: %f", msg2.pwm_l, msg2.pwm_r, msg2.pwm_u, msg2.pwm_d);
         publisher_->publish(msg2);
         //RCLCPP_INFO(this->get_logger(), "M1: %f  M2: %f  M3: %f  M4: %f", F(0), F(1), F(2), F(3));
 
@@ -170,6 +171,7 @@ private:
     float lx1, lx2, lx3, lx4;
     float ly1, ly2, ly3, ly4;
     float lz1, lz2, lz3, lz4;
+    double f1, f2, f3, f4;
     Eigen::DiagonalMatrix<double, 4> K;
     Eigen::DiagonalMatrix<double, 4> K_inv;
     Eigen::Matrix<double, 6,1> tau;

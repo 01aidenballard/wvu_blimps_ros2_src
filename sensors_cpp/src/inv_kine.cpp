@@ -18,7 +18,7 @@ public:
     zg{0.21788162}
     {
         this->declare_parameter<double>("rho_air", 1.225); // kg/m^3
-        this->declare_parameter<double>("buoyancy", 0.42511728);
+        this->declare_parameter<double>("buoyancy", 0.42511728*9.81);
 
         rho_air = this->get_parameter("rho_air").as_double();
         B = this->get_parameter("buoyancy").as_double();
@@ -73,7 +73,7 @@ public:
     }
 
     void D_matrix() {
-        D = Eigen::DiagonalMatrix<double, 6>(-0.0220, -0.1745, -0.6321, -0.1291, -0.4332, -0.0281);
+        D = Eigen::DiagonalMatrix<double, 6>(0.0220, 0.1745, 0.6321, 0.1291, 0.4332, 0.0281);
     }
 
 private:
@@ -81,6 +81,28 @@ private:
 
     void callback_baro(const blimp_interfaces::msg::BaroData::SharedPtr msg) {
         height = msg->height;
+        time(&finish);
+        dt = difftime(finish, start);
+        time(&start);
+
+        // if (dt > 0) { // Prevent division by zero.
+        //     vz1 = ((height - height_old) / dt)*-1;
+        //     height_old = height;
+            
+        //     // Add new value to the buffer
+        //     if (vz_buffer.size() >= AVG_WINDOW) {
+        //         // If the buffer is full, remove the oldest value
+        //         std::rotate(vz_buffer.begin(), vz_buffer.begin() + 1, vz_buffer.end());
+        //         vz_buffer.back() = vz1;
+        //     } else {
+        //         // If the buffer is not full, just add the new value
+        //         vz_buffer.push_back(vz1);
+        //     }
+            
+        //     // Calculate the moving average of vz
+        //     sum = std::accumulate(vz_buffer.begin(), vz_buffer.end(), 0.0);
+        //     vz = sum / vz_buffer.size();
+        // }
     }
 
     void callback_imu(const blimp_interfaces::msg::ImuData::SharedPtr msg) {
@@ -95,15 +117,14 @@ private:
     }
 
     void callback_dynamic_model(const blimp_interfaces::msg::CartCoord::SharedPtr msg) {
-        time(&finish);
-        //double dt = difftime(finish, start);
-        time(&start);
-        //vz = (height_old - height)/dt;
-        vz = 0;
+        
+        //RCLCPP_INFO(this->get_logger(), "time: %f  height: %f  height_old: %f  vz: %f", dt, height, height_old,vz);
+        vz = 0.0;
+        //vx = 1.0;
         vx = 1.0;
         vy = 0.0;
         vel << vx, vy, vz, gyro(0), gyro(1), gyro(2);
-        height_old = height;
+        
 
         accel << msg->x,msg->y,msg->z,msg->theta,msg->phi,msg->psy;
         
@@ -142,10 +163,16 @@ private:
 
 
     // Members for the node
+    // Constant for AVG_WINDOW length
+    static constexpr size_t AVG_WINDOW = 5;
+    
+    // Buffer to store history of vz values
+    std::vector<double> vz_buffer;
     double height;
     double m;
     double zg;
     double rho_air;
+    double dt;
     double B;
     double W;
     double mx_prime, my_prime, mz_prime;
@@ -157,7 +184,9 @@ private:
     double vx;
     double vy;
     double vz;
+    double vz1;
     double height_old;
+    double sum;
     Eigen::Matrix<double, 6, 1> tau;
     Eigen::Matrix<double, 6, 1> g;
     Eigen::Matrix<double, 6, 6> C;

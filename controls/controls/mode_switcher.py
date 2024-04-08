@@ -41,17 +41,17 @@ class BalloonPI(Node):
 		
 	def callback_camera(self,msg):
 		self.camera_pins = msg.esc_pins
-		self.camera_L = msg.pwm_l
-		self.camera_R = msg.pwm_r
-		self.camera_U = msg.pwm_u
-		self.camera_D = msg.pwm_d
+		self.camera_L = float(msg.pwm_l)
+		self.camera_R = float(msg.pwm_r)
+		self.camera_U = float(msg.pwm_u)
+		self.camera_D = float(msg.pwm_d)
 		
 	def callback_manual(self,msg):
 		self.manual_pins = msg.esc_pins
-		self.manual_L = msg.pwm_l
-		self.manual_R = msg.pwm_r
-		self.manual_U = msg.pwm_u
-		self.manual_D = msg.pwm_d
+		self.manual_L = float(msg.pwm_l)
+		self.manual_R = float(msg.pwm_r)
+		self.manual_U = float(msg.pwm_u)
+		self.manual_D = float(msg.pwm_d)
 		
 
 	def callback_switch_mode(self, msg):
@@ -65,17 +65,17 @@ class BalloonPI(Node):
 		
 		if self.Manual_mode == True:
 			msg2.esc_pins = self.manual_pins
-			msg2.pwm_l = self.manual_L
-			msg2.pwm_r = self.manual_R
-			msg2.pwm_u = self.manual_U
-			msg2.pwm_d = self.manual_D
+			msg2.pwm_l = float(self.manual_L)
+			msg2.pwm_r = float(self.manual_R)
+			msg2.pwm_u = float(self.manual_U)
+			msg2.pwm_d = float(self.manual_D)
 		
 		elif self.Manual_mode == False:
 			msg2.esc_pins = self.camera_pins
-			msg2.pwm_l = self.camera_L
-			msg2.pwm_r = self.camera_R
-			msg2.pwm_u = self.camera_U
-			msg2.pwm_d = self.camera_D
+			msg2.pwm_l = float(self.camera_L)
+			msg2.pwm_r = float(self.camera_R)
+			msg2.pwm_u = float(self.camera_U)
+			msg2.pwm_d = float(self.camera_D)
 		
 		self.publisher.publish(msg2)
 			

@@ -38,11 +38,11 @@ private:
         cv::Mat hsv_frame;
         cv::cvtColor(frame, hsv_frame, cv::COLOR_BGR2HSV);
 
-        cv::Scalar lower_bound_1 = cv::Scalar(56, 41, 155);
-        cv::Scalar upper_bound_1 = cv::Scalar(76, 81, 255);
+        cv::Scalar lower_bound_1 = cv::Scalar(39, 80, 80);
+        cv::Scalar upper_bound_1 = cv::Scalar(75, 255, 255);
 
-        cv::Scalar lower_bound_2 = cv::Scalar(116, 16, 154);
-        cv::Scalar upper_bound_2 = cv::Scalar(136, 116, 254);
+        cv::Scalar lower_bound_2 = cv::Scalar(115, 80, 80);
+        cv::Scalar upper_bound_2 = cv::Scalar(160, 255, 255);
 
         cv::Mat mask_1, mask_2;
         cv::inRange(hsv_frame, lower_bound_1, upper_bound_1, mask_1);

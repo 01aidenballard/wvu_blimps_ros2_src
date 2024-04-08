@@ -29,9 +29,10 @@ def generate_launch_description():
 			name='balloon_detect_PI',
 			#kpx = 0.3 without forward motors
 			parameters = [{
-				"kpx": 0.35,
+				"kpx": 0.005,
+				#0.00000001
 				"kix": 0.0,
-				"kpy": 0.0,
+				"kpy": 0.003,
 				"kiy": 0.0
 			}]
         ),
@@ -44,6 +45,10 @@ def generate_launch_description():
 			package='sensors_cpp',
 			executable='dynamic_model',
 			name='inv_kine',
+			parameters = [{
+				"buoyancy": 0.375*9.81,
+				"rho_air": 1.225
+			}]
         ),
 		Node(
 			package='controls',
@@ -53,7 +58,10 @@ def generate_launch_description():
 		Node(
 			package='sensors',
 			name='read_altitude',
-			executable='read_altitude'
+			executable='read_altitude',
+			parameters = [{
+				"sea_level_pressure": 1011.6 
+			}]
 		),
 		Node(
 			package='sensors',

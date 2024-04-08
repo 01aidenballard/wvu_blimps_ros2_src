@@ -12,15 +12,23 @@ class BarometerNode(Node): #Creating a Node
                 self.barometer_data = self.create_publisher(BaroData,"barometer_data",10)
                 self.i2c = board.I2C()
                 self.sensor = adafruit_bmp3xx.BMP3XX_I2C(self.i2c)
-                self.declare_parameter('sea_level_pressure', 73)
+                #adafruit_bmp3xx.BMP3XX.filter_coefficient(128)
+                self.declare_parameter('sea_level_pressure', 999.3233801073472)
                 self.sea_level_pressure = self.get_parameter('sea_level_pressure').value
                 self.sensor.sea_level_pressure = self.sea_level_pressure
                 self.create_timer(0.2, self.publish_barometer_data)
+                self.height_init =0.0
+                self.c = 0
 
         def publish_barometer_data(self):
                 while True:
                         msg = BaroData()
-                        msg.height = float(self.sensor.altitude)
+
+                        if self.c == 0:
+                                self.height_init = self.sensor.altitude
+                                self.c = self.c + 1
+                        
+                        msg.height = float(self.sensor.altitude) - self.height_init
                         #self.get_logger().info(str(msg)) # Prints data to command line
                         self.barometer_data.publish(msg)
 

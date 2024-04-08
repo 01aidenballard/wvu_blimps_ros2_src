@@ -7,7 +7,7 @@ import pigpio               #importing GPIO library
 #This file is used to program new esc's or reprogram old ones to new battery or motor specs
 #When you run this hit enter after every Beep. 
 
-ESC=26  #Connect the ESC in this GPIO pin. Currently the up motor pin. can change in the future.
+ESC=6  #Connect the ESC in this GPIO pin. Currently the up motor pin. can change in the future.
 #current pin options
 # 5
 # 6
