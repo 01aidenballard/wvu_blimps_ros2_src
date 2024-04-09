@@ -1,3 +1,4 @@
+
 import rclpy
 from rclpy.node import Node
 #from std_msgs.msg import Float64
@@ -12,6 +13,10 @@ class EscControl(Node):
 	def __init__(self):
 		
 		self.pi = pigpio.pi()
+		self.pwm_L = 0
+		self.pwm_R = 0
+		self.pwm_U = 0
+		self.pwm_D = 0
 
 		super().__init__("manual_esc_control")
 		self.subscriber = self.create_subscription(
@@ -26,28 +31,16 @@ class EscControl(Node):
 
 	def callback_control_the_esc(self, msg):
 		pins = msg.esc_pins
-		pwm = msg.esc_pwm
-		self.inputs = pwm
+		self.pwm_L = msg.pwm_l
+		self.pwm_R = msg.pwm_r
+		self.pwm_U = msg.pwm_u
+		self.pwm_D = msg.pwm_d
 		#self.get_logger().info(str(pwm))
 
-		self.pi.set_servo_pulsewidth(pins[0], pwm[0])
-		self.pi.set_servo_pulsewidth(pins[1], pwm[1])
-		self.pi.set_servo_pulsewidth(pins[2], pwm[2])
-		self.pi.set_servo_pulsewidth(pins[3], pwm[3])
-		
-	#def callback_time(self, msg):
-		#time1 = msg.data
-		#time2 = time.time()
-		
-		#dtime = time2 - time1
-		#self.get_logger().info("Left Motor: " + str(self.inputs[0]) + " Right Motor: " + str(self.inputs[1]) + 
-		#" Up Motor: " + str(self.inputs[2]) + " Down Motor: " + str(self.inputs[3]) + " Time:" + str(dtime))
-		
-		#f = open("time_latency_test6.txt", 'a')
-		#f.write("Left Motor: " + str(self.inputs[0]) + " Right Motor: " + str(self.inputs[1]) + 
-		#" Up Motor: " + str(self.inputs[2]) + " Down Motor: " + str(self.inputs[3]) + " Time:" + str(dtime) + "\n")
-		
-		
+		self.pi.set_servo_pulsewidth(pins[0], self.pwm_L)
+		self.pi.set_servo_pulsewidth(pins[1], self.pwm_R)
+		self.pi.set_servo_pulsewidth(pins[2], self.pwm_U)
+		self.pi.set_servo_pulsewidth(pins[3], self.pwm_D)
 
 
 

@@ -3,6 +3,7 @@ project(blimp_interfaces)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
+  add_compile_options(-Wno-class-memaccess)
 endif()
 
 # find dependencies
@@ -17,6 +18,8 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/EscInput.msg"
   "msg/CameraCoord.msg"
   "msg/ImuData.msg"
+  "msg/BaroData.msg"
+  "msg/CartCoord.msg"
   "srv/GetCamera.srv"
 )
 

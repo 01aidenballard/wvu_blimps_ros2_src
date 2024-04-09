@@ -24,15 +24,30 @@ def generate_launch_description():
         ),
 		#Control Package Executables:
 		Node(
-			package='controls',
-			executable='balloon_detect_control',
+			package='sensors_cpp',
+			executable='pi_controller',
 			name='balloon_detect_PI',
 			#kpx = 0.3 without forward motors
 			parameters = [{
-				"kpx": 0.35,
+				"kpx": 0.005,
+				#0.00000001
 				"kix": 0.0,
-				"kpy": 0.0,
+				"kpy": 0.003,
 				"kiy": 0.0
+			}]
+        ),
+		Node(
+			package='sensors_cpp',
+			executable='F_to_Esc',
+			name='force_to_esc',
+        ),
+		Node(
+			package='sensors_cpp',
+			executable='dynamic_model',
+			name='inv_kine',
+			parameters = [{
+				"buoyancy": 0.375*9.81,
+				"rho_air": 1.225
 			}]
         ),
 		Node(
@@ -41,12 +56,17 @@ def generate_launch_description():
 			executable='esc_driver'
 		),
 		Node(
-			package='sensors'
-			name='read_altitude'
-			executable='read_altitude'
+			package='sensors',
+			name='read_altitude',
+			executable='read_altitude',
 			parameters = [{
-				"sea_level_pressure": 1019.0 #hPa. Morgantown, WV
+				"sea_level_pressure": 1011.6 
 			}]
+		),
+		Node(
+			package='sensors',
+			name='read_imu',
+			executable='read_imu'
 		),
 #		Node(
 #			package = 'sensors',

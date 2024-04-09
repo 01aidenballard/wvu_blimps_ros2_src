@@ -42,11 +42,11 @@ class CamNode(Node): #Creating a Node
 
         hsv_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         
-        lower_bound_purple = np.array([115, 50, 50])
-        upper_bound_purple = np.array([160, 255, 255])
+        lower_bound_purple = np.array([116, 16, 154])
+        upper_bound_purple = np.array([136, 116, 254])
 
-        lower_bound_green = np.array([33, 50, 50])  # Adjusted for light green
-        upper_bound_green = np.array([90, 255, 255])  # Adjusted for dark green
+        lower_bound_green = np.array([56, 41, 155])  # Adjusted for light green
+        upper_bound_green = np.array([76, 81, 255])  # Adjusted for dark green
 
         mask_green = cv2.inRange(hsv_frame, lower_bound_green, upper_bound_green)
         mask_purple = cv2.inRange(hsv_frame, lower_bound_purple, upper_bound_purple)
@@ -81,7 +81,7 @@ class CamNode(Node): #Creating a Node
         if circles is not None:
 	        # convert the (x, y) coordinates and radius of the circles to integers
             circles = np.round(circles[0, :]).astype("int")
-            self.frame_count += 1
+            
             # loop over the (x, y) coordinates and radius of the circles
             for (x, y, r) in circles:
                 area = r * r * 3.14
@@ -90,14 +90,15 @@ class CamNode(Node): #Creating a Node
                     # cv2.circle(output, (x, y), r, (0, 255, 0), 4)
 
 
-            cv2.imshow('Detected Color', gray)
-        if self.frame_count % 3 == 0:
+           # cv2.imshow('Detected Color', frame)
+        self.frame_count += 1
+        if self.frame_count % 1 == 0:
             for idx, (x, y) in enumerate(detected_coordinates):
                 total_x = sum(x for x, _ in detected_coordinates)
                 total_y = sum(y for _, y in detected_coordinates)
                 avg_x = total_x / len(detected_coordinates)
                 avg_y = total_y / len(detected_coordinates)
-                self.get_logger().info("X: " + str(avg_x) + ", Y: " + str(avg_y))
+                #self.get_logger().info("X: " + str(avg_x) + ", Y: " + str(avg_y))
                 msg = CameraCoord()
                 msg.position = [int(avg_x),int(avg_y)]
                 self.cam_data.publish(msg)
