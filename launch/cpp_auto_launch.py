@@ -22,6 +22,11 @@ def generate_launch_description():
 			executable='balloon_detect_cpp',
 			name='balloon_detection',
         ),
+		Node(
+			package='sensors_cpp',
+			executable='goal_detect_cpp',
+			name='goal_detection',
+        ),
 		#Control Package Executables:
 		Node(
 			package='sensors_cpp',
