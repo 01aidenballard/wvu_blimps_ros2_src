@@ -73,7 +73,7 @@ public:
     }
 
     void D_matrix() {
-        D = Eigen::DiagonalMatrix<double, 6>(0.0220, 0.1745, 0.6321, 0.1291, 0.4332, 0.0281);
+        D = Eigen::DiagonalMatrix<double, 6>(0.24852, 0.8901, 0.61923, 0.94907, 0.37799, 0.041846);
     }
 
 private:

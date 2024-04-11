@@ -20,6 +20,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/ImuData.msg"
   "msg/BaroData.msg"
   "msg/CartCoord.msg"
+  "msg/UtcTime.msg"
   "srv/GetCamera.srv"
 )
 

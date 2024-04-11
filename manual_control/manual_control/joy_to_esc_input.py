@@ -5,6 +5,7 @@ from blimp_interfaces.msg import EscInput
 from std_msgs.msg import String 
 from std_msgs.msg import Float32MultiArray
 from std_msgs.msg import Float64
+from blimp_interfaces.msg import UtcTime
 import time
 
 class FixAxesNode(Node):
@@ -14,27 +15,52 @@ class FixAxesNode(Node):
 		self.ESC_pin2 = 6
 		self.ESC_pin3 = 13
 		self.ESC_pin4 = 26
-
+		self.joy_time = 0
+		
 		super().__init__("esc_input")
+
+		self.declare_parameter('Klm', 1.0)
+		self.declare_parameter('Krm', 1.0)
+		self.Klm = self.get_parameter('Klm').value
+		self.Krm = self.get_parameter('Krm').value
 		
 		self.subscriber = self.create_subscription(
 			Joy, "joy", self.callback_manual_esc_input, 10
 		)
 		
-		self.publisher = self.create_publisher(EscInput, "ESC_Manual_input", 10)		
+		self.publisher = self.create_publisher(EscInput, "ESC_Manual_input", 10)
+		self.publisher_time = self.create_publisher(UtcTime, "Time", 10)		
 		
 		self.get_logger().info("Data is being sent to the ESC node")
 
+	def callback_time(self):
+		msg = UtcTime
+		msg.time = self.joy_time
+		self.publisher_time.publish(msg)
 
 	def callback_manual_esc_input(self, msg):
 		
-		RM = msg.axes[5]*-100
-		LM = ((msg.axes[3]-1)*-100)/2
-		if msg.axes[1] > 0.05:
-			UM = abs(msg.axes[1])*100
+		RTrim = msg.axes[5]*-50
+		LTrim = ((msg.axes[3]-1)*-100)/4
+		F = abs(msg.axes[1])*50
+		LM = (F*self.Klm) + LTrim - RTrim
+		RM = (F*self.Krm) + RTrim - LTrim
+
+		if LM < 0:
+			LM = 0
+		elif RM < 0:
+			RM = 0
+
+		if LM > 100:
+			LM = 100
+		elif RM > 100:
+			RM = 100
+
+		if msg.axes[2] > 0.05:
+			UM = abs(msg.axes[2])*100
 			DM = 0
-		elif msg.axes[1] < -0.05:
-			DM = abs(msg.axes[1])*100
+		elif msg.axes[2] < -0.05:
+			DM = abs(msg.axes[2])*100
 			UM = 0
 		else:
 			UM = 0
@@ -46,6 +72,7 @@ class FixAxesNode(Node):
 		RM_pwm = self.control_to_esc_input(RM)
 		
 		msg2 = EscInput()
+		self.joy_time = time.time()
 		msg2.esc_pins = [self.ESC_pin1, self.ESC_pin2, self.ESC_pin3, self.ESC_pin4]
 		msg2.pwm_l = LM_pwm
 		msg2.pwm_r = RM_pwm

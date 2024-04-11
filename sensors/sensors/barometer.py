@@ -16,7 +16,6 @@ class BarometerNode(Node): #Creating a Node
                 self.declare_parameter('sea_level_pressure', 999.3233801073472)
                 self.sea_level_pressure = self.get_parameter('sea_level_pressure').value
                 self.sensor.sea_level_pressure = self.sea_level_pressure
-                self.create_timer(0.2, self.publish_barometer_data)
                 self.height_init =0.0
                 self.c = 0
 

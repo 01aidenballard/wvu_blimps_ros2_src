@@ -23,13 +23,12 @@ class RecordDataNode(Node): #Creating a Node
 		self.get_logger().info("Data is starting to record")
 
 	def callback_record_esc(self,msg):
-		self.motor = msg.esc_pwm
 		dt = time.time() - self.start_time
 		fn = self.get_parameter('file_name').get_parameter_value().string_value
 		f = open(str(fn), 'a')
-		f.write(" L Motor: {}".format(self.motor[0]) + " " +
-			"R Motor: {}".format(self.motor[1]) + " " + "U Motor: {}".format(self.motor[2]) + " " + 
-			"D Motor: {}".format(self.motor[3]) + " " + "time: {}".format(dt) + "\n")
+		f.write(" L Motor: {}".format(msg.pwm_l) + " " +
+			"R Motor: {}".format(msg.pwm_r) + " " + "U Motor: {}".format(msg.pwm_u) + " " + 
+			"D Motor: {}".format(msg.pwm_d) + " " + "time: {}".format(dt) + "\n")
 		f.close()
 def main(args=None):
 	rclpy.init(args=args)

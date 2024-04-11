@@ -22,7 +22,8 @@ setup(
         'console_scripts': [
             "esc_driver = controls.esc_driver:main",
             "balloon_detect_control = controls.balloon_pi:main",
-            "mode_switch = controls.mode_switcher:main"
+            "mode_switch = controls.mode_switcher:main",
+            "net_servo = controls.net_servo:main"
         ],
     },
 )
