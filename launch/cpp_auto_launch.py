@@ -22,10 +22,17 @@ def generate_launch_description():
 			executable='balloon_detect_cpp',
 			name='balloon_detection',
         ),
+<<<<<<< HEAD
 		Node(
 			package='sensors_cpp',
 			executable='goal_detect_cpp',
 			name='goal_detection',
+=======
+                Node(
+                        package='sensors_cpp',
+                        executable='goal_detect_cpp',
+                        name='goal_detection',
+>>>>>>> ffdf8ca (updating configs)
         ),
 		#Control Package Executables:
 		Node(

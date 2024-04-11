@@ -49,6 +49,10 @@ install(TARGETS
   balloon_detect_cpp
   DESTINATION lib/${PROJECT_NAME}
 )
+install(TARGETS
+  goal_detect_cpp
+  DESTINATION lib/${PROJECT_NAME}
+)
 
 install(TARGETS
   goal_detect_cpp
