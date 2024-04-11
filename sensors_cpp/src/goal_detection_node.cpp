@@ -107,12 +107,11 @@ public:
         }
 
 
+        //cv::imshow("Detection", frame);
 
         //if (cv::waitKey(1)) {
             //return;
         //}
-
-
     }
 
     cv::VideoCapture cap;
@@ -121,8 +120,6 @@ public:
 
     int center_x;
     int center_y;
-    int frame_count = 0;
-
     float rho;
     float theta;
     int threshold;
@@ -130,16 +127,9 @@ public:
     int max_line_gap;
     int low_threshold;
     int high_threshold;
-    int x1;
-    int y1;
-    int x2;
-    int y2;
-    int mid_x;
-    int mid_y;
     int total_x;
     int total_y;
     int total_lines;
-
 };
 
 int main(int argc, char **argv) {
@@ -151,3 +141,4 @@ int main(int argc, char **argv) {
     cv::destroyAllWindows();
     return 0;
 }
+
