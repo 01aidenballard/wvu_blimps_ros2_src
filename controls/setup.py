@@ -23,7 +23,9 @@ setup(
             "esc_driver = controls.esc_driver:main",
             "balloon_detect_control = controls.balloon_pi:main",
             "mode_switch = controls.mode_switcher:main",
-            "net_servo = controls.net_servo:main"
+            "net_servo = controls.net_servo:main",
+            "random_walk = controls.random_walk:main",
+            "bomber_cntrl = controls.Bomber_Cntrl:main"
         ],
     },
 )

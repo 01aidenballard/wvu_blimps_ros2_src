@@ -29,7 +29,7 @@ class FixAxesNode(Node):
 		)
 		
 		self.publisher = self.create_publisher(EscInput, "ESC_Manual_input", 10)
-		self.publisher_time = self.create_publisher(UtcTime, "Time", 10)		
+	#	self.publisher_time = self.create_publisher(UtcTime, "Time", 10)		
 		
 		self.get_logger().info("Data is being sent to the ESC node")
 

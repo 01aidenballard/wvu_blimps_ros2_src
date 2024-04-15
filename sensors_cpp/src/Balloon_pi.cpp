@@ -53,8 +53,10 @@ private:
     }
 
     void callback_baro(const blimp_interfaces::msg::BaroData::SharedPtr msg) {
-        if (coord_old[1] != coord_[1] && coord_old[0] != coord_[0]) {
-            y_goal_ = msg->height;
+        //if (coord_old[1] != coord_[1] && coord_old[0] != coord_[0]) {
+	bool dumb_shit = true;
+        if (dumb_shit == false) {
+	    y_goal_ = 2;
 
             x_error = x_goal_ - coord_[0];
             y_error = y_goal_ - msg->height;

@@ -34,11 +34,11 @@ def generate_launch_description():
 			#kpx = 0.3 without forward motors
 			parameters = [{
 				"kpx": 0.005,
-				#0.00000001
-				"kix": 0.0,
-				"kpy": 0.003,
-				"kiy": 0.0,
-				"kpb": 0.005
+				      #0.00000001
+				"kix": 0.0, #0000001,
+				"kpy": 0.0015,
+				"kiy": 0.000000001,
+				"kpb": 0.0  #0.69  #NICE!
 			}]
         ),
 		Node(
@@ -51,7 +51,7 @@ def generate_launch_description():
 			executable='dynamic_model',
 			name='inv_kine',
 			parameters = [{
-				"buoyancy": 0.375*9.81,
+				#"buoyancy": 0.0,
 				"rho_air": 1.225
 			}]
         ),
@@ -70,7 +70,7 @@ def generate_launch_description():
 			name='read_altitude',
 			executable='read_altitude',
 			parameters = [{
-				"sea_level_pressure": 1011.6 
+				"sea_level_pressure": 1002.6
 			}]
 		),
 		Node(
@@ -84,19 +84,19 @@ def generate_launch_description():
 		# 	executable = 'record_data',
 		# 	parameters = [{"file_name":"pi_DBlue_4"}]
 		# ),
-		Node(
-			package='sensors',
-			name='sender',
-			executable='send_data'
-		),
-		Node(
-			package='sensors',
-			name='reciever',
-			executable='recieve_data',
-			parameters = [{
-				"file_name": "test_data_1"
-			}]
-		),
+	#	Node(
+	#		package='sensors',
+	#		name='sender_data',
+	#		executable='sender'
+	#	),
+		# Node(
+		# 	package='sensors',
+		# 	name='reciever',
+		# 	executable='recieve_data',
+		# 	parameters = [{
+		# 		"file_name": "test_data_1"
+		# 	}]
+		# ),
 		Node(
 			package='controls',
 			executable='mode_switch',
