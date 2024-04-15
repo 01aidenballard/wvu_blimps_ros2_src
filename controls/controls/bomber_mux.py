@@ -13,8 +13,8 @@ class MuxNode(Node):
 		self.bomber_c = 0.0
 		self.bomber_esc =[0,0,0,0]
 		self.random_a = 0.0
-		self.random_a = 0.0
-		self.random_a = 0.0
+		self.random_b = 0.0
+		self.random_c = 0.0
 		self.random_esc = [0,0,0,0]
 		self.time = 0.0
 		self.baro_u = 0.0

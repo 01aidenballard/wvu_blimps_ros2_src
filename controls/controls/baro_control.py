@@ -19,7 +19,7 @@ class BaroNode(Node):
 
 	def callback_baro_control(self,msg):
 		height = msg.height
-		msg2 = BaroData()
+		msg2 = EscInput()
 		if height < self.height_goal:
 			msg2.pwm_l = 1050.0
 			msg2.pwm_r = 1050.0

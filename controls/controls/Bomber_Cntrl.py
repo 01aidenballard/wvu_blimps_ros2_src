@@ -11,7 +11,7 @@ class BomberNode(Node):
 
 		super().__init__("Bomber_node")
 		
-		self.declare_parameter('k',1) #kg/m^3
+		self.declare_parameter('k',1.0) #kg/m^3
 		self.k = self.get_parameter('k').value
 		self.subscriber = self.create_subscription(
 			CameraCoord, "cam_data", self.callback_bomber, 3

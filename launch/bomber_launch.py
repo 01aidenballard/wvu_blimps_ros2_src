@@ -24,8 +24,13 @@ def generate_launch_description():
 		),
 		Node(
 			package='controls',
+			name='mux',
+			executable='mux',
+		),
+		Node(
+			package='controls',
 			name='baro_cntrl',
-			executable='baro_control',
+			executable='baro_cntrl',
 			parameters = [{
 				"kpb": 0.69,
 			}]

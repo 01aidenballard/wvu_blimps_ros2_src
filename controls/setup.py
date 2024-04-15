@@ -25,7 +25,9 @@ setup(
             "mode_switch = controls.mode_switcher:main",
             "net_servo = controls.net_servo:main",
             "random_walk = controls.random_walk:main",
-            "bomber_cntrl = controls.Bomber_Cntrl:main"
+            "bomber_cntrl = controls.Bomber_Cntrl:main",
+            "baro_cntrl = controls.baro_control:main",
+            "mux = controls.bomber_mux:main"
         ],
     },
 )
