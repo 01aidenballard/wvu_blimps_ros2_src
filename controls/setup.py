@@ -22,7 +22,12 @@ setup(
         'console_scripts': [
             "esc_driver = controls.esc_driver:main",
             "balloon_detect_control = controls.balloon_pi:main",
-            "mode_switch = controls.mode_switcher:main"
+            "mode_switch = controls.mode_switcher:main",
+            "net_servo = controls.net_servo:main",
+            "random_walk = controls.random_walk:main",
+            "bomber_cntrl = controls.Bomber_Cntrl:main",
+            "baro_cntrl = controls.baro_control:main",
+            "mux = controls.bomber_mux:main"
         ],
     },
 )
