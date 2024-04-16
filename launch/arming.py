@@ -2,7 +2,7 @@ import pigpio
 import time
 import os
 os.system("sudo pigpiod")
-
+time.sleep(1)
 p1 = 5
 p2 = 6
 p3 = 13
