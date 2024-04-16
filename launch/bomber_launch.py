@@ -33,6 +33,7 @@ def generate_launch_description():
 			executable='baro_cntrl',
 			parameters = [{
 				"kpb": 0.69,
+				"height": 2,
 			}]
 		),
 		Node(

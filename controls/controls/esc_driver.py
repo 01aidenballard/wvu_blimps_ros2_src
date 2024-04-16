@@ -33,6 +33,26 @@ class EscControl(Node):
 		self.pwm_R = msg.pwm_r
 		self.pwm_U = msg.pwm_u
 		self.pwm_D = msg.pwm_d
+
+		if self.pwm_L > 1900.0:
+			self.pwm_L = 1900.0
+		elif self.pwm_L < 1050.0:
+			self.pwm_L = 1050.0
+
+		if self.pwm_R > 1900.0:
+			self.pwm_R = 1900.0
+		elif self.pwm_R < 1050.0:
+			self.pwm_R = 1050.0
+
+		if self.pwm_U > 1900.0:
+			self.pwm_U = 1900.0
+		elif self.pwm_U < 1050.0:
+			self.pwm_U = 1050.0
+
+		if self.pwm_D > 1900.0:
+			self.pwm_D = 1900.0
+		elif self.pwm_D < 1050.0:
+			self.pwm_D = 1050.0
 		#self.get_logger().info(str(pwm))
 
 		self.pi.set_servo_pulsewidth(pins[0], self.pwm_L)

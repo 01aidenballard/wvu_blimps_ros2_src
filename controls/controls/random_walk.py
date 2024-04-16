@@ -9,11 +9,11 @@ class RandWalkNode(Node):
 		super().__init__("random_walk_node")
 		self.publisher = self.create_publisher(EscInput, "ESC_random_input", 10)
 		self.get_logger().info("Walking is randomized")
-		self.create_timer(0.2,self.callback_random_walk)
+		self.create_timer(2,self.callback_random_walk)
 
 	def callback_random_walk(self):
 		motor = random.randint(0,2)
-		pwm = float(random.randint(1100, 1500))
+		pwm = float(random.randint(1100, 1300))
 		msg = EscInput()
 		#pwm_l is motor A:
         #pwm_r is motor B:

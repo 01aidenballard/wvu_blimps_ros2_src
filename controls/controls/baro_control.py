@@ -23,7 +23,7 @@ class BaroNode(Node):
 		if height < self.height_goal:
 			msg2.pwm_l = 1050.0
 			msg2.pwm_r = 1050.0
-			msg2.pwm_u = height*self.kpb
+			msg2.pwm_u = 1050 + height*self.kpb
 			msg2.pwm_d = 1050.0
 		else:
 			msg2.pwm_l = 1050.0
