@@ -22,6 +22,9 @@ include_directories(
 add_executable(balloon_detect_cpp src/balloon_detect_node.cpp)
 ament_target_dependencies(balloon_detect_cpp rclcpp blimp_interfaces OpenCV) 
 
+add_executable(goal_detect_cpp src/goal_detection_node.cpp)
+ament_target_dependencies(goal_detect_cpp rclcpp blimp_interfaces OpenCV)
+
 add_executable(dynamic_model src/inv_kine.cpp)
 ament_target_dependencies(dynamic_model
   rclcpp
@@ -44,6 +47,15 @@ ament_target_dependencies(pi_controller
 
 install(TARGETS
   balloon_detect_cpp
+  DESTINATION lib/${PROJECT_NAME}
+)
+install(TARGETS
+  goal_detect_cpp
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+install(TARGETS
+  goal_detect_cpp
   DESTINATION lib/${PROJECT_NAME}
 )
 
