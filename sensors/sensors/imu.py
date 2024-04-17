@@ -21,7 +21,7 @@ class ImuNode(Node): #Creating a Node
 		self.sensor = adafruit_bno055.BNO055_I2C(self.i2c)
 		self.sensor.mode = adafruit_bno055.M4G_MODE
 		self.sensor.mode = adafruit_bno055.NDOF_MODE
-		self.create_timer(0.2, self.publish_imu_data) #calls function every 0.2 seconds
+		self.create_timer(0.01, self.publish_imu_data) #calls function every 0.2 seconds
 		# initializing lists of saved variables and send variables
 		self.prev_lin_accel = [0 ,0 ,0]
 		self.prev_gyro = [0 ,0 ,0]

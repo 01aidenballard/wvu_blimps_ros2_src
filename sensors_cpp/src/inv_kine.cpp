@@ -73,7 +73,7 @@ public:
     }
 
     void D_matrix() {
-        D = Eigen::DiagonalMatrix<double, 6>(0.24852, 0.8901, 1.2, 0.94907, 0.37799, 0.041846);
+        D = Eigen::DiagonalMatrix<double, 6>(0.022, 0.1745, 0.21, .02, 0.04, 0.04);
     }
 
 private:
@@ -86,7 +86,7 @@ private:
         time(&start);
 
          if (dt > 0) { // Prevent division by zero.
-             vz1 = ((height - height_old) / dt)*-1;
+             vz1 = ((height_old - height) / dt)*-1;
              height_old = height;
          
              // Add new value to the buffer
@@ -121,7 +121,7 @@ private:
         //RCLCPP_INFO(this->get_logger(), "time: %f  height: %f  height_old: %f  vz: %f", dt, height, height_old,vz);
         //vz = 0.0;
         //PUT THIS FUCKING SHIT BACK IN vx = 1.0;
-        vx = 1.0;
+        vx = 0.0; //1.0;
         vy = 0.0;
         vel << vx, vy, vz, gyro(0), gyro(1), gyro(2);
         
@@ -137,13 +137,13 @@ private:
         
 
         g << (W - B) * sin(euler(1)),
-            (W - B) * cos(euler(1)) * sin(euler(0)),
-            (W - B) * cos(euler(1)) * cos(euler(0)),
-            -zg * W * cos(euler(1)) * sin(euler(0)),
-            -zg * W * sin(euler(1)),
+            -(W - B) * cos(euler(1)) * sin(euler(0)),
+            -(W - B) * cos(euler(1)) * cos(euler(0)),
+            zg * W * cos(euler(1)) * sin(euler(0)),
+            zg * W * sin(euler(1)),
             0;       
         
-        tau = M*accel + D*vel + C*vel + g;
+        tau = M*accel + C*vel + g + D*vel; // + D*vel + C*vel + g;
 
         auto msg2 = blimp_interfaces::msg::CartCoord();
         msg2.x = tau(0);

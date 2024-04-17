@@ -90,7 +90,7 @@ private:
     void callback_force_to_esc(const blimp_interfaces::msg::CartCoord::SharedPtr msg) {
         //msg->x
 	// REMEBER TO ADD THE +0.15 TO THE MSG->X PLEASE DONT FORGET!!!!!!!!!!!
-        tau << msg->x + 0.1,
+        tau << msg->x,
                   msg->y,
                   msg->z,
                   msg->theta,
@@ -155,8 +155,8 @@ private:
         msg2.esc_pins = {5,6,13,26};
         msg2.pwm_l = F(1,0); 
         msg2.pwm_r = F(0,0);
-        msg2.pwm_u = F(3,0);
-        msg2.pwm_d = F(2,0);
+        msg2.pwm_u = F(2,0);
+        msg2.pwm_d = F(3,0);
         //RCLCPP_INFO(this->get_logger(), "M1: %f  M2: %f  M3: %f  M4: %f", msg2.pwm_l, msg2.pwm_r, msg2.pwm_u, msg2.pwm_d);
         publisher_->publish(msg2);
         //RCLCPP_INFO(this->get_logger(), "M1: %f  M2: %f  M3: %f  M4: %f", F(0), F(1), F(2), F(3));
