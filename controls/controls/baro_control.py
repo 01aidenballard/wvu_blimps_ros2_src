@@ -23,7 +23,7 @@ class BaroNode(Node):
 		if height < self.height_goal:
 			msg2.pwm_l = 1050.0
 			msg2.pwm_r = 1050.0
-			msg2.pwm_u = 1050 + height*self.kpb
+			msg2.pwm_u = 1050 + abs(height-self.height_goal)*self.kpb
 			msg2.pwm_d = 1050.0
 		else:
 			msg2.pwm_l = 1050.0
@@ -32,6 +32,7 @@ class BaroNode(Node):
 			msg2.pwm_d = 1050.0
 		msg2.esc_pins = [5,6,13,26]
 		self.publisher.publish(msg2)
+		#self.get_logger().info("baro: " + str(height)+ " U: "+ str(msg2.pwm_u))
 		
 		
 def main(args=None):

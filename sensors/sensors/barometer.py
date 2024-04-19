@@ -30,7 +30,7 @@ class BarometerNode(Node): #Creating a Node
                         self.c = self.c + 1
                  
                 msg.height = float(self.sensor.altitude) - self.height_init
-                #self.get_logger().info(str(msg.height))
+                #self.get_logger().info("barometer: "+ str(msg.height))
                  # Prints data to command line
                 self.barometer_data.publish(msg)
 

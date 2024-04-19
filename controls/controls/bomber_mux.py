@@ -50,17 +50,17 @@ class MuxNode(Node):
 	def callback_mux(self):
 		dt = time.time() - self.time
 		msg = EscInput()
-		msg.pwm_u = self.baro_u
+		msg.pwm_u =0.0 # self.baro_u
 		if dt > 10:
-			msg.pwm_l = self.random_a
-			msg.pwm_r = self.random_b
-			msg.pwm_d = self.random_c
+			msg.pwm_l = 0.0 #self.random_a
+			msg.pwm_r = 0.0 #self.random_b
+			msg.pwm_d = 0.0 # self.random_c
 		else:
-			msg.pwm_l = self.bomber_a
-			msg.pwm_r = self.bomber_b
-			msg.pwm_d = self.bomber_c
+			msg.pwm_l = 0.0 #self.bomber_a
+			msg.pwm_r = 0.0 #self.bomber_b
+			msg.pwm_d = 0.0 #self.bomber_c
 		msg.esc_pins = [5,6,13,26]
-		
+		self.get_logger().info(" A: " +str(self.bomber_a) + " B: " +str(self.bomber_b) + " C: " +str(self.bomber_c))
 		self.publisher.publish(msg)
 	
 	

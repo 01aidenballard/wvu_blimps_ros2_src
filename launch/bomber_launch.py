@@ -32,8 +32,8 @@ def generate_launch_description():
 			name='baro_cntrl',
 			executable='baro_cntrl',
 			parameters = [{
-				"kpb": 0.69,
-				"height": 2,
+				"kpb": 900.0,
+				"height": 3.0,
 			}]
 		),
 		Node(
@@ -51,7 +51,7 @@ def generate_launch_description():
 			name='read_altitude',
 			executable='read_altitude',
 			parameters = [{
-				"sea_level_pressure": 1002.6
+				"sea_level_pressure": 1016.9
 			}]
 		),
 		
