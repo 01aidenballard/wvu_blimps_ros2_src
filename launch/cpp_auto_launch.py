@@ -35,7 +35,7 @@ def generate_launch_description():
 			parameters = [{
 				"kpx": 0.005, #0.005,
 				      #0.00000001
-				"kix": 0.0, #0000001,
+				"kix": 0.000001,
 				"kpyu": 0.004, # up motor
 				"kpyd": 0.0, # down motor
 				"kiy": 0.000001, #0.000000001,
@@ -52,7 +52,7 @@ def generate_launch_description():
 			executable='dynamic_model',
 			name='inv_kine',
 			parameters = [{
-				"buoyancy": (0.42511726*9.81) - 0.20601,
+				"buoyancy": (0.45131*9.81) - 0.33354,
 				"rho_air": 1.225
 			}]
         ),

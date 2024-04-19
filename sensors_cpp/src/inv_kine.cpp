@@ -14,8 +14,8 @@ public:
     DynamicModel()
     : Node("dynamic_model"),
     height{0.0},
-    m{0.42511728},
-    zg{0.21788162}
+    m{0.45131},
+    zg{0.24401}
     {
         this->declare_parameter<double>("rho_air", 1.225); // kg/m^3
         this->declare_parameter<double>("buoyancy", 0.42511728*9.81);
@@ -24,7 +24,7 @@ public:
         B = this->get_parameter("buoyancy").as_double();
         W = m * 9.81;
         //        a     b      density    Ix         Iy        Iz
-        M_matrix(0.86,0.28,rho_air,0.058241,0.08583106,0.04598382);
+        M_matrix(0.86,0.28,rho_air,0.07359,0.10802,0.05405);
 
         D_matrix();
 
