@@ -38,20 +38,20 @@ private:
         cv::Mat hsv_frame;
         cv::cvtColor(frame, hsv_frame, cv::COLOR_BGR2HSV);
 
-        cv::Scalar lower_bound_1 = cv::Scalar(39, 80, 80);
-        cv::Scalar upper_bound_1 = cv::Scalar(75, 255, 255);
+        //cv::Scalar lower_bound_1 = cv::Scalar(39, 80, 80);
+        //cv::Scalar upper_bound_1 = cv::Scalar(75, 255, 255);
 
-        cv::Scalar lower_bound_2 = cv::Scalar(115, 80, 80);
-        cv::Scalar upper_bound_2 = cv::Scalar(160, 255, 255);
+        cv::Scalar lower_bound_2 = cv::Scalar(/*115*/128.5, 80, 80);
+        cv::Scalar upper_bound_2 = cv::Scalar(160, 170, 255);
 
-        cv::Mat mask_1, mask_2;
-        cv::inRange(hsv_frame, lower_bound_1, upper_bound_1, mask_1);
+        cv::Mat/* mask_1,*/ mask_2;
+       // cv::inRange(hsv_frame, lower_bound_1, upper_bound_1, mask_1);
         cv::inRange(hsv_frame, lower_bound_2, upper_bound_2, mask_2);
 
-        std::vector<std::vector<cv::Point>> contours_1, contours_2, all_contours;
-        cv::findContours(mask_1, contours_1, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+        std::vector<std::vector<cv::Point>>/* contours_1,*/ contours_2, all_contours;
+       // cv::findContours(mask_1, contours_1, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
         cv::findContours(mask_2, contours_2, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-        all_contours.insert(all_contours.end(), contours_1.begin(), contours_1.end());
+       // all_contours.insert(all_contours.end(), contours_1.begin(), contours_1.end());
         all_contours.insert(all_contours.end(), contours_2.begin(), contours_2.end());
 
         cv::RotatedRect largest_contour;
@@ -90,10 +90,10 @@ private:
                 total_y += coord.y;
             }
             if (!detected_coords.empty()) {
-                //RCLCPP_INFO(this->get_logger(),  "Average X: " << total_x / detected_coords.size() << ", Average Y: " << total_y / detected_coords.size());
                 auto msg = blimp_interfaces::msg::CameraCoord();
                 avg_x = std::round(total_x/detected_coords.size());
                 avg_y = std::round(total_y/detected_coords.size());
+		RCLCPP_INFO(this->get_logger(), "X: %d Y: %d", avg_x, avg_y);
                 msg.position = {avg_x,avg_y};
                 cam_data_publisher->publish(msg);
             }

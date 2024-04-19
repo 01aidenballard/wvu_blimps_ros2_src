@@ -32,7 +32,7 @@ def generate_launch_description():
 			name='baro_cntrl',
 			executable='baro_cntrl',
 			parameters = [{
-				"kpb": 900.0,
+				"kpb": 900,
 				"height": 3.0,
 			}]
 		),
