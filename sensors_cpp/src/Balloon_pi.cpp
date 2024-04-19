@@ -3,6 +3,7 @@
 #include "blimp_interfaces/msg/camera_coord.hpp"
 #include "blimp_interfaces/msg/baro_data.hpp"
 #include <vector>
+#include <cmath>
 
 class BalloonPI : public rclcpp::Node {
 public:
@@ -30,6 +31,7 @@ public:
         kiy_ = this->get_parameter("kiy").as_double();
         kpb_ = this->get_parameter("kpb").as_double();
 
+
         // Setup subscriber
         subscriber_ = this->create_subscription<blimp_interfaces::msg::CameraCoord>(
             "cam_data", 3, std::bind(&BalloonPI::callback_camera_data, this, std::placeholders::_1));
@@ -41,41 +43,39 @@ public:
 
         // Timer to repeatedly call callback_pi_control_balloon()
         timer_ = this->create_wall_timer(std::chrono::milliseconds(50), std::bind(&BalloonPI::callback_pi_control_balloon, this));
-	time(&start);
-	height_goal = 0.0;
-	height_update = 0.0;
+	    time(&start);
+	    height_goal = 0.0;
+	    height_update = 0.0;
         RCLCPP_INFO(this->get_logger(), "Started pi control for balloon detection.");
     }
 
 private:
     void callback_camera_data(const blimp_interfaces::msg::CameraCoord::SharedPtr msg) {
-        coord_old = coord_;
         coord_[0] = msg->position[0];
         coord_[1] = msg->position[1];
         time(&start);
-	height_goal = height_update;
+	    height_goal = height;
         
     }
 
     void callback_baro(const blimp_interfaces::msg::BaroData::SharedPtr msg) {
-        //if (coord_old[1] != coord_[1] && coord_old[0] != coord_[0]) {
-	time(&finish);
-	dt = difftime(finish, start);
-        if (dt > 3) {
+        height = msg->height;
+        
+    }
 
+    void callback_pi_control_balloon() {
+        
+	    time(&finish);
+	    dt = difftime(finish, start);
+        if (dt > 3) {
             x_error = x_goal_ - coord_[0];
-            y_error = height_goal - msg->height;
+            y_error = abs(height) - abs(height_goal);
 
             x_int_error_ += x_error;
-            // y_int_error_ += y_error;
 
             LR_input = x_error * kpx_ + x_int_error_ * kix_;
             UD_input = y_error * kpb_;
-
-
         } else {
-            y_goal_ =  this->get_parameter("y_goal").as_double();
-
             x_error = x_goal_ - coord_[0];
             y_error = coord_[1] -  y_goal_;
 
@@ -88,19 +88,12 @@ private:
             } else {
                 UD_input = y_error * kpyd_ + y_int_error_ * kiy_;
             }
-	    height_update = msg->height;
            
         }
-        
-    }
 
-    void callback_pi_control_balloon() {
+
         auto msg2 = blimp_interfaces::msg::CartCoord();
-
-        
-
-        
-	RCLCPP_INFO(this->get_logger(), "dt: %f, height_goal: %f, y_error: %d", dt, height_goal, y_error);
+	    RCLCPP_INFO(this->get_logger(), "dt: %f, height_goal: %f, y_error: %d", dt, height_goal, y_error);
         msg2.x = 0;
         msg2.y = 0;
         msg2.z  = UD_input;
