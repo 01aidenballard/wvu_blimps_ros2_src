@@ -9,7 +9,7 @@ class BalloonEscInput : public rclcpp::Node // MODIFY NAME
 {
 public:
     BalloonEscInput() : Node("balloon_esc_input") // MODIFY NAME
-    {
+    {   // up on left
         Fx1 = 1, Fx2 = 1, Fx3 = 0, Fx4 = 0;
         Fy1 = 0, Fy2 = 0, Fy3 = 0, Fy4 = 0;
         Fz1 = 0, Fz2 = 0, Fz3 = -1, Fz4 = 1;

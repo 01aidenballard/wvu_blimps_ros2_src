@@ -18,7 +18,7 @@ public:
     zg{0.24401}
     {
         this->declare_parameter<double>("rho_air", 1.225); // kg/m^3
-        this->declare_parameter<double>("buoyancy", 0.42511728*9.81);
+        this->declare_parameter<double>("buoyancy", 0.45131*9.81);
 
         rho_air = this->get_parameter("rho_air").as_double();
         B = this->get_parameter("buoyancy").as_double();
