@@ -17,6 +17,15 @@ public:
         frame_count_ = 0;
         minimum_radius_ = 20;
         findGoal = true;
+
+        rho = 1;
+        theta = CV_PI / 180;
+        threshold = 75;
+        min_line_length = 50;
+        max_line_gap = 30;
+
+        total_lines = 0;
+        
         timer_ = this->create_wall_timer(std::chrono::milliseconds(200), std::bind(&CamNode::callback_read_image, this));
         RCLCPP_INFO(this->get_logger(), "Video Detection has Started, press w to switch detection");
     }
