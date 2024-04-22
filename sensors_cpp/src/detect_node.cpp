@@ -70,9 +70,14 @@ public:
         cv::Mat mask_1, mask_2;
         cv::Mat mask_goal;
 
-        cv::Scalar goal_lower_bound = cv::Scalar(23, 80, 80);
-        cv::Scalar goal_upper_bound = cv::Scalar(45, 255, 255);
-  
+        //Yellow
+        cv::Scalar goal_lower_bound = cv::Scalar(28, 80, 120);
+        cv::Scalar goal_upper_bound = cv::Scalar(36, 255, 255);
+
+        //Orange
+        //cv::Scalar goal_lower_bound = cv::Scalar(1, 120, 50);
+        //cv::Scalar goal_lower_bound = cv::Scalar(12, 255, 255);
+        
         cv::Scalar lower_bound_1 = cv::Scalar(39, 80, 80);
         cv::Scalar upper_bound_1 = cv::Scalar(75, 255, 255);
 
