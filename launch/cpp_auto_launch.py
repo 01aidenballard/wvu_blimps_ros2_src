@@ -21,15 +21,15 @@ def generate_launch_description():
 			}]
         ),
 		#Sensors Package Excecutable
+	#	Node(
+	#		package='sensors_cpp',
+	#		executable='balloon_detect_cpp',
+	#		name='balloon_detection',
+       # ),
 		Node(
 			package='sensors_cpp',
-			executable='balloon_detect_cpp',
-			name='balloon_detection',
-        ),
-		Node(
-			package='sensors_cpp',
-			executable='goal_detect_cpp',
-			name='goal_detection',
+			executable='detect_cpp',
+			name='cam_node',
         ),
 		#Control Package Executables:
 		Node(
@@ -38,6 +38,8 @@ def generate_launch_description():
 			name='balloon_detect_PI',
 			#kpx = 0.3 without forward motors
 			parameters = [{
+
+				"iheight": 3.0,
 				"kpx": 0.005, #0.005,
 				      #0.00000001
 				"kix": 0.000001,
@@ -57,7 +59,7 @@ def generate_launch_description():
 			executable='dynamic_model',
 			name='inv_kine',
 			parameters = [{
-				"buoyancy": (0.45131*9.81) - 0.33354,
+				"buoyancy": (0.45131*9.81) - 0.37278,
 				"rho_air": 1.225
 			}]
         ),

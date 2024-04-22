@@ -11,6 +11,7 @@ public:
     : Node("balloon_pi"),
       coord_{320, 240}, x_int_error_(0.0), y_int_error_(0.0) {
         // Declare ROS parameters
+	this->declare_parameter<double>("iheight",0.0);
         this->declare_parameter<double>("kpx", 0.0);
         this->declare_parameter<double>("kix", 0.0);
         this->declare_parameter<double>("kpyu", 0.0);
@@ -24,6 +25,7 @@ public:
         // Retrieve ROS parameters
         x_goal_ = this->get_parameter("x_goal").as_int();
         y_goal_ = this->get_parameter("y_goal").as_double();
+
         kpx_ = this->get_parameter("kpx").as_double();
         kix_ = this->get_parameter("kix").as_double();
         kpyu_ = this->get_parameter("kpyu").as_double();
@@ -44,7 +46,7 @@ public:
         // Timer to repeatedly call callback_pi_control_balloon()
         timer_ = this->create_wall_timer(std::chrono::milliseconds(50), std::bind(&BalloonPI::callback_pi_control_balloon, this));
 	    time(&start);
-	    height_goal = 0.0;
+	    height_goal = this->get_parameter("iheight").as_double();
 	    height_update = 0.0;
         RCLCPP_INFO(this->get_logger(), "Started pi control for balloon detection.");
     }
@@ -67,7 +69,7 @@ private:
         
 	    time(&finish);
 	    dt = difftime(finish, start);
-        if (dt > 3) {
+        if (dt > 5) {
             x_error = x_goal_ - coord_[0];
             y_error = abs(height) - abs(height_goal);
 

@@ -1,8 +1,9 @@
 #include "rclcpp/rclcpp.hpp"
 #include "blimp_interfaces/msg/camera_coord.hpp"
+#include "sensor_msgs/msg/joy.hpp"
 #include "opencv2/opencv.hpp"
 #include "vector"
-
+#include <stdlib.h>
 
 
 class CamNode : public rclcpp::Node
@@ -11,11 +12,13 @@ public:
     CamNode() : Node("cam_node")
     {
         cam_data_publisher_ = this->create_publisher<blimp_interfaces::msg::CameraCoord>("cam_data", 3);
-        cap_ = cv::VideoCapture(0);
+        subscriber_ = this->create_subscription<sensor_msgs::msg::Joy>(
+            "joy", 10, std::bind(&CamNode::callback_read_image, this, std::placeholders::_1));
+        cap_ = cv::VideoCapture(0, cv::CAP_V4L2);
         cap_.set(cv::CAP_PROP_FRAME_WIDTH, 640);
         cap_.set(cv::CAP_PROP_FRAME_HEIGHT, 480);
         frame_count_ = 0;
-        minimum_radius_ = 20;
+        minimum_radius_ = 15;
         findGoal = true;
 
         rho = 1;
@@ -23,18 +26,24 @@ public:
         threshold = 75;
         min_line_length = 50;
         max_line_gap = 30;
-
+        cam_mode = true;
         total_lines = 0;
         
-        timer_ = this->create_wall_timer(std::chrono::milliseconds(200), std::bind(&CamNode::callback_read_image, this));
+       // timer_ = this->create_wall_timer(std::chrono::milliseconds(200), std::bind(&CamNode::callback_read_image, this));
         RCLCPP_INFO(this->get_logger(), "Video Detection has Started, press w to switch detection");
     }
 
 public:
     
     int counter_timer = 0;
-    void callback_read_image()
+    void callback_read_image(const sensor_msgs::msg::Joy::SharedPtr button)
     {
+        if (button->buttons[3] == 1) {
+            cam_mode = !cam_mode;
+            sleep(1);
+            RCLCPP_INFO(this->get_logger(), "Cam Mode has been Switched");
+        }
+
         if (!cap_.isOpened())
         {
             RCLCPP_ERROR(this->get_logger(), "Error: Could not open video source.");
@@ -46,11 +55,11 @@ public:
         if (counter_timer == 25){
                 counter_timer = 0;
                findGoal = !findGoal;
-                if(findGoal){
-                        RCLCPP_INFO(this->get_logger(), "Goal Detection has started!");
+               /* if(findGoal){
+                       RCLCPP_INFO(this->get_logger(), "Goal Detection has started!");
                 } else {
                         RCLCPP_INFO(this->get_logger(), "Balloon Detection has stated!");
-                }
+                }*/
         }
 
         cv::Mat frame, goal;
@@ -69,24 +78,29 @@ public:
 
         cv::Mat mask_1, mask_2;
         cv::Mat mask_goal;
+	
+	//yellow
+        cv::Scalar goal_lower_bound = cv::Scalar(28, 80, 120);
+        cv::Scalar goal_upper_bound = cv::Scalar(36, 255, 255);
+	//orange
+	//cv::Scalar goal_lower_bound = cv::Scalar(1,120,50);
+	//cv::Scalar goal_upper_bound = cv::Scalar(12,255,255);  
 
-        cv::Scalar goal_lower_bound = cv::Scalar(23, 80, 80);
-        cv::Scalar goal_upper_bound = cv::Scalar(45, 255, 255);
-  
-        cv::Scalar lower_bound_1 = cv::Scalar(39, 80, 80);
-        cv::Scalar upper_bound_1 = cv::Scalar(75, 255, 255);
-
-        cv::Scalar lower_bound_2 = cv::Scalar(128.5, 80, 80);
-        cv::Scalar upper_bound_2 = cv::Scalar(160, 170, 255);
+	//green
+        cv::Scalar lower_bound_1 = cv::Scalar(41, 80, 80);
+        cv::Scalar upper_bound_1 = cv::Scalar(56, 255, 255);
+	//purple
+        cv::Scalar lower_bound_2 = cv::Scalar(120, 80, 80);
+        cv::Scalar upper_bound_2 = cv::Scalar(150, 170, 255);
 
         cv::inRange(hsv_frame, goal_lower_bound, goal_upper_bound, mask_goal);
 
         cv::inRange(hsv_frame, lower_bound_1, upper_bound_1, mask_1);
         cv::inRange(hsv_frame, lower_bound_2, upper_bound_2, mask_2);
 
-        if (!(findGoal)) 
+        if (cam_mode == true) 
         {
-
+		//RCLCPP_INFO(this->get_logger(), "balloon on bitch");
                 std::vector<std::vector<cv::Point>> contours_1, contours_2, all_contours;
                 cv::findContours(mask_1, contours_1, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
                 cv::findContours(mask_2, contours_2, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
@@ -144,6 +158,7 @@ public:
 
         else
         { 
+	//RCLCPP_INFO(this->get_logger(),"Goal on biotch");
 
           cv::Mat edges;
           cv::Canny(mask_goal, edges, low_threshold, high_threshold);
@@ -210,6 +225,7 @@ public:
 
     const int minimum_radius = 20;
     const int maximum_radius = 300;
+    bool cam_mode;
     int avg_x;
     int avg_y;
     int frame_count = 0;
@@ -218,6 +234,7 @@ public:
     float total_y = 0;
 
     rclcpp::Publisher<blimp_interfaces::msg::CameraCoord>::SharedPtr cam_data_publisher_;
+    rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr subscriber_;
     cv::VideoCapture cap_;
     rclcpp::TimerBase::SharedPtr timer_;
     size_t frame_count_;

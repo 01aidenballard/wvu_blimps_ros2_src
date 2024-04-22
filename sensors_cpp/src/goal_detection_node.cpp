@@ -28,7 +28,7 @@ public:
         total_y = 0;
         total_lines = 0;
 
-        cam_data_publisher = this->create_publisher<blimp_interfaces::msg::CameraCoord>("goal_data", 10);
+        cam_data_publisher = this->create_publisher<blimp_interfaces::msg::CameraCoord>("cam_data", 10);
         timer_ = this->create_wall_timer(std::chrono::milliseconds(30), std::bind(&GoalDetectNode::timerCallback, this));
         RCLCPP_INFO(this->get_logger(), "Goal Detection CPP has Started!");
     }

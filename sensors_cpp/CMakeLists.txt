@@ -13,6 +13,7 @@ find_package(blimp_interfaces REQUIRED)
 #find_package(vector REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(Eigen3 REQUIRED)
+find_package(sensor_msgs REQUIRED)
 
 include_directories(
   include
@@ -24,6 +25,9 @@ ament_target_dependencies(balloon_detect_cpp rclcpp blimp_interfaces OpenCV)
 
 add_executable(goal_detect_cpp src/goal_detection_node.cpp)
 ament_target_dependencies(goal_detect_cpp rclcpp blimp_interfaces OpenCV)
+
+add_executable(detect_cpp src/detect_node.cpp)
+ament_target_dependencies(detect_cpp rclcpp blimp_interfaces OpenCV sensor_msgs)
 
 add_executable(dynamic_model src/inv_kine.cpp)
 ament_target_dependencies(dynamic_model
@@ -49,8 +53,9 @@ install(TARGETS
   balloon_detect_cpp
   DESTINATION lib/${PROJECT_NAME}
 )
+
 install(TARGETS
-  goal_detect_cpp
+  detect_cpp
   DESTINATION lib/${PROJECT_NAME}
 )
 

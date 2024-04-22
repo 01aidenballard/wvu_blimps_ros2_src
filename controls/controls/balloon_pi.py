@@ -16,7 +16,7 @@ class BalloonPI(Node):
 		self.ESC_pin4 = 26
 		
 		super().__init__("balloon_pi")
-		
+		self.declare_parameter('iheight',0.0)		
 		self.declare_parameter('kpx', 0.0)
 		self.declare_parameter('kix', 0.0)
 		self.declare_parameter('kpy', 0.0)
@@ -27,6 +27,7 @@ class BalloonPI(Node):
 		self.x_goal = self.get_parameter('x_goal').value
 		self.y_goal = self.get_parameter('y_goal').value
 
+		self.iheight = self.get_parameter('iheight').value
 		self.kpx = self.get_parameter('kpx').value
 		self.kix = self.get_parameter('kix').value
 		self.kpy = self.get_parameter('kpy').value
