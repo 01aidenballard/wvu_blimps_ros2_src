@@ -90,7 +90,7 @@ private:
     void callback_force_to_esc(const blimp_interfaces::msg::CartCoord::SharedPtr msg) {
         //msg->x
 	// REMEBER TO ADD THE +0.15 TO THE MSG->X PLEASE DONT FORGET!!!!!!!!!!!
-        tau << msg->x+0.1,
+        tau << msg->x+0.05,
                   msg->y,
                   msg->z,
                   msg->theta,

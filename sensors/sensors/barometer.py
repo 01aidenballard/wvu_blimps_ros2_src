@@ -24,16 +24,21 @@ class BarometerNode(Node): #Creating a Node
                 
 
         def publish_barometer_data(self):
-                msg = BaroData()
-                if self.c == 0:
-                        self.height_init = self.sensor.altitude
-                        self.c = self.c + 1
+               msg = BaroData()
+               try:
+                        
+                        if self.c == 0:
+                                self.height_init = self.sensor.altitude
+                                self.c = self.c + 1
                  
-                msg.height = float(self.sensor.altitude) - self.height_init
-                #self.get_logger().info("barometer: "+ str(msg.height))
-                 # Prints data to command line
-                self.barometer_data.publish(msg)
-
+                        msg.height = float(self.sensor.altitude) - self.height_init
+                        #self.get_logger().info("barometer: "+ str(msg.height))
+                        # Prints data to command line
+                       
+               except: 
+                        self.get_logger().info("barometer offffffff whyyyyyyyy")
+                        msg.height = 10.0
+               self.barometer_data.publish(msg)
 def main(args=None):
         rclpy.init(args=args)
         node = BarometerNode()

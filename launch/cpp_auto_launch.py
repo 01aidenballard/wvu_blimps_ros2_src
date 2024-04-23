@@ -40,9 +40,9 @@ def generate_launch_description():
 			parameters = [{
 
 				"iheight": 4.0,
-				"kpx": 0.0025, #0.005,
+				"kpx": 0.003, #0.005,
 				      #0.00000001
-				"kix": 0.000001,
+				"kix": 0.000002,
 				"kpyu": 0.003, # up motor
 				"kpyd": 0.0025, # down motor
 				"kiy": 0.000001, #0.000000001,
