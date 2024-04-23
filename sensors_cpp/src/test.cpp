@@ -11,6 +11,7 @@ public:
     : Node("balloon_pi"),
       coord_{320, 240}, x_int_error_(0.0), y_int_error_(0.0) {
         // Declare ROS parameters
+	this->declare_parameter<double>("iheight", 0.0);
         this->declare_parameter<double>("kpx", 0.0);
         this->declare_parameter<double>("kix", 0.0);
         this->declare_parameter<double>("kpyu", 0.0);
@@ -44,7 +45,7 @@ public:
         // Timer to repeatedly call callback_pi_control_balloon()
         timer_ = this->create_wall_timer(std::chrono::milliseconds(50), std::bind(&BalloonPI::callback_pi_control_balloon, this));
 	    time(&start);
-	    height_goal = 0.0;
+	    height_goal =  this->get_parameter("iheight").as_double();
 	    height_update = 0.0;
         RCLCPP_INFO(this->get_logger(), "Started pi control for balloon detection.");
     }
@@ -67,20 +68,22 @@ private:
         
 	    time(&finish);
 	    dt = difftime(finish, start);
-        if (dt > 3) {
+        if (dt > 5) {
             x_error = x_goal_ - coord_[0];
             y_error = abs(height) - abs(height_goal);
 
             x_int_error_ += x_error;
 
-            LR_input = x_error * kpx_ + x_int_error_ * kix_;
+            LR_input = (x_goal_ - 50)*kpx_;
             UD_input = y_error * kpb_;
+	    RCLCPP_INFO(this->get_logger(), "IT'S BARO TIME! height: %f goal_height %f", height, height_goal);
         } else {
             x_error = x_goal_ - coord_[0];
             y_error = coord_[1] -  y_goal_;
 
             x_int_error_ += x_error;
             y_int_error_ += y_error;
+	    RCLCPP_INFO(this->get_logger(), "fuck ew stinky auto mode");
 
             LR_input = x_error * kpx_ + x_int_error_ * kix_;
             if (y_error < 0) {
@@ -93,7 +96,7 @@ private:
 
 
         auto msg2 = blimp_interfaces::msg::CartCoord();
-	    RCLCPP_INFO(this->get_logger(), "dt: %f, height_goal: %f, y_error: %d", dt, height_goal, y_error);
+	    //RCLCPP_INFO(this->get_logger(), "dt: %f, height_goal: %f, y_error: %d", dt, height_goal, y_error);
         msg2.x = 0;
         msg2.y = 0;
         msg2.z  = UD_input;

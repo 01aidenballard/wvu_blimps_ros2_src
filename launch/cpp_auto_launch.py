@@ -39,12 +39,12 @@ def generate_launch_description():
 			#kpx = 0.3 without forward motors
 			parameters = [{
 
-				"iheight": 3.0,
-				"kpx": 0.005, #0.005,
+				"iheight": 4.0,
+				"kpx": 0.0025, #0.005,
 				      #0.00000001
 				"kix": 0.000001,
-				"kpyu": 0.004, # up motor
-				"kpyd": 0.0, # down motor
+				"kpyu": 0.003, # up motor
+				"kpyd": 0.0025, # down motor
 				"kiy": 0.000001, #0.000000001,
 				"kpb": 0.69  #0.69  #NICE!
 			}]
@@ -59,14 +59,17 @@ def generate_launch_description():
 			executable='dynamic_model',
 			name='inv_kine',
 			parameters = [{
-				"buoyancy": (0.45131*9.81) - 0.37278,
+				"buoyancy": ((0.45131) - (5*0.001))*9.81,
 				"rho_air": 1.225
 			}]
         ),
 		Node(
 			package='controls',
 			name='esc_motor_driver',
-			executable='esc_driver'
+			executable='esc_driver',
+			parameters = [{
+				"MAC":"68:6C:E6:73:04:62"
+			}]
 		),
 		Node(
 			package='controls',
@@ -78,7 +81,7 @@ def generate_launch_description():
 			name='read_altitude',
 			executable='read_altitude',
 			parameters = [{
-				"sea_level_pressure": 1011.3
+				"sea_level_pressure": 1022.0
 			}]
 		),
 		Node(

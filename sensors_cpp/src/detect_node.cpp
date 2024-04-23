@@ -87,24 +87,25 @@ public:
 	//cv::Scalar goal_upper_bound = cv::Scalar(12,255,255);  
 
 	//green
-        cv::Scalar lower_bound_1 = cv::Scalar(41, 80, 80);
-        cv::Scalar upper_bound_1 = cv::Scalar(56, 255, 255);
+        // cv::Scalar lower_bound_1 = cv::Scalar(41, 80, 80);
+        // cv::Scalar upper_bound_1 = cv::Scalar(56, 255, 255);
 	//purple
-        cv::Scalar lower_bound_2 = cv::Scalar(120, 80, 80);
-        cv::Scalar upper_bound_2 = cv::Scalar(150, 170, 255);
+        cv::Scalar lower_bound_2 = cv::Scalar(124, 80, 80);
+        cv::Scalar upper_bound_2 = cv::Scalar(150, 170, 220);
 
         cv::inRange(hsv_frame, goal_lower_bound, goal_upper_bound, mask_goal);
 
-        cv::inRange(hsv_frame, lower_bound_1, upper_bound_1, mask_1);
+        //cv::inRange(hsv_frame, lower_bound_1, upper_bound_1, mask_1);
         cv::inRange(hsv_frame, lower_bound_2, upper_bound_2, mask_2);
 
         if (cam_mode == true) 
         {
 		//RCLCPP_INFO(this->get_logger(), "balloon on bitch");
-                std::vector<std::vector<cv::Point>> contours_1, contours_2, all_contours;
-                cv::findContours(mask_1, contours_1, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+		//green taken out add contour 1 below
+                std::vector<std::vector<cv::Point>>  contours_2, all_contours;
+               // cv::findContours(mask_1, contours_1, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
                 cv::findContours(mask_2, contours_2, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-                all_contours.insert(all_contours.end(), contours_1.begin(), contours_1.end());
+                //all_contours.insert(all_contours.end(), contours_1.begin(), contours_1.end());
                 all_contours.insert(all_contours.end(), contours_2.begin(), contours_2.end());
 
                 cv::RotatedRect largest_contour;
@@ -147,7 +148,7 @@ public:
                         avg_y = std::round(total_y/detected_coords.size());
                         msg.position = {avg_x,avg_y};
                         cam_data_publisher_->publish(msg);
-                        RCLCPP_INFO(this->get_logger(), "coords} avg_x: %i, avg_y: %i", avg_x, avg_y);
+                        //RCLCPP_INFO(this->get_logger(), "coords} avg_x: %i, avg_y: %i", avg_x, avg_y);
                     }
                     // Clear the detected coordinates for the next 10 frames
                     detected_coords.clear();
@@ -179,7 +180,7 @@ public:
               }
   
               if (!midpoints.empty()) {
-                 RCLCPP_INFO(this->get_logger(), "DEsolation."); 
+                 //RCLCPP_INFO(this->get_logger(), "DEsolation."); 
                  int max_x = INT_MIN, min_x = INT_MAX, max_y = INT_MIN, min_y = INT_MAX;
   
                   for (const auto &point : midpoints) {
@@ -204,7 +205,7 @@ public:
                   auto msg = blimp_interfaces::msg::CameraCoord();
                   msg.position = {center_x, center_y};
                   cam_data_publisher_->publish(msg);
-                  RCLCPP_INFO(this->get_logger(), "X: %i Y: %i", center_x, center_y);
+                  //RCLCPP_INFO(this->get_logger(), "X: %i Y: %i", center_x, center_y);
 
               midpoints.clear();
               //std::cout << "Goal - X: " << center_x << ", Y: " << center_y << std::endl;

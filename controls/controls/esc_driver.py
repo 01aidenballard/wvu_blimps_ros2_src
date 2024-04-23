@@ -6,6 +6,7 @@ from sensor_msgs.msg import Joy
 import pigpio
 import os
 import time
+import subprocess as sp
 os.system("sudo pigpiod")
 time.sleep(1)
 
@@ -20,7 +21,9 @@ class EscControl(Node):
 		self.pin_net = 17
 		self.net = False
 
-		super().__init__("manual_esc_control")
+		super().__init__("manual_esc_control") 
+		self.declare_parameter("MAC","68:6C:E6:73:04:62")
+		self.MAC = self.get_parameter("MAC").get_parameter_value().string_value
 		self.subscriber = self.create_subscription(
 			EscInput, "ESC_input", self.callback_control_the_esc, 10
 		)
@@ -53,12 +56,21 @@ class EscControl(Node):
 			self.pwm_D = 1900.0
 		elif self.pwm_D < 1050.0:
 			self.pwm_D = 1050.0
-		#self.get_logger().info(str(pwm))
+		
+		stdoutdata = sp.getoutput('hcitool con')
+		if not(self.MAC in stdoutdata.split()):
+			print('Bluetooth Disconnected')
+			self.pi.set_servo_pulsewidth(pins[0], 0)
+			self.pi.set_servo_pulsewidth(pins[1], 0)
+			self.pi.set_servo_pulsewidth(pins[2], 0)
+			self.pi.set_servo_pulsewidth(pins[3], 0)
+		else:
+			self.pi.set_servo_pulsewidth(pins[0], self.pwm_L)
+			self.pi.set_servo_pulsewidth(pins[1], self.pwm_R)
+			self.pi.set_servo_pulsewidth(pins[2], self.pwm_U)
+			self.pi.set_servo_pulsewidth(pins[3], self.pwm_D)
 
-		self.pi.set_servo_pulsewidth(pins[0], self.pwm_L)
-		self.pi.set_servo_pulsewidth(pins[1], self.pwm_R)
-		self.pi.set_servo_pulsewidth(pins[2], self.pwm_U)
-		self.pi.set_servo_pulsewidth(pins[3], self.pwm_D)
+
 
 
 

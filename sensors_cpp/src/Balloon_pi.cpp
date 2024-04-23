@@ -1,3 +1,8 @@
+//DONT EDIT THIS CODE TEST.CPP IS THE REPLACEMENT FOR THIS CODE
+//%^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #include "rclcpp/rclcpp.hpp"
 #include "blimp_interfaces/msg/cart_coord.hpp"
 #include "blimp_interfaces/msg/camera_coord.hpp"
@@ -95,7 +100,7 @@ private:
 
 
         auto msg2 = blimp_interfaces::msg::CartCoord();
-	    RCLCPP_INFO(this->get_logger(), "dt: %f, height_goal: %f, y_error: %d", dt, height_goal, y_error);
+	//RCLCPP_INFO(this->get_logger(), "dt: %f, height_goal: %f, y_error: %d", dt, height_goal, y_error);
         msg2.x = 0;
         msg2.y = 0;
         msg2.z  = UD_input;
