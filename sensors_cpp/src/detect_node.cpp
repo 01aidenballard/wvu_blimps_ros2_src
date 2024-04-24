@@ -90,7 +90,7 @@ public:
         // cv::Scalar lower_bound_1 = cv::Scalar(41, 80, 80);
         // cv::Scalar upper_bound_1 = cv::Scalar(56, 255, 255);
 	//purple
-        cv::Scalar lower_bound_2 = cv::Scalar(124, 80, 80);
+        cv::Scalar lower_bound_2 = cv::Scalar(120, 80, 70);
         cv::Scalar upper_bound_2 = cv::Scalar(150, 170, 220);
 
         cv::inRange(hsv_frame, goal_lower_bound, goal_upper_bound, mask_goal);

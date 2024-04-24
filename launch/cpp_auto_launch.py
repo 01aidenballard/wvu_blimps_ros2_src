@@ -42,11 +42,11 @@ def generate_launch_description():
 				"iheight": 4.0,
 				"kpx": 0.003, #0.005,
 				      #0.00000001
-				"kix": 0.000002,
-				"kpyu": 0.003, # up motor
-				"kpyd": 0.0025, # down motor
-				"kiy": 0.000001, #0.000000001,
-				"kpb": 0.69  #0.69  #NICE!
+				"kix":  0.000002,
+				"kpyu": 0.002, # up motor
+				"kpyd": 0.0015, # down motor
+				"kiy":  0.00001, #0.000000001,
+				"kpb":  0.69  #0.69  #NICE!
 			}]
         ),
 		Node(
@@ -81,7 +81,7 @@ def generate_launch_description():
 			name='read_altitude',
 			executable='read_altitude',
 			parameters = [{
-				"sea_level_pressure": 1022.0
+				"sea_level_pressure": 1017.0
 			}]
 		),
 		Node(
