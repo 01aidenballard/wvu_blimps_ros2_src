@@ -1,3 +1,4 @@
+# used in our dynamic model, more documentation for each messages use and purpose their.
 float64 x       # x-axis
 float64 y       # y-axis
 float64 z       # z-axis
