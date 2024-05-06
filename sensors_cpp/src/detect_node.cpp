@@ -3,7 +3,6 @@
 #include "sensor_msgs/msg/joy.hpp"
 #include "opencv2/opencv.hpp"
 #include "vector"
-#include <stdlib.h>
 
 
 class CamNode : public rclcpp::Node
