@@ -1,5 +1,6 @@
 # used in our dynamic model, more documentation for each messages use and purpose there.
-# published in inv_kine
+# published in inv_kine, and in force_to_esc
+# used to 
 float64 x       # x-axis
 float64 y       # y-axis
 float64 z       # z-axis
