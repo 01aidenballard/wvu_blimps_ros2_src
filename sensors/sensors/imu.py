@@ -1,13 +1,13 @@
-  
-import rclpy
-from rclpy.node import Node
-import time
-import board
-import busio
-import adafruit_bno055
-import numpy as np
-import math
-from blimp_interfaces.msg import ImuData
+ # importing the libraries
+import rclpy 				#for ros2 to work in python
+from rclpy.node import Node #same as above
+import time 				#for reading and manipulating time within the file
+import board 				#for commuication between the board and the gpio pins
+import busio 				#mor communication biz
+import adafruit_bno055		#sensor library for the imu
+import numpy as np 			#Matrix math library
+import math					#math library
+from blimp_interfaces.msg import ImuData #custom interface made for the imu
 
 
 class ImuNode(Node): #Creating a Node
@@ -38,28 +38,10 @@ class ImuNode(Node): #Creating a Node
 		lin_accel = self.sensor.linear_acceleration
 		gyro = self.sensor.gyro
 		euler = self.sensor.euler
-		# #Check accelerations for NaNs
-		# for i in enumerate(lin_accel):
-		# 	if math.isnan(i[1]):
-		# 		self.imu_lin_accel[i[0]] = self.prev_lin_accel[i[0]]
-		# 	else:
-		# 		self.imu_lin_accel[i[0]] = lin_accel[i[0]]
-		# 		self.prev_lin_accel[i[0]] = lin_accel[i[0]]
-		# #Check gyros for NaNs
-		# for i in enumerate(gyro):
-		# 	if math.isnan(i[1]):
-		# 		self.imu_gyro[i[0]] = self.prev_gyro[i[0]]
-		# 	else:
-		# 		self.imu_gyro[i[0]] = gyro[i[0]]
-		# 		self.prev_gyro[i[0]] = gyro[i[0]]
-		# #Check Eulers for NaNs
-		# for i in enumerate(euler):
-		# 	if math.isnan(i[1]):
-		# 		self.imu_euler[i[0]] = self.prev_euler[i[0]]
-		# 	else:
-		# 		self.imu_euler[i[0]] = euler[i[0]]
-		# 		self.prev_euler[i[0]] = euler[i[0]]
+		
 		# Check accelerations for None and NaNs
+		# this will iterate over the values in lin_accel
+		# if a NaN or a None is found the value will be replaced with the last read non nan value
 		for index, value in enumerate(lin_accel):
 			if value is None or math.isnan(value):
 				self.imu_lin_accel[index] = self.prev_lin_accel[index]
@@ -87,10 +69,14 @@ class ImuNode(Node): #Creating a Node
 			self.imu_euler[1] = self.imu_euler[1]*(np.pi/180)
 			self.imu_euler[2] = self.imu_euler[2]*(np.pi/180)
 
+		#setting the msg values to the read accel, gyro, and euler variables
 		msg.imu_lin_accel = self.imu_lin_accel
 		msg.imu_gyro = self.imu_gyro
 		msg.imu_euler = self.imu_euler
-	#	self.get_logger().info(str(msg.imu_euler)) # Displays data on command line
+
+		#	self.get_logger().info(str(msg.imu_euler)) # Displays data on command line
+
+		#publishes the read data
 		self.imu_data.publish(msg)
         
 def main(args=None):
