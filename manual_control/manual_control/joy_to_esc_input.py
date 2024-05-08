@@ -1,51 +1,70 @@
-import rclpy
-from rclpy.node import Node
-from sensor_msgs.msg import Joy
-from blimp_interfaces.msg import EscInput
-from std_msgs.msg import String 
-from std_msgs.msg import Float32MultiArray
-from std_msgs.msg import Float64
-from blimp_interfaces.msg import UtcTime
-import time
+import rclpy								#ros2 library for python
+from rclpy.node import Node					#same as above
+from sensor_msgs.msg import Joy				#importing the Joy interface that was downloaded in the joy package
+from blimp_interfaces.msg import EscInput	#importing the custom EscInput interface
+import time									# importing time
 
 class FixAxesNode(Node):
 	def __init__(self):
-		
+		# defining the pin numbers
 		self.ESC_pin1 = 5
 		self.ESC_pin2 = 6
 		self.ESC_pin3 = 13
 		self.ESC_pin4 = 26
 		self.joy_time = 0
 		
-		super().__init__("esc_input")
+		#Initializing the node and nameing it "joy_to_esc" 
+		super().__init__("joy_to_esc")
 
+		# sometime the motors are not the same so we have variables to multiply the inputs to try and get them closser
 		self.declare_parameter('Klm', 1.0)
 		self.declare_parameter('Krm', 1.0)
 		self.Klm = self.get_parameter('Klm').value
 		self.Krm = self.get_parameter('Krm').value
 		
+		#Subscribing to the /joy topic with is the controller read infformation
 		self.subscriber = self.create_subscription(
 			Joy, "joy", self.callback_manual_esc_input, 10
 		)
 		
-		self.publisher = self.create_publisher(EscInput, "ESC_Manual_input", 10)
-	#	self.publisher_time = self.create_publisher(UtcTime, "Time", 10)		
-		
+		#setting up the publisher EscInput is the message type and ESC_Manual_input is the topic name
+		self.publisher = self.create_publisher(EscInput, "ESC_Manual_input", 10)	
+		#get_logger to show that the node has started
 		self.get_logger().info("Data is being sent to the ESC node")
 
-	def callback_time(self):
-		msg = UtcTime
-		msg.time = self.joy_time
-		self.publisher_time.publish(msg)
-
 	def callback_manual_esc_input(self, msg):
+		#so the idea rn is the left joy stick moves on the xbox controller moves the drone forwards.
+		#to turn the blimp the left and right triggers are used
+		# the right joy stick on the motor is used for going up or down
+		#
+		#   				Table of Analog Inputs from /joy
+		#=========================================================================
+		#    L = Left dir           R = Right Dir           M = middle pos 
+		#           Unp = unpressed trig   P = pressed Trig Value
+		#=========================================================================
+		# axes array 	  input		 Max value	Min value   middle or
+		#   index        on cntrl	 & dirctn   & direction equlibrium value
+		# -----------    --------    -------    --------    -------
+		# msg.axes[0]:   Left Joy    L = 1.0    R = -1.0    M = 0.0
+		# msg.axes[1]:   Left Joy    U = 1.0    D = -1.0    M = 0.0
+		# msg.axes[2]:   Right Joy   U = 1.0    D = -1.0    M = 0.0
+		# msg.axes[3]:   Right Trig  UnP = 1.0  P = -1.0
+		# msg.axes[4]:   Right Joy   L = 0.0    R = -1      M = -0.5
+		# msg.axes[5]:   Left Trig   UnP = 0.0  P = -1.0
 		
+		#setting trig values will range from 0 to 50
 		RTrim = msg.axes[5]*-50
 		LTrim = ((msg.axes[3]-1)*-100)/4
+
+		# setting the forrward value that will go to each motor will range from 0 to 50
 		F = abs(msg.axes[1])*50
+
+		# Lm is the Left motor and RM is the right motor
+		# will add the forward value to the trim value. will range from 0 to 100
 		LM = (F*self.Klm) + LTrim - RTrim
 		RM = (F*self.Krm) + RTrim - LTrim
 
+		# checking bounds
 		if LM < 0:
 			LM = 0
 		elif RM < 0:
@@ -56,6 +75,7 @@ class FixAxesNode(Node):
 		elif RM > 100:
 			RM = 100
 
+		# dividing the 
 		if msg.axes[2] > 0.05:
 			UM = abs(msg.axes[2])*100
 			DM = 0
@@ -66,26 +86,29 @@ class FixAxesNode(Node):
 			UM = 0
 			DM = 0
 		
+		# turning the values from 0 - 100 into 1050 to 1900 for the pwm input
 		LM_pwm = self.control_to_esc_input(LM)
 		UM_pwm = self.control_to_esc_input(UM)
 		DM_pwm = self.control_to_esc_input(DM)
 		RM_pwm = self.control_to_esc_input(RM)
 		
+		# defining msg type to be the EscInput 
 		msg2 = EscInput()
-		self.joy_time = time.time()
+		# inputing the pin values and pwm values into the msg
 		msg2.esc_pins = [self.ESC_pin1, self.ESC_pin2, self.ESC_pin3, self.ESC_pin4]
 		msg2.pwm_l = LM_pwm
 		msg2.pwm_r = RM_pwm
 		msg2.pwm_u = UM_pwm
 		msg2.pwm_d = DM_pwm
 
+		#publishing the msg
 		self.publisher.publish(msg2)
-		time.sleep(0.1)
 
 		
 	def control_to_esc_input(self, input):
+		#linear interpolation for the 0 -100 into 1050 - 1900
 		pwm = 1050 + (((input-0)*(1900-1050))/(100 - 0))
-
+		#returns the pwm value
 		return pwm
 
 def main(args=None):
