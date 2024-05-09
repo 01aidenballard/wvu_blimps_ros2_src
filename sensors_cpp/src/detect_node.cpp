@@ -1,30 +1,37 @@
+// dependicies and libraires needed for detect_node.cpp
 #include "rclcpp/rclcpp.hpp"
 #include "blimp_interfaces/msg/camera_coord.hpp"
 #include "sensor_msgs/msg/joy.hpp"
-#include "opencv2/opencv.hpp"
+#include "opencv2/opencv.hpp" // inlcluding class for capturing from video files, image sequences or cameras
 #include "vector"
 
-
+// creating class with name CamNode
+// ros2 Notation foor creatin node in public using rclpp ros2 communication matrix
 class CamNode : public rclcpp::Node
 {
-public:
-    CamNode() : Node("cam_node")
+public: 
+    CamNode() : Node("cam_node") 
     {
+	// creating publisher, publishing on the topic "cam_data" 
         cam_data_publisher_ = this->create_publisher<blimp_interfaces::msg::CameraCoord>("cam_data", 3);
+	// subcribsing to the topic "joy"
         subscriber_ = this->create_subscription<sensor_msgs::msg::Joy>(
             "joy", 10, std::bind(&CamNode::callback_read_image, this, std::placeholders::_1));
+	// setting variable cap_ to default constructer VideoCapture
         cap_ = cv::VideoCapture(0, cv::CAP_V4L2);
+	// setting frame width of pi camera
         cap_.set(cv::CAP_PROP_FRAME_WIDTH, 640);
+	// setting frame height of py camera
         cap_.set(cv::CAP_PROP_FRAME_HEIGHT, 480);
-        frame_count_ = 0;
-        minimum_radius_ = 15;
-        findGoal = true;
+        frame_count_ = 0; 
+        minimum_radius_ = 15; // setting minimum radius that camera detects (eliminating false positives)
+        findGoal = true; 
 
-        rho = 1;
+        rho = 1; 
         theta = CV_PI / 180;
         threshold = 75;
-        min_line_length = 50;
-        max_line_gap = 30;
+        min_line_length = 50; // minimum line length for goal detection
+        max_line_gap = 30; // maximum line gap for goal detection
         cam_mode = true;
         total_lines = 0;
         
