@@ -12,13 +12,16 @@ class RandWalkNode(Node):
 		self.create_timer(2,self.callback_random_walk)
 
 	def callback_random_walk(self):
+		# generating a random interger to choos the motor
 		motor = random.randint(0,2)
+		# generating a random pwm
 		pwm = float(random.randint(1100, 1300))
 		msg = EscInput()
 		#pwm_l is motor A:
         #pwm_r is motor B:
 		#pwm_d is motor C:
         #See documentation if scott ever gets to that gl brother.
+		# assign the rand motor to the rand pwm
 		if motor == 0:
 			msg.pwm_l = pwm
 			msg.pwm_r = 1050.0

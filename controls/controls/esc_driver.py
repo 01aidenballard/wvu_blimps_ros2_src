@@ -1,9 +1,7 @@
-import rclpy
-from rclpy.node import Node
-#from std_msgs.msg import Float64
-from blimp_interfaces.msg import EscInput 
-from sensor_msgs.msg import Joy
-import pigpio
+import rclpy								# ros2 package for python
+from rclpy.node import Node					# samsies
+from blimp_interfaces.msg import EscInput  	# custom interfaces for Esc inputs
+import pigpio								# gpio library
 import os
 import time
 import subprocess as sp
@@ -13,51 +11,41 @@ time.sleep(1)
 class EscControl(Node):
 	def __init__(self):
 		
-		self.pi = pigpio.pi()
+		self.pi = pigpio.pi() #assigning self.pi as pigpio object
+		#initializing variables
 		self.pwm_L = 0
 		self.pwm_R = 0
 		self.pwm_U = 0
 		self.pwm_D = 0
-		self.pin_net = 17
-		self.net = False
 
-		super().__init__("manual_esc_control") 
+		super().__init__("esc_driver") # initialing ros2 node
+		#decalreing a parameter MAC to inport the mac adress
 		self.declare_parameter("MAC","68:6C:E6:73:04:62")
+		#getting the value of that parameter
 		self.MAC = self.get_parameter("MAC").get_parameter_value().string_value
+		#subscribing to the ESC_input topic
 		self.subscriber = self.create_subscription(
 			EscInput, "ESC_input", self.callback_control_the_esc, 10
 		)
 
+		#printing that the node has started
 		self.get_logger().info("ESC is controlled")
 
 	def callback_control_the_esc(self, msg):
+		# assigning the variables from the message
 		pins = msg.esc_pins
-		self.pwm_L = msg.pwm_l
-		self.pwm_R = msg.pwm_r
-		self.pwm_U = msg.pwm_u
-		self.pwm_D = msg.pwm_d
 
-		if self.pwm_L > 1900.0:
-			self.pwm_L = 1900.0
-		elif self.pwm_L < 1050.0:
-			self.pwm_L = 1050.0
+		#assign ing the msg to the global variable and checking the bounds of the signal
+		self.pwm_L = self.limit(msg.pwm_l)
+		self.pwm_R = self.limit(msg.pwm_r)
+		self.pwm_U = self.limit(msg.pwm_u)
+		self.pwm_D = self.limit(msg.pwm_d)
 
-		if self.pwm_R > 1900.0:
-			self.pwm_R = 1900.0
-		elif self.pwm_R < 1050.0:
-			self.pwm_R = 1050.0
-
-		if self.pwm_U > 1900.0:
-			self.pwm_U = 1900.0
-		elif self.pwm_U < 1050.0:
-			self.pwm_U = 1050.0
-
-		if self.pwm_D > 1900.0:
-			self.pwm_D = 1900.0
-		elif self.pwm_D < 1050.0:
-			self.pwm_D = 1050.0
-		
+		#grabing the bluetooth info
 		stdoutdata = sp.getoutput('hcitool con')
+		#checking if the MAC adress is not in the list
+		# if no setting every value of the motors to zero
+		#else input new values
 		if not(self.MAC in stdoutdata.split()):
 			print('Bluetooth Disconnected')
 			self.pi.set_servo_pulsewidth(pins[0], 0)
@@ -69,6 +57,13 @@ class EscControl(Node):
 			self.pi.set_servo_pulsewidth(pins[1], self.pwm_R)
 			self.pi.set_servo_pulsewidth(pins[2], self.pwm_U)
 			self.pi.set_servo_pulsewidth(pins[3], self.pwm_D)
+	def limit(self,pwm):
+		if pwm > 1900.0:
+			pwm = 1900.0
+		elif pwm < 1050.0:
+			pwm = 1050.0
+		return pwm
+
 
 
 
