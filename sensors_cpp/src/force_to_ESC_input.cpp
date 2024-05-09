@@ -9,31 +9,42 @@ class BalloonEscInput : public rclcpp::Node // MODIFY NAME
 {
 public:
     BalloonEscInput() : Node("balloon_esc_input") // MODIFY NAME
-    {   //AUSTIN COMMENT HERE
+    {   // Force Coefficients for each motor 
+        // includes the direction of thrust (x,y,z) that each thruster produces
+        // includes the moments arms between the thruster and center of gravity 
+        // 1 = left motor, 2 = right motor, 3 = up motor, 4 = down motor
         Fx1 = 1, Fx2 = 1, Fx3 = 0, Fx4 = 0;
         Fy1 = 0, Fy2 = 0, Fy3 = 0, Fy4 = 0;
         Fz1 = 0, Fz2 = 0, Fz3 = -1, Fz4 = 1;
         lx1 = 0.08, lx2 = 0.08, lx3 = 0, lx4 = 0;
         ly1 = -0.36, ly2 = 0.36, ly3 = -0.08, ly4 = 0.08;
         lz1 = -0.19, lz2 = -0.19, lz3 = 0.30, lz4 = 0.30;
-        //AUSTIN COMMENT HERE
+        // Thrust Coefficient Matrix (values comes form thrust stand testing)
+        // Approximated as a linear function so Thrust [N] = K * PWM + B
+        // K matrix is the slope of the function relating Thrust and PWM input
         K = Eigen::DiagonalMatrix<double, 4>(0.000602, 0.000602, 0.00153807, 0.00153807);
-        //AUSTIN COMMENT HERE
+        // B vector represents the Y-intercept of the linear function 
         B << -0.632456,
              -0.632456,
              -1.75866439,
              -1.75866439;
-        //AUSTIN COMMENT HERE
+        // [6 x 4] Matrix for all 4 thrusters. 
+        // Column 1 = forces and moments for left thruster
+        // Column 2 = forces and moments for right thruster
+        // Column 3 = "..." up thruster
+        // Column 4 = "..." down thruster
         Q <<   Fx1,             Fx2,             Fx3,             Fx4, 
                Fy1,             Fy2,             Fy3,             Fy4, 
                Fz1,             Fz2,             Fz3,             Fz4, 
                Fz1*ly1-Fy1*lz1, Fz2*ly2-Fy2*lz2, Fz3*ly3-Fy3*lz3, Fz4*ly4-Fy4*lz4,
                Fx1*lz1-Fz1*lx1, Fx2*lz2-Fz2*lx2, Fx3*lz3-Fz3*lx3, Fx4*lz4-Fz4*lx4,
                Fy1*lx1-Fx1*ly1, Fy2*lx2-Fx2*ly2, Fy3*lx3-Fx3*ly3, Fy4*lx4-Fx4*ly4;
-        //AUSTIN COMMENT HERE
+        //Since Force Coefficent Matrix is not square we need to make it square to be able to take the inverse
+        // Q++ is the Moorse-psuedo inverse of Q
         T = Q.transpose()*Q;
         Qp = T.inverse()*Q.transpose();
-        //AUSTIN COMMENT HERE
+        // Taking Inverse of Thrust Coefficents
+        // Wanting to solve tau = Q*K*u, for u
         K_inv = K.inverse();
 
         // CREATING A SUBSCRIBER TO THE INV_KINE NODE. CartCoord is the interface type forces is the topic and the bind is the callback we need to send the info too
