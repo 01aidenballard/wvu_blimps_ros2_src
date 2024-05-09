@@ -43,7 +43,7 @@ ament_target_dependencies(F_to_Esc
   Eigen3
 )
 
-add_executable(pi_controller src/test.cpp)
+add_executable(pi_controller src/Balloon_pi.cpp)
 ament_target_dependencies(pi_controller
   rclcpp
   blimp_interfaces
