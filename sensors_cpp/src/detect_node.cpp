@@ -17,7 +17,7 @@ public:
 	// subcribsing to the topic "joy"
         subscriber_ = this->create_subscription<sensor_msgs::msg::Joy>(
             "joy", 10, std::bind(&CamNode::callback_read_image, this, std::placeholders::_1));
-	// setting variable cap_ to default constructer VideoCapture
+	// setting variable cap_ to default constructer VideoCapture, CAP_V4L2 sets the cap to the proper video channel for linux
         cap_ = cv::VideoCapture(0, cv::CAP_V4L2);
 	// setting frame width of pi camera
         cap_.set(cv::CAP_PROP_FRAME_WIDTH, 640);
@@ -25,15 +25,18 @@ public:
         cap_.set(cv::CAP_PROP_FRAME_HEIGHT, 480);
         frame_count_ = 0; 
         minimum_radius_ = 15; // setting minimum radius that camera detects (eliminating false positives)
-        findGoal = true; 
+        findGoal = true; // Flag for switching between goal detection and balloon detection, this is used for testing
 
+	// Parameters for HoughLinesP
         rho = 1; 
         theta = CV_PI / 180;
         threshold = 75;
         min_line_length = 50; // minimum line length for goal detection
         max_line_gap = 30; // maximum line gap for goal detection
-        cam_mode = true;
-        total_lines = 0;
+        
+	    
+	cam_mode = true; // Flag for goal detection and balloon detection
+        total_lines = 0; // Counter for goal detection averaging, this used in our code
         
        // timer_ = this->create_wall_timer(std::chrono::milliseconds(200), std::bind(&CamNode::callback_read_image, this));
         RCLCPP_INFO(this->get_logger(), "Video Detection has Started, press w to switch detection");
@@ -41,6 +44,7 @@ public:
 
 public:
     
+    // funtion to read xbox buttons in order to switch between goal and balloon detection
     int counter_timer = 0;
     void callback_read_image(const sensor_msgs::msg::Joy::SharedPtr button)
     {
@@ -57,7 +61,8 @@ public:
         }
 
         counter_timer++;
-
+	
+	// Test timer to switch modes
         if (counter_timer == 25){
                 counter_timer = 0;
                findGoal = !findGoal;
@@ -68,20 +73,24 @@ public:
                 }*/
         }
 
-        cv::Mat frame, goal;
+	// Making separate frame matrices to run both detection's respective methods without affecting the other detection
+	cv::Mat frame, goal;
         cap_ >> frame;
         cap_ >> goal;
 
+	//Checking frame is readable
         if (frame.empty())
         {
             RCLCPP_ERROR(this->get_logger(), "Error: Could not read frame.");
             return;
         }
 
+	//HSV matrices to store the color filtering
         cv::Mat hsv_frame, goal_hsv;
         cv::cvtColor(frame, hsv_frame, cv::COLOR_BGR2HSV);
         cv::cvtColor(goal, goal_hsv, cv::COLOR_BGR2HSV);
 
+	//Color filtering masks matrices, leaves the HSV values NOT THE DETECTED COLOR
         cv::Mat mask_1, mask_2;
         cv::Mat mask_goal;
 	// push for tav
@@ -104,6 +113,8 @@ public:
         //cv::inRange(hsv_frame, lower_bound_1, upper_bound_1, mask_1);
         cv::inRange(hsv_frame, lower_bound_2, upper_bound_2, mask_2);
 
+
+	// Balloon Detection
         if (cam_mode == true) 
         {
 		//RCLCPP_INFO(this->get_logger(), "balloon on bitch");
@@ -117,7 +128,7 @@ public:
                 cv::RotatedRect largest_contour;
                 double largest_contour_area = 0;
 
-
+		// Finding the contour with the largest area
                for (const auto &contour : all_contours) {
                    double contour_area = cv::contourArea(contour);
                    if (contour_area > largest_contour_area) {
@@ -125,7 +136,7 @@ public:
                        largest_contour_area = contour_area;
                    }
                }
-
+		// if the largest contour has width and has height, so it exists, then we find the radius and we append the points to a Point list so long as the are greater than the minimum radius and less than the maximum radius
                 if (largest_contour.size.width != 0 && largest_contour.size.height != 0) {
                     cv::Point2f center = largest_contour.center;
                     int radius = std::max(largest_contour.size.width, largest_contour.size.height) / 2;
@@ -149,15 +160,15 @@ public:
                     }
                     if (!detected_coords.empty()) {
                        // RCLCPP_INFO(this->get_logger(),  "Average X: " << total_x / detected_coords.size() << ", Average Y: " << total_y / detected_coords.size());
-                        auto msg = blimp_interfaces::msg::CameraCoord();
-                        avg_x = std::round(total_x/detected_coords.size());
-                        avg_y = std::round(total_y/detected_coords.size());
-                        msg.position = {avg_x,avg_y};
-                        cam_data_publisher_->publish(msg);
+			auto msg = blimp_interfaces::msg::CameraCoord(); // blimp interfaces message
+                        avg_x = std::round(total_x/detected_coords.size()); // averaging the x we found to reduce noise
+                        avg_y = std::round(total_y/detected_coords.size()); // averaging the y we found to reduce noise
+                        msg.position = {avg_x,avg_y}; // setting the value of the ROS topic message
+                        cam_data_publisher_->publish(msg); //publishing the message
                         //RCLCPP_INFO(this->get_logger(), "coords} avg_x: %i, avg_y: %i", avg_x, avg_y);
                     }
                     // Clear the detected coordinates for the next 10 frames
-                    detected_coords.clear();
+                    detected_coords.clear(); // clears the Point list in order to remove oversaturating the averaging values (too many means we will slowly centralize to a fixed point rather than the centers we need)
 
                 //cv::imshow("Detected Color", frame);
 
@@ -166,20 +177,23 @@ public:
         else
         { 
 	//RCLCPP_INFO(this->get_logger(),"Goal on biotch");
-
+	// matrix for edge detection
           cv::Mat edges;
+	// edge detection method provided from OpenCV, takes the frame(must be made grayscale by this point(1 channel)), an output matrix, and then 2 bounding threshold values
           cv::Canny(mask_goal, edges, low_threshold, high_threshold);
-
+	// List to store the 4 values in Lines(x1, y1, x2, y2)
          std::vector<cv::Vec4i> linesP;
-         cv::HoughLinesP(edges, linesP, rho, theta, threshold, min_line_length, max_line_gap);
+        // OpenCV method find lines between two points found in the edge detection matrix
+	  cv::HoughLinesP(edges, linesP, rho, theta, threshold, min_line_length, max_line_gap);
           std::vector<cv::Point> midpoints;
           if (!linesP.empty()) {
               for (size_t i = 0; i < linesP.size(); i++) {
                   cv::Vec4i line = linesP[i];
                   int x1 = line[0], y1 = line[1], x2 = line[2], y2 = line[3];
-                  int mid_x = (x1 + x2) / 2;
+                  //finding midpoints
+		  int mid_x = (x1 + x2) / 2;
                   int mid_y = (y1 + y2) / 2;
-  
+  		  //appending to a list for future computations
                   midpoints.push_back(cv::Point(mid_x, mid_y));
   
                   //cv::line(frame, cv::Point(x1, y1), cv::Point(x2, y2), cv::Scalar(0, 255, 0), 2);
@@ -187,7 +201,11 @@ public:
   
               if (!midpoints.empty()) {
                  //RCLCPP_INFO(this->get_logger(), "DEsolation."); 
-                 int max_x = INT_MIN, min_x = INT_MAX, max_y = INT_MIN, min_y = INT_MAX;
+                // finds the max and min for both x and y
+		// we use this to find the furthest out you can get from the center of the square
+		// the min and max x tell us the vertical sides(left and right) of the square(because y wouldn't change in those instance)
+		//the same goes for y and the horizontal(top and bottom) sides of the square.
+		int max_x = INT_MIN, min_x = INT_MAX, max_y = INT_MIN, min_y = INT_MAX;
   
                   for (const auto &point : midpoints) {
                       max_x = std::max(max_x, point.x);
@@ -195,7 +213,7 @@ public:
                       max_y = std::max(max_y, point.y);
                       min_y = std::min(min_y, point.y);
                   }
-  
+  		 //finding the midpoint of the midpoints in order to find the center
                   center_x = (min_x + max_x) / 2;
                   center_y = (min_y + max_y) / 2;
                   total_lines++;
@@ -208,12 +226,13 @@ public:
   
   
               } 
-                  auto msg = blimp_interfaces::msg::CameraCoord();
+                  // publishing the message to blimp interfaces
+		  auto msg = blimp_interfaces::msg::CameraCoord();
                   msg.position = {center_x, center_y};
                   cam_data_publisher_->publish(msg);
                   //RCLCPP_INFO(this->get_logger(), "X: %i Y: %i", center_x, center_y);
-
-              midpoints.clear();
+		
+              midpoints.clear(); // removing oversaturation of averaging data
               //std::cout << "Goal - X: " << center_x << ", Y: " << center_y << std::endl;
           }
        }
@@ -229,9 +248,9 @@ public:
     }
 
 
-
-    const int minimum_radius = 20;
-    const int maximum_radius = 300;
+    // members 
+    const int minimum_radius = 20; //pixels
+    const int maximum_radius = 300; //pixels
     bool cam_mode;
     int avg_x;
     int avg_y;
@@ -259,6 +278,7 @@ public:
     bool findGoal;
 };
 
+// Necessary ROS node functions
 int main(int argc, char *argv[])
 {
     rclcpp::init(argc, argv);
