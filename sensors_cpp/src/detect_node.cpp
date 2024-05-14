@@ -16,7 +16,7 @@ public:
         cam_data_publisher_ = this->create_publisher<blimp_interfaces::msg::CameraCoord>("cam_data", 3);
 	// subcribsing to the topic "joy"
         subscriber_ = this->create_subscription<sensor_msgs::msg::Joy>(
-            "joy", 10, std::bind(&CamNode::callback_read_image, this, std::placeholders::_1));
+            "joy", 10, std::bind(&CamNode::callback_read_imjoy, this, std::placeholders::_1));
 	// setting variable cap_ to default constructer VideoCapture, CAP_V4L2 sets the cap to the proper video channel for linux
         cap_ = cv::VideoCapture(0, cv::CAP_V4L2);
 	// setting frame width of pi camera
@@ -38,7 +38,7 @@ public:
 	cam_mode = true; // Flag for goal detection and balloon detection
         total_lines = 0; // Counter for goal detection averaging, this used in our code
         
-       // timer_ = this->create_wall_timer(std::chrono::milliseconds(200), std::bind(&CamNode::callback_read_image, this));
+        timer_ = this->create_wall_timer(std::chrono::milliseconds(200), std::bind(&CamNode::callback_read_image, this));
         RCLCPP_INFO(this->get_logger(), "Video Detection has Started, press w to switch detection");
     }
 
@@ -46,9 +46,13 @@ public:
     
     // funtion to read xbox buttons in order to switch between goal and balloon detection
     int counter_timer = 0;
-    void callback_read_image(const sensor_msgs::msg::Joy::SharedPtr button)
+    void callback_read_joy(const sensor_msgs::msg::Joy::SharedPtr button)
     {
-        if (button->buttons[3] == 1) {
+        x_button = button->buttons[3]
+    }
+
+    void callback_read_image() {
+        if (x_button == 1) {
             cam_mode = !cam_mode;
             sleep(1);
             RCLCPP_INFO(this->get_logger(), "Cam Mode has been Switched");
@@ -275,6 +279,7 @@ public:
     int low_threshold;
     int high_threshold;
     int total_lines;
+    int x_button;
     bool findGoal;
 };
 
