@@ -9,7 +9,7 @@ class BalloonPI : public rclcpp::Node {
 public:
     BalloonPI() //constructor for the BalloonPI class
     : Node("balloon_pi"), // Node name
-      coord_{320, 240}, x_int_error_(0.0), y_int_error_(0.0) {
+      coord_{640, 360}, x_int_error_(0.0), y_int_error_(0.0) {
         // Declare ROS parameters
 	    this->declare_parameter<double>("iheight", 0.0);
         this->declare_parameter<double>("kpx", 0.0);
@@ -17,8 +17,8 @@ public:
         this->declare_parameter<double>("kpyu", 0.0);
         this->declare_parameter<double>("kpyd", 0.0);
         this->declare_parameter<double>("kiy", 0.0);
-        this->declare_parameter<int>("x_goal", 320);
-        this->declare_parameter<double>("y_goal", 240);
+        this->declare_parameter<int>("x_goal", 640);
+        this->declare_parameter<double>("y_goal", 360);
         this->declare_parameter<double>("kpb", 0.0);
         coord_ = {0, 0};
         coord_old = {1, 1};
