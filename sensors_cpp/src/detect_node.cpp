@@ -16,13 +16,13 @@ public:
         cam_data_publisher_ = this->create_publisher<blimp_interfaces::msg::CameraCoord>("cam_data", 3);
 	// subcribsing to the topic "joy"
         subscriber_ = this->create_subscription<sensor_msgs::msg::Joy>(
-            "joy", 10, std::bind(&CamNode::callback_read_imjoy, this, std::placeholders::_1));
+            "joy", 10, std::bind(&CamNode::callback_read_joy, this, std::placeholders::_1));
 	// setting variable cap_ to default constructer VideoCapture, CAP_V4L2 sets the cap to the proper video channel for linux
         cap_ = cv::VideoCapture(0, cv::CAP_V4L2);
 	// setting frame width of pi camera
-        cap_.set(cv::CAP_PROP_FRAME_WIDTH, 640);
+        cap_.set(cv::CAP_PROP_FRAME_WIDTH, 1280); //640
 	// setting frame height of py camera
-        cap_.set(cv::CAP_PROP_FRAME_HEIGHT, 480);
+        cap_.set(cv::CAP_PROP_FRAME_HEIGHT, 720); //480
         frame_count_ = 0; 
         minimum_radius_ = 15; // setting minimum radius that camera detects (eliminating false positives)
         findGoal = true; // Flag for switching between goal detection and balloon detection, this is used for testing
@@ -48,7 +48,7 @@ public:
     int counter_timer = 0;
     void callback_read_joy(const sensor_msgs::msg::Joy::SharedPtr button)
     {
-        x_button = button->buttons[3]
+        x_button = button->buttons[3];
     }
 
     void callback_read_image() {
@@ -108,15 +108,18 @@ public:
 	//green
         // cv::Scalar lower_bound_1 = cv::Scalar(41, 80, 80);
         // cv::Scalar upper_bound_1 = cv::Scalar(56, 255, 255);
+
 	//purple
-        cv::Scalar lower_bound_2 = cv::Scalar(120, 80, 70);
-        cv::Scalar upper_bound_2 = cv::Scalar(150, 170, 220);
+        cv::Scalar lower_bound_2 = cv::Scalar(120, 40, 30);
+        cv::Scalar upper_bound_2 = cv::Scalar(150, 255, 255);
 
         cv::inRange(hsv_frame, goal_lower_bound, goal_upper_bound, mask_goal);
 
         //cv::inRange(hsv_frame, lower_bound_1, upper_bound_1, mask_1);
         cv::inRange(hsv_frame, lower_bound_2, upper_bound_2, mask_2);
 
+	//cv::Mat masked_frame;
+	//cv::bitwise_and(frame,frame,masked_frame,mask_2);
 
 	// Balloon Detection
         if (cam_mode == true) 
@@ -148,7 +151,7 @@ public:
                         if (center.x >= 0 && center.x < frame.cols && center.y >= 0 && center.y < frame.rows) {
                             detected_coords.push_back(center);
                             // Draw a circle around the detected coordinate
-                           // cv::circle(frame, center, radius, cv::Scalar(0, 255, 0), 2);
+                           cv::circle(frame, center, radius, cv::Scalar(0, 255, 0), 2);
                             // Print the detected coordinates
                           // std::cout << "Detected X: " << center.x << ", Detected Y: " << center.y << std::endl;
                         }
@@ -242,18 +245,18 @@ public:
        }
 
     
-        // cv::imshow("Detection", frame);
+         //cv::imshow("Detection", masked_frame);
 
-        // if(cv::waitKey(1) == 27){
-          // return;
-        // }
+         if(cv::waitKey(1) == 27){
+           return;
+         }
 
     
     }
 
 
     // members 
-    const int minimum_radius = 20; //pixels
+    const int minimum_radius = 15; //pixels
     const int maximum_radius = 300; //pixels
     bool cam_mode;
     int avg_x;

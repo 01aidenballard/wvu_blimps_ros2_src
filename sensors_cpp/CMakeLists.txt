@@ -20,11 +20,6 @@ include_directories(
   ${EIGEN3_INCLUDE_DIRS}
 )
 
-add_executable(balloon_detect_cpp src/balloon_detect_node.cpp)
-ament_target_dependencies(balloon_detect_cpp rclcpp blimp_interfaces OpenCV) 
-
-add_executable(goal_detect_cpp src/goal_detection_node.cpp)
-ament_target_dependencies(goal_detect_cpp rclcpp blimp_interfaces OpenCV)
 
 add_executable(detect_cpp src/detect_node.cpp)
 ament_target_dependencies(detect_cpp rclcpp blimp_interfaces OpenCV sensor_msgs)
@@ -50,17 +45,7 @@ ament_target_dependencies(pi_controller
 )
 
 install(TARGETS
-  balloon_detect_cpp
-  DESTINATION lib/${PROJECT_NAME}
-)
-
-install(TARGETS
   detect_cpp
-  DESTINATION lib/${PROJECT_NAME}
-)
-
-install(TARGETS
-  goal_detect_cpp
   DESTINATION lib/${PROJECT_NAME}
 )
 
