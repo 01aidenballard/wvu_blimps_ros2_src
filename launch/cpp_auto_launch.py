@@ -16,8 +16,8 @@ def generate_launch_description():
 			executable='joy_to_esc',
 			name='joy_to_esc',
 			parameters = [{
-				"Klm": 1.2,
-				"Krm": 1.0,
+				"Klm": 1.0,
+				"Krm": 1.125,
 			}]
         ),
 		#Sensors Package Excecutable
