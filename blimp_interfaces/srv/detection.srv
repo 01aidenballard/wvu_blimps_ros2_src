@@ -1,0 +1,7 @@
+std::vector frame
+int rows
+int cols
+---
+bool detection
+int x
+int y
