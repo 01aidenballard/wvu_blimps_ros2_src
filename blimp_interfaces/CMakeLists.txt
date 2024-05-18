@@ -22,6 +22,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/CartCoord.msg"
   "msg/UtcTime.msg"
   "srv/GetCamera.srv"
+  "srv/Detection.srv"
 )
 
 ament_export_dependencies(rosidl_default_runtime)

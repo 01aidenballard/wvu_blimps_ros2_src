@@ -20,9 +20,31 @@ include_directories(
   ${EIGEN3_INCLUDE_DIRS}
 )
 
+# detect_node not needed any more (hopefully)
+#add_executable(detect_cpp src/detect_node.cpp)
+#ament_target_dependencies(detect_cpp rclcpp blimp_interfaces OpenCV sensor_msgs)
 
-add_executable(detect_cpp src/detect_node.cpp)
-ament_target_dependencies(detect_cpp rclcpp blimp_interfaces OpenCV sensor_msgs)
+add_executable(detect_cpp src/detect_client.cpp)
+ament_target_dependencies(detect_cpp 
+  rclcpp 
+  blimp_interfaces 
+  OpenCV 
+  sensor_msgs
+)
+
+add_executable(balloon_server src/balloon_server.cpp)
+ament_target_dependencies(balloon_server
+  rclcpp
+  blimp_interfaces
+  OpenCV
+)
+
+add_executable(goal_server src/goal_server.cpp)
+ament_target_dependencies(goal_server
+  rclcpp
+  blimp_interfaces
+  OpenCV
+)
 
 add_executable(dynamic_model src/inv_kine.cpp)
 ament_target_dependencies(dynamic_model
@@ -46,31 +68,12 @@ ament_target_dependencies(pi_controller
 
 install(TARGETS
   detect_cpp
-  DESTINATION lib/${PROJECT_NAME}
-)
-
-install(TARGETS
+  balloon_server
+  goal_server
   dynamic_model
-  DESTINATION lib/${PROJECT_NAME}
-)
-
-install(TARGETS
   F_to_Esc
-  DESTINATION lib/${PROJECT_NAME}
-)
-
-install(TARGETS
   pi_controller
   DESTINATION lib/${PROJECT_NAME}
 )
 
 ament_package()
-
-
-#include "rclcpp/rclcpp.hpp"
-#include "blimp_interfaces/msg/imu_data.hpp"
-#include "blimp_interfaces/msg/cart_coord.hpp"
-#include "blimp_interfaces/msg/baro_data.hpp"
-#include "blimp_interfaces/msg/esc_input.hpp"
-#include <Eigen/Dense>
-#include <cmath>
