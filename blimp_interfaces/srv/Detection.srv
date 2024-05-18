@@ -1,4 +1,4 @@
-std::vector frame
+uint8[] frame
 int rows
 int cols
 ---
