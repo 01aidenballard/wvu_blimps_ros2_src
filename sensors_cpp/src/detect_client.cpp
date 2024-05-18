@@ -49,67 +49,8 @@ class CamNode : public rclcpp::Node {
 
     private:
         void callback_read_joy(const sensor_msgs::msg::Joy::SharedPtr button) {
+            std::cout << "I have been called!" << std::endl;
             x_button = button->buttons[3];
-        }
-
-        void callback_read_image() {
-            // seeing if button to switch cam mode has been pressed
-            if (x_button == 1) {
-                cam_mode = !cam_mode;
-                sleep(1);
-                RCLCPP_INFO(this->get_logger(), "CamNode - Cam Mode has been switched!");
-            }
-
-            if (!cap_.isOpened()) {
-                RCLCPP_ERROR(this->get_logger(), "CamNode - ERROR: Could not open video source!");
-                return;
-            }
-
-            // checking to see if in manual or autonomous control (true -> manual, false -> autonomous)
-            if (!control_mode) {
-                // capture frame and setting it to matrix frame
-                cv::Mat frame;
-                cap_ >> frame;
-
-                // converting frame into std::vector<unsigned char> to be sent through service
-                std::vector<signed char> frameVector;
-                if (frame.isContinuous()) {
-                    frameVector.assign(frame.datastart, frame.dataend);
-                } else {
-                    for (int i = 0; i < frame.rows; ++i) {
-                        frameVector.insert(frameVector.end(), frame.ptr<signed char>(i), frame.ptr<signed char>(i) + frame.cols * frame.channels());
-                    }
-                }
-
-                // checking to see if balloon or goal detection (true -> balloon, false -> goal)
-                if (cam_mode) {
-                    // balloon detection
-                    call_thread = std::thread(&CamNode::call_balloon_detection_service, this, std::ref(frameVector), frame.rows, frame.cols);
-                } else {
-                    // goal detection
-                    call_thread = std::thread(&CamNode::call_goal_detection_service, this, std::ref(frameVector), frame.rows, frame.cols);
-                }
-            } else {
-                // manual control mode
-            }
-
-            call_thread.join(); // waits until thread is finished execution (a little backwards to call a thread and then wait till finsihed but idk)
-
-            /*
-                TODO:
-                  - fix stupid ass lines above
-                  - create an the 10 average for detected coords
-                  - possibly create something that will clear when recently switched from balloon to goal or vice versa
-            */
-
-           RCLCPP_INFO(this->get_logger(), "CamNode - X: %i Y: %i", x_coord, y_coord);
-
-            // checks to see if a detection was made
-            if (hasDetection) {
-                auto msg = blimp_interfaces::msg::CameraCoord();
-                msg.position = {x_coord, y_coord};
-                cam_data_publisher_->publish(msg);
-            }
         }
 
         void call_balloon_detection_service(std::vector<signed char>& convertedFrame, int rows, int cols) {
@@ -157,6 +98,68 @@ class CamNode : public rclcpp::Node {
                 RCLCPP_ERROR(this->get_logger(), "Balloon Detection service call failed!");
             }
         }
+
+        void callback_read_image() {
+            // seeing if button to switch cam mode has been pressed
+            if (x_button == 1) {
+                cam_mode = !cam_mode;
+                sleep(1);
+                RCLCPP_INFO(this->get_logger(), "CamNode - Cam Mode has been switched!");
+            }
+
+            if (!cap_.isOpened()) {
+                RCLCPP_ERROR(this->get_logger(), "CamNode - ERROR: Could not open video source!");
+                return;
+            }
+
+            // checking to see if in manual or autonomous control (true -> manual, false -> autonomous)
+            if (!control_mode) {
+                // capture frame and setting it to matrix frame
+                cv::Mat frame;
+                cap_ >> frame;
+
+                cv::imshow("Frame", frame);
+
+                std::cout << "HERE" << std::endl;
+
+                // converting frame into std::vector<unsigned char> to be sent through service
+                std::vector<signed char> frameVector;
+                if (frame.isContinuous()) {
+                    frameVector.assign(frame.datastart, frame.dataend);
+                } else {
+                    for (int i = 0; i < frame.rows; ++i) {
+                        frameVector.insert(frameVector.end(), frame.ptr<signed char>(i), frame.ptr<signed char>(i) + frame.cols * frame.channels());
+                    }
+                }
+
+                // checking to see if balloon or goal detection (true -> balloon, false -> goal)
+                if (cam_mode) {
+                    // balloon detection
+                    call_thread = std::thread(&CamNode::call_balloon_detection_service, this, std::ref(frameVector), frame.rows, frame.cols);
+                } else {
+                    // goal detection
+                    call_thread = std::thread(&CamNode::call_goal_detection_service, this, std::ref(frameVector), frame.rows, frame.cols);
+                }
+            } 
+
+            call_thread.join(); // waits until thread is finished execution (a little backwards to call a thread and then wait till finsihed but idk)
+
+            /*
+                TODO:
+                  - fix stupid ass lines above
+                  - create an the 10 average for detected coords
+                  - possibly create something that will clear when recently switched from balloon to goal or vice versa
+            */
+
+           RCLCPP_INFO(this->get_logger(), "CamNode - X: %i Y: %i", x_coord, y_coord);
+
+            // checks to see if a detection was made
+            if (hasDetection) {
+                auto msg = blimp_interfaces::msg::CameraCoord();
+                msg.position = {x_coord, y_coord};
+                cam_data_publisher_->publish(msg);
+            }
+        }
 };
 
 int main(int argc, char **argv) {
@@ -165,6 +168,6 @@ int main(int argc, char **argv) {
     rclcpp::spin(node);
     rclcpp::shutdown();
     node->cap_.release();
-    //cv::destroyAllWindows(); //needed when showing frame windows
+    cv::destroyAllWindows(); //needed when showing frame windows
     return 0;
 }

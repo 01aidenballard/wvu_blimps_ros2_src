@@ -44,6 +44,8 @@ class GoalDetectionServer : public rclcpp::Node {
     private:
         void callback_goal_detect(const blimp_interfaces::srv::Detection::Request::SharedPtr request,
         const blimp_interfaces::srv::Detection::Response::SharedPtr response){
+            std::cout << "I have been called!" << std::endl;
+            
             // converting vector back into cv::Mat (98% sure will have to change)
             cv::Mat frame(request->rows, request->cols, CV_8UC1, request->frame.data());
 

@@ -34,6 +34,8 @@ class BalloonDetectionServerNode : public rclcpp::Node {
     private:
         void callback_balloon_detect(const blimp_interfaces::srv::Detection::Request::SharedPtr request,
             const blimp_interfaces::srv::Detection::Response::SharedPtr response) {
+            std::cout << "I have been called!" << std::endl;
+            
             // Converting vector back into cv::Mat (98% sure will have to change)
             cv::Mat frame(request->rows, request->cols, CV_8UC1, request->frame.data());
 
