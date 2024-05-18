@@ -58,25 +58,19 @@ class CamNode : public rclcpp::Node {
                 cv::Mat frame;
                 cap_ >> frame;
 
-                // converting frame to vector frameVector and getting rows and columns
-                int rows = frame.rows;
-                int cols = frame.cols;
-                std::vector<uint8_t> frameVector;
-                if (frame.isContinuous()) {
-                    frameVector.assign(frame.datastart, frame.dataend);
-                } else {
-                    for (int i = 0; i < frame.rows; ++i) {
-                        frameVector.insert(frameVector.end(), frame.ptr<uint8_t>(i), frame.ptr<uint8_t>(i) + frame.cols * frame.elemSize());
-                    }
-                }
+                // creating int8[] for sending through service
+                uint8_t* frameArray = new uint8_t[frame.total() * frame.elemSize()];
+
+                // copying frame data to frameArray
+                std::memcpy(frameArray, frame.data, frame.total() * frame.elemSize());
 
                 // checking to see if balloon or goal detection (true -> balloon, false -> goal)
                 if (cam_mode) {
                     // balloon detection
-                    call_thread = std::thread(std::bind(&CamNode::call_balloon_detection_service, this, frameVector, rows, cols));
+                    call_thread = std::thread(std::bind(&CamNode::call_balloon_detection_service, this, frameArray, frame.rows, frame.cols));
                 } else {
                     // goal detection
-                    call_thread = std::thread(std::bind(&CamNode::call_goal_detection_service, this, frameVector, rows, cols));
+                    call_thread = std::thread(std::bind(&CamNode::call_goal_detection_service, this, frameArray, frame.rows, frame.cols));
                 }
             } else {
                 // manual control mode
@@ -101,7 +95,7 @@ class CamNode : public rclcpp::Node {
             }
         }
 
-        void call_balloon_detection_service(std::vector<uint8_t>& convertedFrame, int rows, int cols) {
+        void call_balloon_detection_service(uint8_t[] convertedFrame, int rows, int cols) {
             auto client = this->create_client<blimp_interfaces::srv::Detection>("balloon_detection");
             while (!client->wait_for_service(std::chrono::milliseconds(500))) {
                 RCLCPP_WARN(this->get_logger(), "Waiting for balloon detection server to be up...");
@@ -124,7 +118,7 @@ class CamNode : public rclcpp::Node {
             }  
         }
 
-        void call_goal_detection_service(std::vector<uint8_t>& convertedFrame, int rows, int cols) {
+        void call_goal_detection_service(uint8_t[] convertedFrame, int rows, int cols) {
             auto client = this->create_client<blimp_interfaces::srv::Detection>("goal_detection");
             while (!client->wait_for_service(std::chrono::milliseconds(500))) {
                 RCLCPP_WARN(this->get_logger(), "Waiting for balloon detection server to be up...");

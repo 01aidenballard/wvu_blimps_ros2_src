@@ -10,7 +10,7 @@ using std::placeholders::_3;
 class GoalDetectionServer : public rclcpp::Node {
     public:
         GoalDetectionServer() : Node("Goal_detection_server") {
-            server_ = this.create_service<blimp_interfaces::srv::Detection>(
+            server_ = this->create_service<blimp_interfaces::srv::Detection>(
                 "goal_detection",
                 std::bind(&GoalDetectionServer::callback_goal_detect,
                 this, _1, _2, _3));
@@ -46,7 +46,7 @@ class GoalDetectionServer : public rclcpp::Node {
         void callback_goal_detect(const blimp_interfaces::srv::Detection::Request::SharedPtr request,
         const blimp_interfaces::srv::Detection::Response::SharedPtr response){
             // converting vector back into cv::Mat (98% sure will have to change)
-            cv::Mat frame(request->rows, request->cols, uchar, (void*)request->frame.data());
+            cv::Mat frame(request->rows, request->cols, CV_8UC1, request->frame);
 
             // creating HSV matrices to store the color filtering
             cv::Mat hsv_frame;
@@ -58,9 +58,9 @@ class GoalDetectionServer : public rclcpp::Node {
 
             // Creating matrix for edge detection and
             cv::Mat edges;
-            cv::Canny(mask_goal, edges, low_threshold, high_threshold);
+            cv::Canny(goal_mask, edges, low_threshold, high_threshold);
 
-            std::vector<cv::Point> linedP;
+            std::vector<cv::Point> linesP;
             cv::HoughLinesP(edges, linesP, rho, theta, threshold, min_line_length, max_line_gap);
 
             std::vector<cv::Point> midpoints;
@@ -69,7 +69,7 @@ class GoalDetectionServer : public rclcpp::Node {
             // checking to see if any lines have been drawn
             if (!linesP.empty()) {
                 // going through each drawn line to create midpoints
-                for (size_t i = 0; i < lines.P.size(); i++) {
+                for (size_t i = 0; i < linesP.size(); i++) {
                     cv::Vec4i line = linesP[i];
                     int x1 = line[0], y1 = line[1], x2 = line[2], y2 = line[3];
                     int mid_x = (x1 + x2) / 2;

@@ -10,14 +10,12 @@ using std::placeholders::_3;
 class BalloonDetectionServerNode : public rclcpp::Node {
     public:
         BalloonDetectionServerNode() : Node("balloon_detection_server") {
-            server_ = this.create_service<blimp_interfaces::srv::Detection>(
+            server_ = this->create_service<blimp_interfaces::srv::Detection>(
                 "balloon_detection", 
                 std::bind(&BalloonDetectionServerNode::callback_balloon_detect, 
                 this, _1, _2, _3));
 
             // setting up variables for balloon detection
-            minimum_radius = 15;
-            maximum_radius = 300;
             purple_lower_bound = cv::Scalar(120, 40, 30);
             purple_upper_bound = cv::Scalar(150, 255, 255);
             green_lower_bound = cv::Scalar(41, 80, 80);
@@ -26,8 +24,8 @@ class BalloonDetectionServerNode : public rclcpp::Node {
             RCLCPP_INFO(this->get_logger(), "Balloon Detection Server has been started!");
         }
 
-        const int minimum_radius;
-        const int maximum_radius;
+        const int minimum_radius = 15;
+        const int maximum_radius = 300;
         cv::Scalar purple_lower_bound;
         cv::Scalar purple_upper_bound;
         cv::Scalar green_lower_bound;
@@ -38,7 +36,7 @@ class BalloonDetectionServerNode : public rclcpp::Node {
         void callback_balloon_detect(const blimp_interfaces::srv::Detection::Request::SharedPtr request,
             const blimp_interfaces::srv::Detection::Response::SharedPtr response) {
             // Converting vector back into cv::Mat (98% sure will have to change)
-            cv::Mat frame(request->rows, request->cols, CV_8UC1, const_cast<uint8_t*>(request->frame.data()));
+            cv::Mat frame(request->rows, request->cols, CV_8UC1, request->frame);
 
             // Creating HSV matrices to store the color filtering
             cv::Mat hsv_frame;
