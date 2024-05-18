@@ -10,18 +10,35 @@ using std::placeholders::_3;
 class BalloonDetectionServerNode : public rclcpp::Node {
     public:
         BalloonDetectionServerNode() : Node("balloon_detection_server") {
-            server_ = this.create_service<blimp_interfaces::srv::detection>(
+            server_ = this.create_service<blimp_interfaces::srv::Detection>(
                 "balloon_detection", 
                 std::bind(&BalloonDetectionServerNode::callback_balloon_detect, 
                 this, _1, _2, _3));
+
+            // setting up variables for balloon detection
+            minimum_radius = 15;
+            maximum_radius = 300;
+            purple_lower_bound = cv::Scalar(120, 40, 30);
+            purple_upper_bound = cv::Scalar(150, 255, 255);
+            green_lower_bound = cv::Scalar(41, 80, 80);
+            green_upper_bound = cv::Scalar(56, 255, 255);
+
             RCLCPP_INFO(this->get_logger(), "Balloon Detection Server has been started!");
         }
+
+        const int minimum_radius;
+        const int maximum_radius;
+        cv::Scalar purple_lower_bound;
+        cv::Scalar purple_upper_bound;
+        cv::Scalar green_lower_bound;
+        cv::Scalar green_upper_bound;
+        rclcpp::Service<blimp_interfaces::srv::Detection>::SharedPtr server_;
     
     private:
-        void callback_balloon_detect(const blimp_interfaces::srv::detection::Request::SharedPrt request,
-            const blimp_interfaces::srv::detection::Response::SharedPrt response) {
+        void callback_balloon_detect(const blimp_interfaces::srv::Detection::Request::SharedPtr request,
+            const blimp_interfaces::srv::Detection::Response::SharedPtr response) {
             // Converting vector back into cv::Mat (98% sure will have to change)
-            cv::Mat frame(request->rows, request->cols, uchar, (void*)request->frame.data());
+            cv::Mat frame(request->rows, request->cols, CV_8UC1, const_cast<uint8_t*>(request->frame.data()));
 
             // Creating HSV matrices to store the color filtering
             cv::Mat hsv_frame;
@@ -50,39 +67,21 @@ class BalloonDetectionServerNode : public rclcpp::Node {
                 }
             }
 
-            int balloonX = 0;
-            int baloonY = 0;
-
             if (largest_contour.size.width != 0 && largest_contour.size.height != 0) {
                 cv::Point2f center = largest_contour.center;
                 int radius = std::max(largest_contour.size.width, largest_contour.size.height) / 2;
                 if ((radius >= minimum_radius && radius <= maximum_radius) && (center.x >= 0 && center.x < frame.cols && center.y >= 0 && center.y < frame.rows)) {
-                    hasDetection = true;
-                    balloonX = center.x;
-                    balloonY = center.y;
-                } else {
-                    hasDetection = false;
+                    response->detection = true;
+                    response->x = center.x;
+                    response->y = center.y;
+                    return;
                 }
-            } else {
-                hasDetection = false;
-                returnX = 0;
             }
 
-            response->detection = hasDetection;
-            reponse->x = balloonX;
-            reponse->y = balloonY;
+            response->detection = false;
+            reponse->x = 0;
+            reponse->y = 0;
         }
-
-        bool hasDetection = false;
-        const int minimum_radius = 15;
-        const int maximum_radius = 300;
-
-        cv::Scalar purple_lower_bound = cv::Scalar(120, 40, 30);
-        cv::Scalar purple_upper_bound = cv::Scalar(150, 255, 255);
-        cv::Scalar green_lower_bound = cv::Scalar(41, 80, 80);
-        cv::Scalar green_upper_bound = cv::Scalar(56, 255, 255);
-
-        rclcpp::Service<blimp_interfaces::srv::detection>::SharedPtr server_;
 };
 
 int main(int argc, char **argv) {
