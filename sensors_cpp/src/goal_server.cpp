@@ -5,7 +5,6 @@
 
 using std::placeholders::_1;
 using std::placeholders::_2;
-using std::placeholders::_3;
 
 class GoalDetectionServer : public rclcpp::Node {
     public:
@@ -13,7 +12,7 @@ class GoalDetectionServer : public rclcpp::Node {
             server_ = this->create_service<blimp_interfaces::srv::Detection>(
                 "goal_detection",
                 std::bind(&GoalDetectionServer::callback_goal_detect,
-                this, _1, _2, _3));
+                this, _1, _2));
 
             // setting up variables for goal detection
             rho = 1;
@@ -46,7 +45,7 @@ class GoalDetectionServer : public rclcpp::Node {
         void callback_goal_detect(const blimp_interfaces::srv::Detection::Request::SharedPtr request,
         const blimp_interfaces::srv::Detection::Response::SharedPtr response){
             // converting vector back into cv::Mat (98% sure will have to change)
-            cv::Mat frame(request->rows, request->cols, CV_8UC1, request->frame);
+            cv::Mat frame(request->rows, request->cols, CV_8UC1, request->frame.data());
 
             // creating HSV matrices to store the color filtering
             cv::Mat hsv_frame;
@@ -60,11 +59,11 @@ class GoalDetectionServer : public rclcpp::Node {
             cv::Mat edges;
             cv::Canny(goal_mask, edges, low_threshold, high_threshold);
 
-            std::vector<cv::Point> linesP;
+            std::vector<cv::Vec4i> linesP;
             cv::HoughLinesP(edges, linesP, rho, theta, threshold, min_line_length, max_line_gap);
 
             std::vector<cv::Point> midpoints;
-            int center_x, center_y, total_lines;
+            int center_x, center_y, total_lines = 0;
 
             // checking to see if any lines have been drawn
             if (!linesP.empty()) {

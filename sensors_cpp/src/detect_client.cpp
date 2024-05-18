@@ -35,6 +35,19 @@ class CamNode : public rclcpp::Node {
             RCLCPP_INFO(this->get_logger(), "CamNode - Video Detection has started!");
         }
 
+        cv::VideoCapture cap_;
+        rclcpp::TimerBase::SharedPtr timer_;
+        std::thread call_thread;
+        rclcpp::Publisher<blimp_interfaces::msg::CameraCoord>::SharedPtr cam_data_publisher_;
+        rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr subscriber_;
+        bool control_mode;
+        bool cam_mode;
+        int x_button;
+        int hasDetection;
+        int x_coord;
+        int y_coord;
+
+    private:
         void callback_read_joy(const sensor_msgs::msg::Joy::SharedPtr button) {
             x_button = button->buttons[3];
         }
@@ -58,19 +71,23 @@ class CamNode : public rclcpp::Node {
                 cv::Mat frame;
                 cap_ >> frame;
 
-                // creating int8[] for sending through service
-                uint8_t* frameArray = new uint8_t[frame.total() * frame.elemSize()];
-
-                // copying frame data to frameArray
-                std::memcpy(frameArray, frame.data, frame.total() * frame.elemSize());
+                // converting frame into std::vector<unsigned char> to be sent through service
+                std::vector<signed char> frameVector;
+                if (frame.isContinuous()) {
+                    frameVector.assign(frame.datastart, frame.dataend);
+                } else {
+                    for (int i = 0; i < frame.rows; ++i) {
+                        frameVector.insert(frameVector.end(), frame.ptr<signed char>(i), frame.ptr<signed char>(i) + frame.cols * frame.channels());
+                    }
+                }
 
                 // checking to see if balloon or goal detection (true -> balloon, false -> goal)
                 if (cam_mode) {
                     // balloon detection
-                    call_thread = std::thread(std::bind(&CamNode::call_balloon_detection_service, this, frameArray, frame.rows, frame.cols));
+                    call_thread = std::thread(&CamNode::call_balloon_detection_service, this, std::ref(frameVector), frame.rows, frame.cols);
                 } else {
                     // goal detection
-                    call_thread = std::thread(std::bind(&CamNode::call_goal_detection_service, this, frameArray, frame.rows, frame.cols));
+                    call_thread = std::thread(&CamNode::call_goal_detection_service, this, std::ref(frameVector), frame.rows, frame.cols);
                 }
             } else {
                 // manual control mode
@@ -95,7 +112,7 @@ class CamNode : public rclcpp::Node {
             }
         }
 
-        void call_balloon_detection_service(uint8_t[] convertedFrame, int rows, int cols) {
+        void call_balloon_detection_service(std::vector<signed char>& convertedFrame, int rows, int cols) {
             auto client = this->create_client<blimp_interfaces::srv::Detection>("balloon_detection");
             while (!client->wait_for_service(std::chrono::milliseconds(500))) {
                 RCLCPP_WARN(this->get_logger(), "Waiting for balloon detection server to be up...");
@@ -118,7 +135,7 @@ class CamNode : public rclcpp::Node {
             }  
         }
 
-        void call_goal_detection_service(uint8_t[] convertedFrame, int rows, int cols) {
+        void call_goal_detection_service(std::vector<signed char>&  convertedFrame, int rows, int cols) {
             auto client = this->create_client<blimp_interfaces::srv::Detection>("goal_detection");
             while (!client->wait_for_service(std::chrono::milliseconds(500))) {
                 RCLCPP_WARN(this->get_logger(), "Waiting for balloon detection server to be up...");
@@ -138,23 +155,8 @@ class CamNode : public rclcpp::Node {
                 y_coord = response->y;
             } catch (const std::exception &e) {
                 RCLCPP_ERROR(this->get_logger(), "Balloon Detection service call failed!");
-            } 
+            }
         }
-
-        cv::VideoCapture cap_;
-        rclcpp::TimerBase::SharedPtr timer_;
-        std::thread call_thread;
-        rclcpp::Publisher<blimp_interfaces::msg::CameraCoord>::SharedPtr cam_data_publisher_;
-        rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr subscriber_;
-
-        bool control_mode;
-        bool cam_mode;
-
-        int x_button;
-
-        int hasDetection;
-        int x_coord;
-        int y_coord;
 };
 
 int main(int argc, char **argv) {

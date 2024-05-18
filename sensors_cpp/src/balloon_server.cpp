@@ -5,7 +5,6 @@
 
 using std::placeholders::_1;
 using std::placeholders::_2;
-using std::placeholders::_3;
 
 class BalloonDetectionServerNode : public rclcpp::Node {
     public:
@@ -13,7 +12,7 @@ class BalloonDetectionServerNode : public rclcpp::Node {
             server_ = this->create_service<blimp_interfaces::srv::Detection>(
                 "balloon_detection", 
                 std::bind(&BalloonDetectionServerNode::callback_balloon_detect, 
-                this, _1, _2, _3));
+                this, _1, _2));
 
             // setting up variables for balloon detection
             purple_lower_bound = cv::Scalar(120, 40, 30);
@@ -36,7 +35,7 @@ class BalloonDetectionServerNode : public rclcpp::Node {
         void callback_balloon_detect(const blimp_interfaces::srv::Detection::Request::SharedPtr request,
             const blimp_interfaces::srv::Detection::Response::SharedPtr response) {
             // Converting vector back into cv::Mat (98% sure will have to change)
-            cv::Mat frame(request->rows, request->cols, CV_8UC1, request->frame);
+            cv::Mat frame(request->rows, request->cols, CV_8UC1, request->frame.data());
 
             // Creating HSV matrices to store the color filtering
             cv::Mat hsv_frame;
@@ -77,8 +76,8 @@ class BalloonDetectionServerNode : public rclcpp::Node {
             }
 
             response->detection = false;
-            reponse->x = 0;
-            reponse->y = 0;
+            response->x = 0;
+            response->y = 0;
         }
 };
 
