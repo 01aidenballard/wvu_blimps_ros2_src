@@ -34,10 +34,10 @@ class BalloonDetectionServerNode : public rclcpp::Node {
     private:
         void callback_balloon_detect(const blimp_interfaces::srv::Detection::Request::SharedPtr request,
             const blimp_interfaces::srv::Detection::Response::SharedPtr response) {
-            std::cout << "I have been called!" << std::endl;
+            RCLCPP_INFO(this->get_logger(), "BalloonServer - I have been called!");
             
             // Converting vector back into cv::Mat (98% sure will have to change)
-            cv::Mat frame(request->rows, request->cols, CV_8UC1, request->frame.data());
+            cv::Mat frame(request->rows, request->cols, CV_8UC3, request->frame.data());
 
             // Creating HSV matrices to store the color filtering
             cv::Mat hsv_frame;
@@ -73,6 +73,8 @@ class BalloonDetectionServerNode : public rclcpp::Node {
                     response->detection = true;
                     response->x = center.x;
                     response->y = center.y;
+
+                    RCLCPP_INFO(this->get_logger(), "I am done with a detection");
                     return;
                 }
             }
@@ -80,6 +82,7 @@ class BalloonDetectionServerNode : public rclcpp::Node {
             response->detection = false;
             response->x = 0;
             response->y = 0;
+            RCLCPP_INFO(this->get_logger(), "I am done without a detection");
         }
 };
 
