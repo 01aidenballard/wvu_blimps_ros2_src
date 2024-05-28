@@ -21,11 +21,8 @@ setup(
     entry_points={
         'console_scripts': [
             "read_altitude = sensors.barometer:main",
-            "read_imu = sensors.imu:main",
-            "balloon_detect = sensors.camera:main",
-            "record_data = sensors.record_data:main",
-            "sender = sensors.sender_pi:main",
-            "reciever = sensors.reciever_pi:main"
+            "read_bno055 = sensors.BNO055:main",
+            "read_bno085 = sensors.BNO085:main",
         ],
     },
 )

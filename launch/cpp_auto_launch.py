@@ -87,7 +87,7 @@ def generate_launch_description():
 		Node(
 			package='sensors',
 			name='read_imu',
-			executable='read_imu'
+			executable='read_bno055'
 		),
 		# Node(
 		# 	package = 'sensors',
