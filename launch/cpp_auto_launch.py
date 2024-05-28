@@ -59,7 +59,7 @@ def generate_launch_description():
 			executable='dynamic_model',
 			name='inv_kine',
 			parameters = [{
-				"buoyancy": ((0.45131) - (5*0.001))*9.81,
+				"buoyancy": ((0.43) - (5*0.001))*9.81,
 				"rho_air": 1.225
 			}]
         ),
