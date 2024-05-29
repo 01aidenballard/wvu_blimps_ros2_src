@@ -16,9 +16,9 @@ public:
         Fx1 = 1, Fx2 = 1, Fx3 = 0, Fx4 = 0;
         Fy1 = 0, Fy2 = 0, Fy3 = 0, Fy4 = 0;
         Fz1 = 0, Fz2 = 0, Fz3 = -1, Fz4 = 1;
-        lx1 = 0.00, lx2 = 0.00, lx3 = 0, lx4 = 0;
-        ly1 = -0.43, ly2 = 0.43, ly3 = -0.09, ly4 = 0.09;
-        lz1 = -0.13, lz2 = -0.13, lz3 = 0.21, lz4 = 0.21;
+        lx1 = 0.04, lx2 = 0.04, lx3 = 0.07, lx4 = 0.07;
+        ly1 = -0.51, ly2 = 0.51, ly3 = -0.09, ly4 = 0.09;
+        lz1 = -0.26, lz2 = -0.26, lz3 = 0.26, lz4 = 0.26;
         // Thrust Coefficient Matrix (values comes form thrust stand testing)
         // Approximated as a linear function so Thrust [N] = K * PWM + B
         // K matrix is the slope of the function relating Thrust and PWM input
