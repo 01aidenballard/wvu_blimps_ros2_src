@@ -37,7 +37,7 @@ class CamNode : public rclcpp::Node {
 
         cv::VideoCapture cap_;
         rclcpp::TimerBase::SharedPtr timer_;
-        //std::thread call_thread;
+        std::thread call_thread;
         rclcpp::Publisher<blimp_interfaces::msg::CameraCoord>::SharedPtr cam_data_publisher_;
         rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr subscriber_;
         bool control_mode;
@@ -67,8 +67,12 @@ class CamNode : public rclcpp::Node {
 
             auto future = client->async_send_request(request);
 
+            if (rclcpp::spin_until_future_complete(this->shared_from_this(), future) != rclcpp::FutureReturnCode::SUCCESS) {
+                RCLCPP_ERROR(this->get_logger(), "Failed getting response from server");
+            }   
+
             auto response = future.get();
-            RCLCPP_INFO(this->get_logger(), "response recieved");
+
 
             return;
         }
@@ -113,6 +117,13 @@ class CamNode : public rclcpp::Node {
                 return;
             }
 
+            static bool detection_in_progress = false;
+            if (detection_in_progress) {
+                return;
+            }
+
+            detection_in_progress = true;
+
             // checking to see if in manual or autonomous control (true -> manual, false -> autonomous)
             if (!control_mode) {
                 // capture frame and setting it to matrix frame
@@ -145,7 +156,9 @@ class CamNode : public rclcpp::Node {
                     call_goal_detection_service(frameVector, frame.rows, frame.cols);
                 }
 
-                //call_thread.join(); // waits until thread is finished execution (a little backwards to call a thread and then wait till finsihed but idk
+                if (call_thread.joinable()) {
+                    call_thread.join();
+                }
             } 
 
             /*
@@ -162,6 +175,8 @@ class CamNode : public rclcpp::Node {
                 msg.position = {x_coord, y_coord};
                 cam_data_publisher_->publish(msg);
             }
+
+            detection_in_progress = false;
         }
 };
 
