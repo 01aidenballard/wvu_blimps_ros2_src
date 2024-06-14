@@ -1,9 +1,10 @@
-// dependicies and libraires needed for detect_node.cpp
+std::cout << "Detected Goal - Max X: " << max_x << ", Min X: " << min_X << ", Max Y: " << max_y << ", Min Y: "<< min_y< < std::endl;// dependicies and libraires needed for detect_node.cpp
 #include "rclcpp/rclcpp.hpp"
 #include "blimp_interfaces/msg/camera_coord.hpp"
 #include "sensor_msgs/msg/joy.hpp"
 #include "opencv2/opencv.hpp" // inlcluding class for capturing from video files, image sequences or cameras
 #include "vector"
+#include "iostream"
 
 // creating class with name CamNode
 // ros2 Notation foor creatin node in public using rclpp ros2 communication matrix
@@ -110,8 +111,8 @@ public:
         // cv::Scalar upper_bound_1 = cv::Scalar(56, 255, 255);
 
 	//purple
-        cv::Scalar lower_bound_2 = cv::Scalar(120, 40, 30);
-        cv::Scalar upper_bound_2 = cv::Scalar(150, 255, 255);
+       cv::Scalar lower_bound_2 = cv::Scalar(115, 40, 30);
+       cv::Scalar upper_bound_2 = cv::Scalar(150, 255, 255);
 
         cv::inRange(hsv_frame, goal_lower_bound, goal_upper_bound, mask_goal);
 
@@ -212,19 +213,23 @@ public:
 		// we use this to find the furthest out you can get from the center of the square
 		// the min and max x tell us the vertical sides(left and right) of the square(because y wouldn't change in those instance)
 		//the same goes for y and the horizontal(top and bottom) sides of the square.
-		int max_x = INT_MIN, min_x = INT_MAX, max_y = INT_MIN, min_y = INT_MAX;
+		max_x = INT_MIN, min_x = INT_MAX, max_y = INT_MIN, min_y = INT_MAX;
   
                   for (const auto &point : midpoints) {
                       max_x = std::max(max_x, point.x);
                       min_x = std::min(min_x, point.x);
                       max_y = std::max(max_y, point.y);
                       min_y = std::min(min_y, point.y);
+		      std::cout << "Detected Goal - Max X: " << max_x << ", Min X: " << min_x << ", Max Y: " << max_y << ", Min Y: "<< min_y << std::endl;
+
+		      //RCLCPP_INFO(this->get_logger(), "min x: %i max x: %i min y: %i max y: %i", min_x, max_x, min_y, max_y);
                   }
   		 //finding the midpoint of the midpoints in order to find the center
+		  //RCLCPP_INFO(this->get_logger(), "min x: %i max x: %i min y: %i max y: %i", min_x, max_x, min_y, max_y);
                   center_x = (min_x + max_x) / 2;
                   center_y = (min_y + max_y) / 2;
                   total_lines++;
-  
+                 // std::cout << "min: " << min_x << "max: " << max_x << std::endl;  
                  // cv::circle(frame, cv::Point(max_x, max_y), 5, cv::Scalar(0, 0, 255), -1);
                  // cv::circle(frame, cv::Point(max_x, min_y), 5, cv::Scalar(0, 0, 255), -1);
                  // cv::circle(frame, cv::Point(min_x, max_y), 5, cv::Scalar(0, 0, 255), -1);
@@ -232,12 +237,13 @@ public:
                  // cv::circle(frame, cv::Point(center_x, center_y), 5, cv::Scalar(255, 0 , 0), -1);
   
   
-              } 
+               }
                   // publishing the message to blimp interfaces
+		 //RCLCPP_INFO(this->get_logger(), "min x: %i max x: %i min y: %i max y: %i", min_x, max_x, min_y, max_y);
 		  auto msg = blimp_interfaces::msg::CameraCoord();
                   msg.position = {center_x, center_y};
                   cam_data_publisher_->publish(msg);
-                  //RCLCPP_INFO(this->get_logger(), "X: %i Y: %i", center_x, center_y);
+    //RCLCPP_INFO(this->get_logger(), "max: %i min: %i", max_x, min_y);
 		
               midpoints.clear(); // removing oversaturation of averaging data
               //std::cout << "Goal - X: " << center_x << ", Y: " << center_y << std::endl;
@@ -283,6 +289,7 @@ public:
     int high_threshold;
     int total_lines;
     int x_button;
+    int max_x, min_x, min_y, max_y;
     bool findGoal;
 };
 
