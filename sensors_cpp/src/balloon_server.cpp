@@ -1,7 +1,9 @@
 #include "rclcpp/rclcpp.hpp"
 #include "blimp_interfaces/srv/detection.hpp"
+#include "blimp_interfaces/msg/camera_coord.hpp"
 #include "opencv2/opencv.hpp"
 #include <vector>
+#include <memory>
 
 using std::placeholders::_1;
 using std::placeholders::_2;
@@ -14,6 +16,9 @@ class BalloonDetectionServerNode : public rclcpp::Node {
                 std::bind(&BalloonDetectionServerNode::callback_balloon_detect, 
                 this, _1, _2));
 
+            // creates publisher, publishing on the topic "cam_data"
+            cam_data_publisher_ = this->create_publisher<blimp_interfaces::msg::CameraCoord>("cam_data", 3);
+            
             // setting up variables for balloon detection
             purple_lower_bound = cv::Scalar(120, 40, 30);
             purple_upper_bound = cv::Scalar(150, 255, 255);
@@ -30,12 +35,12 @@ class BalloonDetectionServerNode : public rclcpp::Node {
         cv::Scalar green_lower_bound;
         cv::Scalar green_upper_bound;
         rclcpp::Service<blimp_interfaces::srv::Detection>::SharedPtr server_;
-    
+        rclcpp::Publisher<blimp_interfaces::msg::CameraCoord>::SharedPtr cam_data_publisher_;
+
+
     private:
-        void callback_balloon_detect(const blimp_interfaces::srv::Detection::Request::SharedPtr request,
-            const blimp_interfaces::srv::Detection::Response::SharedPtr response) {
-            RCLCPP_INFO(this->get_logger(), "BalloonServer - I have been called!");
-            
+        void callback_balloon_detect(const std::shared_ptr<blimp_interfaces::srv::Detection::Request> request,
+        const std::shared_ptr<blimp_interfaces::srv::Detection::Response> response) {
             // Converting vector back into cv::Mat (98% sure will have to change)
             cv::Mat frame(request->rows, request->cols, CV_8UC3, request->frame.data());
 
@@ -70,19 +75,22 @@ class BalloonDetectionServerNode : public rclcpp::Node {
                 cv::Point2f center = largest_contour.center;
                 int radius = std::max(largest_contour.size.width, largest_contour.size.height) / 2;
                 if ((radius >= minimum_radius && radius <= maximum_radius) && (center.x >= 0 && center.x < frame.cols && center.y >= 0 && center.y < frame.rows)) {
-                    response->detection = true;
-                    response->x = center.x;
-                    response->y = center.y;
+                    RCLCPP_INFO(this->get_logger(), "CamNode - X: %f Y: %f", center.x, center.y);
+                    // response->detection = true;
+                    // response->x = center.x;
+                    // response->y = center.y;
 
-                    RCLCPP_INFO(this->get_logger(), "I am done with a detection");
+                    auto msg = blimp_interfaces::msg::CameraCoord();
+                    msg.position = {(long int) center.x, (long int) center.y};
+                    cam_data_publisher_->publish(msg);
+
                     return;
                 }
             }
 
-            response->detection = false;
-            response->x = 0;
-            response->y = 0;
-            RCLCPP_INFO(this->get_logger(), "I am done without a detection");
+            // response->detection = false;
+            // response->x = 0;
+            // response->y = 0;
         }
 };
 

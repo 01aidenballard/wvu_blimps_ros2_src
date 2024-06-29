@@ -1,5 +1,6 @@
 #include "rclcpp/rclcpp.hpp"
 #include "blimp_interfaces/srv/detection.hpp"
+#include "blimp_interfaces/msg/camera_coord.hpp"
 #include "opencv2/opencv.hpp"
 #include <vector>
 
@@ -8,11 +9,14 @@ using std::placeholders::_2;
 
 class GoalDetectionServer : public rclcpp::Node {
     public:
-        GoalDetectionServer() : Node("Goal_detection_server") {
+        GoalDetectionServer() : Node("goal_detection_server") {
             server_ = this->create_service<blimp_interfaces::srv::Detection>(
                 "goal_detection",
                 std::bind(&GoalDetectionServer::callback_goal_detect,
                 this, _1, _2));
+
+            // creates publisher, publishing on the topic "cam_data"
+            cam_data_publisher_ = this->create_publisher<blimp_interfaces::msg::CameraCoord>("cam_data", 3);
 
             // setting up variables for goal detection
             rho = 1;
@@ -29,6 +33,7 @@ class GoalDetectionServer : public rclcpp::Node {
         }
 
     rclcpp::Service<blimp_interfaces::srv::Detection>::SharedPtr server_;
+    rclcpp::Publisher<blimp_interfaces::msg::CameraCoord>::SharedPtr cam_data_publisher_;
     int rho;
     int theta;
     int threshold;
@@ -42,8 +47,8 @@ class GoalDetectionServer : public rclcpp::Node {
 	//cv::Scalar orange_upper_bound;
 
     private:
-        void callback_goal_detect(const blimp_interfaces::srv::Detection::Request::SharedPtr request,
-        const blimp_interfaces::srv::Detection::Response::SharedPtr response){
+        void callback_goal_detect(const std::shared_ptr<blimp_interfaces::srv::Detection::Request> request,
+        const std::shared_ptr<blimp_interfaces::srv::Detection::Response> response){
             RCLCPP_INFO(this->get_logger(), "BalloonServer - I have been called!");
             
             // converting vector back into cv::Mat (98% sure will have to change)
@@ -96,9 +101,11 @@ class GoalDetectionServer : public rclcpp::Node {
                 }
 
                 if (total_lines % 5 == 0) {
-                    response->detection = true;
-                    response->x = center_x;
-                    response->y = center_y;
+                    RCLCPP_INFO(this->get_logger(), "CamNode - X: %i Y: %i", center_x, center_y);
+                    
+                    auto msg = blimp_interfaces::msg::CameraCoord();
+                    msg.position = {center_x, center_y};
+                    cam_data_publisher_->publish(msg);
                 }
 
                 midpoints.clear();
@@ -106,9 +113,6 @@ class GoalDetectionServer : public rclcpp::Node {
                 return;
             }
 
-            response->detection = false;
-            response->x = 0;
-            response->y = 0;
         }   
 };
 int main(int argc, char **argv) {
