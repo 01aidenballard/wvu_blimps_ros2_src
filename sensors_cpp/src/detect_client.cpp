@@ -100,7 +100,7 @@ private:
             //lock.unlock();
 
             cv::imshow("frame", frame);
-            cv::waitKey(0.1);
+            cv::waitKey(1);
 
             if (frame.empty()) {
                 RCLCPP_ERROR(this->get_logger(), "CamNode - ERROR: frame is empty!");
