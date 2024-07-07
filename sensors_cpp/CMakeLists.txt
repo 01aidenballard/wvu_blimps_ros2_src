@@ -20,6 +20,13 @@ include_directories(
   ${EIGEN3_INCLUDE_DIRS}
 )
 
+# adding globals "library"
+add_library(shared_frame
+  src/shared_frame.cpp
+)
+
+ament_target_dependencies(shared_frame OpenCV)
+
 # detect_node not needed any more (hopefully)
 #add_executable(detect_cpp src/detect_node.cpp)
 #ament_target_dependencies(detect_cpp rclcpp blimp_interfaces OpenCV sensor_msgs)
@@ -31,6 +38,9 @@ ament_target_dependencies(detect_cpp
   OpenCV 
   sensor_msgs
 )
+target_link_libraries(detect_cpp
+  shared_frame
+)
 
 add_executable(balloon_server src/balloon_server.cpp)
 ament_target_dependencies(balloon_server
@@ -38,12 +48,18 @@ ament_target_dependencies(balloon_server
   blimp_interfaces
   OpenCV
 )
+target_link_libraries(balloon_server
+  shared_frame
+)
 
 add_executable(goal_server src/goal_server.cpp)
 ament_target_dependencies(goal_server
   rclcpp
   blimp_interfaces
   OpenCV
+)
+target_link_libraries(goal_server
+  shared_frame
 )
 
 add_executable(dynamic_model src/inv_kine.cpp)

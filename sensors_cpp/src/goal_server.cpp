@@ -2,7 +2,9 @@
 #include "blimp_interfaces/srv/detection.hpp"
 #include "blimp_interfaces/msg/camera_coord.hpp"
 #include "opencv2/opencv.hpp"
+#include "shared_frame.h"
 #include <vector>
+//#include <mutex>
 
 using std::placeholders::_1;
 using std::placeholders::_2;
@@ -49,14 +51,11 @@ class GoalDetectionServer : public rclcpp::Node {
     private:
         void callback_goal_detect(const std::shared_ptr<blimp_interfaces::srv::Detection::Request> request,
         const std::shared_ptr<blimp_interfaces::srv::Detection::Response> response){
-            RCLCPP_INFO(this->get_logger(), "BalloonServer - I have been called!");
-            
-            // converting vector back into cv::Mat (98% sure will have to change)
-            cv::Mat frame(request->rows, request->cols, CV_8UC1, request->frame.data());
-
             // creating HSV matrices to store the color filtering
             cv::Mat hsv_frame;
+            //std::unique_lock<std::mutex> lock(*frame_mutex);
             cv::cvtColor(frame, hsv_frame, cv::COLOR_BGR2HSV);
+            //lock.unlock();
 
             // Creating mask matrices which leaves the HSV values (NOT THE DETECTED COLOR)
             cv::Mat goal_mask;

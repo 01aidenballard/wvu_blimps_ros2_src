@@ -1,10 +1,11 @@
 #include "rclcpp/rclcpp.hpp"
 #include "blimp_interfaces/srv/detection.hpp"
 #include "sensor_msgs/msg/joy.hpp"
+#include "shared_frame.h"
 #include "opencv2/opencv.hpp"
 #include <vector>
-#include <thread>
 #include <chrono>
+//#include <mutex>
 
 class CamNode : public rclcpp::Node {
 public:
@@ -35,15 +36,7 @@ public:
     void shutdown_node() {
         if (frames > 0 && time_since_start > 0.0) {
             double avg_fps = frames / time_since_start;
-            RCLCPP_INFO(this->get_logger(), "Average FPS: %f", avg_fps);
-        }
-    }
-
-    void shutdown_and_display_fps() {
-        shutdown_node(); // Call the private shutdown function
-        if (frames > 0 && time_since_start > 0.0) {
-            double avg_fps = frames / time_since_start;
-            RCLCPP_INFO(this->get_logger(), "Average FPS: %f", avg_fps);
+            RCLCPP_INFO(this->get_logger(), "************************Average FPS: %f******************************", avg_fps);
         }
     }
 
@@ -53,7 +46,7 @@ private:
         x_button = button->buttons[3];
     }
 
-    void call_balloon_detection_service(std::vector<signed char>& convertedFrame, int rows, int cols) {
+    void call_balloon_detection_service() {
         auto client = this->create_client<blimp_interfaces::srv::Detection>("balloon_detection");
 
         while (!client->wait_for_service(std::chrono::milliseconds(500))) {
@@ -61,35 +54,21 @@ private:
         }
 
         auto request = std::make_shared<blimp_interfaces::srv::Detection::Request>();
-        request->frame = convertedFrame;
-        request->rows = rows;
-        request->cols = cols;
 
         auto future = client->async_send_request(request);
 
         while (!future.valid()) {}
 
-        /*
-        auto response = future.get();
-
-        hasDetection = response->detection;
-        x_coord = response->x;
-        y_coord = response->y;
-        */
-
         return;
     }
 
-    void call_goal_detection_service(std::vector<signed char>&  convertedFrame, int rows, int cols) {
+    void call_goal_detection_service() {
         auto client = this->create_client<blimp_interfaces::srv::Detection>("goal_detection");
         while (!client->wait_for_service(std::chrono::milliseconds(500))) {
             RCLCPP_WARN(this->get_logger(), "Waiting for balloon detection server to be up...");
         }
 
         auto request = std::make_shared<blimp_interfaces::srv::Detection::Request>();
-        request->frame = convertedFrame;
-        request->rows = rows;
-        request->cols = cols;
 
         auto future = client->async_send_request(request);
 
@@ -116,33 +95,27 @@ private:
         // checking to see if in manual or autonomous control (true -> manual, false -> autonomous)
         if (!control_mode) {
             // capture frame and setting it to matrix frame
-            cv::Mat frame;
+            //std::unique_lock<std::mutex> lock(*frame_mutex);
             cap_ >> frame;
+            //lock.unlock();
+
+            cv::imshow("frame", frame);
+            cv::waitKey(0.1);
 
             if (frame.empty()) {
                 RCLCPP_ERROR(this->get_logger(), "CamNode - ERROR: frame is empty!");
                 return;
             }
 
-            // converting frame into std::vector<unsigned char> to be sent through service
-            std::vector<signed char> frameVector;
-            if (frame.isContinuous()) {
-                frameVector.assign(frame.datastart, frame.dataend);
-            } else {
-                for (int i = 0; i < frame.rows; ++i) {
-                    frameVector.insert(frameVector.end(), frame.ptr<signed char>(i), frame.ptr<signed char>(i) + frame.cols * frame.channels());
-                }
-            }
-
             // checking to see if balloon or goal detection (true -> balloon, false -> goal)
             if (cam_mode) {
                 // balloon detection
                 //call_thread = std::thread(&CamNode::call_balloon_detection_service, this, std::ref(frameVector), frame.rows, frame.cols);
-                call_balloon_detection_service(frameVector, frame.rows, frame.cols);
+                call_balloon_detection_service();
             } else {
                 // goal detection
                 //call_thread = std::thread(&CamNode::call_goal_detection_service, this, std::ref(frameVector), frame.rows, frame.cols);
-                call_goal_detection_service(frameVector, frame.rows, frame.cols);
+                call_goal_detection_service();
             }
 
             frames += 1;
@@ -162,7 +135,6 @@ private:
 
     cv::VideoCapture cap_;
     rclcpp::TimerBase::SharedPtr timer_;
-    std::thread call_thread;
     rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr subscriber_;
     bool control_mode;
     bool cam_mode;
@@ -178,7 +150,7 @@ int main(int argc, char **argv) {
     rclcpp::init(argc, argv);
     auto node = std::make_shared<CamNode>();
     rclcpp::spin(node);
-    node->shutdown_and_display_fps(); // Call the method to display FPS
+    node->shutdown_node(); // Call the method to display FPS
     rclcpp::shutdown();
     return 0;
 }

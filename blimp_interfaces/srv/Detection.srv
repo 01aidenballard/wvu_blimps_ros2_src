@@ -1,7 +1,3 @@
-int8[] frame
-int32 rows
-int32 cols
+#empty
 ---
-bool detection
-int32 x
-int32 y
+#empty

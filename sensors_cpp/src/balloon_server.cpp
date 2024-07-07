@@ -2,8 +2,11 @@
 #include "blimp_interfaces/srv/detection.hpp"
 #include "blimp_interfaces/msg/camera_coord.hpp"
 #include "opencv2/opencv.hpp"
+#include "shared_frame.h"
 #include <vector>
 #include <memory>
+#include <unordered_map>
+//#include <mutex>
 
 using std::placeholders::_1;
 using std::placeholders::_2;
@@ -41,12 +44,12 @@ class BalloonDetectionServerNode : public rclcpp::Node {
     private:
         void callback_balloon_detect(const std::shared_ptr<blimp_interfaces::srv::Detection::Request> request,
         const std::shared_ptr<blimp_interfaces::srv::Detection::Response> response) {
-            // Converting vector back into cv::Mat (98% sure will have to change)
-            cv::Mat frame(request->rows, request->cols, CV_8UC3, request->frame.data());
-
-            // Creating HSV matrices to store the color filtering
+            // Creating HSV matrices to store the color filtering (getting frame from frame pointer)
+            
             cv::Mat hsv_frame;
+            //std::unique_lock<std::mutex> lock(*frame_mutex);
             cv::cvtColor(frame, hsv_frame, cv::COLOR_BGR2HSV);
+            //lock.unlock();
 
             // Color filtering mask matrices, leaves the HSV values NOT THE DETECTED COLOR
             cv::Mat purple_mask, green_mask;
@@ -76,10 +79,6 @@ class BalloonDetectionServerNode : public rclcpp::Node {
                 int radius = std::max(largest_contour.size.width, largest_contour.size.height) / 2;
                 if ((radius >= minimum_radius && radius <= maximum_radius) && (center.x >= 0 && center.x < frame.cols && center.y >= 0 && center.y < frame.rows)) {
                     RCLCPP_INFO(this->get_logger(), "CamNode - X: %f Y: %f", center.x, center.y);
-                    // response->detection = true;
-                    // response->x = center.x;
-                    // response->y = center.y;
-
                     auto msg = blimp_interfaces::msg::CameraCoord();
                     msg.position = {(long int) center.x, (long int) center.y};
                     cam_data_publisher_->publish(msg);
@@ -87,10 +86,6 @@ class BalloonDetectionServerNode : public rclcpp::Node {
                     return;
                 }
             }
-
-            // response->detection = false;
-            // response->x = 0;
-            // response->y = 0;
         }
 };
 
