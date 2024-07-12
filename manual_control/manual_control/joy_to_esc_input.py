@@ -10,7 +10,7 @@ class FixAxesNode(Node):
 		self.ESC_pin1 = 5
 		self.ESC_pin2 = 6
 		self.ESC_pin3 = 13
-		self.ESC_pin4 = 26
+		#self.ESC_pin4 = 26
 		self.joy_time = 0
 		
 		#Initializing the node and nameing it "joy_to_esc" 
@@ -53,52 +53,55 @@ class FixAxesNode(Node):
 		# msg.axes[5]:   Left Trig   UnP = 0.0  P = -1.0
 		
 		#setting trig values will range from 0 to 50
-		RTrim = msg.axes[5]*-50
-		LTrim = ((msg.axes[3]-1)*-100)/4
+		RTrim = -450*(msg.axes[5])
+		LTrim = 450+((0-450)/(2))*(msg.axes[3]+1)
 
 		# setting the forrward value that will go to each motor will range from 0 to 50
-		F = abs(msg.axes[1])*50
+		F = 1950+((1050-1950)/(-2))*(msg.axes[1]-1)
 
 		# Lm is the Left motor and RM is the right motor
 		# will add the forward value to the trim value. will range from 0 to 100
 		LM = (F*self.Klm) + LTrim - RTrim
 		RM = (F*self.Krm) + RTrim - LTrim
+		DM = 1950+((1050-1950)/(-2))*(msg.axes[2]-1)
+		# # checking bounds
+		# if LM < 0:
+		# 	LM = 0
+		# elif RM < 0:
+		# 	RM = 0
 
-		# checking bounds
-		if LM < 0:
-			LM = 0
-		elif RM < 0:
-			RM = 0
+		# if LM > 100:
+		# 	LM = 100
+		# elif RM > 100:
+		# 	RM = 100
 
-		if LM > 100:
-			LM = 100
-		elif RM > 100:
-			RM = 100
-
-		# dividing the 
-		if msg.axes[2] > 0.05:
-			UM = abs(msg.axes[2])*100
-			DM = 0
-		elif msg.axes[2] < -0.05:
-			DM = abs(msg.axes[2])*100
-			UM = 0
-		else:
-			UM = 0
-			DM = 0
+		# # dividing the 
+		# if msg.axes[2] > 0.05:
+		# 	UM = abs(msg.axes[2])*100
+		# 	DM = 0
+		# elif msg.axes[2] < -0.05:
+		# 	DM = abs(msg.axes[2])*100
+		# 	UM = 0
+		# else:
+		# 	UM = 0
+		# 	DM = 0
 		
 		# turning the values from 0 - 100 into 1050 to 1900 for the pwm input
-		LM_pwm = self.control_to_esc_input(LM)
-		UM_pwm = self.control_to_esc_input(UM)
-		DM_pwm = self.control_to_esc_input(DM)
-		RM_pwm = self.control_to_esc_input(RM)
+		# LM_pwm = self.control_to_esc_input(LM)
+		# UM_pwm = self.control_to_esc_input(UM)
+		# DM_pwm = self.control_to_esc_input(DM)
+		# RM_pwm = self.control_to_esc_input(RM)
+		LM_pwm = LM
+		RM_pwm = RM
+		DM_pwm = DM
 		
 		# defining msg type to be the EscInput 
 		msg2 = EscInput()
 		# inputing the pin values and pwm values into the msg
-		msg2.esc_pins = [self.ESC_pin1, self.ESC_pin2, self.ESC_pin3, self.ESC_pin4]
+		msg2.esc_pins = [self.ESC_pin1, self.ESC_pin2, self.ESC_pin3]
 		msg2.pwm_l = LM_pwm
 		msg2.pwm_r = RM_pwm
-		msg2.pwm_u = UM_pwm
+		#msg2.pwm_u = UM_pwm
 		msg2.pwm_d = DM_pwm
 
 		#publishing the msg

@@ -15,7 +15,7 @@ class EscControl(Node):
 		#initializing variables
 		self.pwm_L = 0
 		self.pwm_R = 0
-		self.pwm_U = 0
+		#self.pwm_U = 0
 		self.pwm_D = 0
 
 		super().__init__("esc_driver") # initialing ros2 node
@@ -38,7 +38,7 @@ class EscControl(Node):
 		#assign ing the msg to the global variable and checking the bounds of the signal
 		self.pwm_L = self.limit(msg.pwm_l)
 		self.pwm_R = self.limit(msg.pwm_r)
-		self.pwm_U = self.limit(msg.pwm_u)
+		#self.pwm_U = self.limit(msg.pwm_u)
 		self.pwm_D = self.limit(msg.pwm_d)
 
 		#grabing the bluetooth info
@@ -51,15 +51,15 @@ class EscControl(Node):
 			self.pi.set_servo_pulsewidth(pins[0], 0)
 			self.pi.set_servo_pulsewidth(pins[1], 0)
 			self.pi.set_servo_pulsewidth(pins[2], 0)
-			self.pi.set_servo_pulsewidth(pins[3], 0)
+			#self.pi.set_servo_pulsewidth(pins[3], 0)
 		else:
 			self.pi.set_servo_pulsewidth(pins[0], self.pwm_L)
 			self.pi.set_servo_pulsewidth(pins[1], self.pwm_R)
-			self.pi.set_servo_pulsewidth(pins[2], self.pwm_U)
-			self.pi.set_servo_pulsewidth(pins[3], self.pwm_D)
+			self.pi.set_servo_pulsewidth(pins[2], self.pwm_D)
+			#self.pi.set_servo_pulsewidth(pins[3], self.pwm_D)
 	def limit(self,pwm):
-		if pwm > 1900.0:
-			pwm = 1900.0
+		if pwm > 1950.0:
+			pwm = 1950.0
 		elif pwm < 1050.0:
 			pwm = 1050.0
 		return pwm
