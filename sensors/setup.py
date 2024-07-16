@@ -25,6 +25,7 @@ setup(
             "read_bno085 = sensors.BNO085:main",
             "read_lidar = sensors.Lidar:main",
             "read_sonar = sensors.Sonar:main",
+            "LED_modulation = sensors.LED:main",
         ],
     },
 )

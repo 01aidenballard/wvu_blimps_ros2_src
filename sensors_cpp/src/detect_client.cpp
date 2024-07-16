@@ -99,7 +99,7 @@ private:
             cap_ >> frame;
             //lock.unlock();
 
-            cv::imshow("frame", frame);
+            //cv::imshow("frame", frame);
             cv::waitKey(1);
 
             if (frame.empty()) {

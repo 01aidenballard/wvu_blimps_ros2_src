@@ -32,11 +32,11 @@ def generate_launch_description():
 		#	name='sonar',
         #),
         # Launching Lidar
-		Node (
-			package='sensors',
-			executable='read_lidar',
-			name='lidar',
-		),
+#		Node (
+#			package='sensors',
+#			executable='read_lidar',
+#			name='lidar',
+#		),
 		# Launching PID Controler
 		Node(
 			package='sensors_cpp',
@@ -123,7 +123,12 @@ def generate_launch_description():
 			package='controls',
 			executable='mode_switch',
 			name='mode_switcher',
-        )
+        ),
+		Node(
+			package ='sensors',
+			executable='LED_modulation',
+			name='LED',
+		)
 	])
 def main(args=None):
 	generate_launch_description()

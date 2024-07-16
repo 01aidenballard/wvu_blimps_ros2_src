@@ -17,7 +17,7 @@ def generate_launch_description():
 			name='joy_to_esc',
 			parameters = [{
 				"Klm": 1.0,
-				"Krm": 1.125,
+				"Krm": 1.0,
 			}]
         ),
 		#Sensors Package Excecutable
@@ -28,19 +28,19 @@ def generate_launch_description():
        # ),
 		Node(
 			package='sensors_cpp',
-			executable='detect_cpp',
-			name='cam_node',
+			executable='old_cam',
+			name='old_cam_node',
         ),
-		Node(
-			package='sensors_cpp',
-			executable='balloon_server',
-			name="balloon_detection_server",
-		),
-		Node(
-			package='sensors_cpp',
-			executable='goal_server',
-			name="goal_detection_server",
-		),
+		#Node(
+	#		package='sensors_cpp',
+#		executable='balloon_server',
+#			name="balloon_detection_server",
+#		),
+#		Node(
+#			package='sensors_cpp',
+#			executable='goal_server',
+#			name="goal_detection_server",
+#		),
 		#Control Package Executables:
 		Node(
 			package='sensors_cpp',
@@ -49,14 +49,14 @@ def generate_launch_description():
 			#kpx = 0.3 without forward motors
 			parameters = [{
 
-				"iheight": 4.0,
-				"kpx": 0.003, #0.005,
+				"iheight": 2.0,
+				"kpx": 0.001, #0.005,
 				      #0.00000001
-				"kix":  0.000002,
-				"kpyu": 0.002, # up motor
-				"kpyd": 0.0015, # down motor
-				"kiy":  0.00001, #0.000000001,
-				"kpb":  0.69  #0.69  #NICE!
+				"kix":  0.0000,
+				"kpyu": 0.005, # up motor
+				"kpyd": 0.005, # down motor
+				"kiy":  0.0000, #0.000000001,
+				"kpb":  0.0  #0.69  #NICE!
 			}]
         ),
 		Node(
@@ -69,7 +69,7 @@ def generate_launch_description():
 			executable='dynamic_model',
 			name='inv_kine',
 			parameters = [{
-				"buoyancy": ((0.798) - (0*0.001))*9.81,
+				"buoyancy": ((0.460386) - (0*0.001))*9.81,
 				"rho_air": 1.225
 			}]
         ),
@@ -97,7 +97,7 @@ def generate_launch_description():
 		Node(
 			package='sensors',
 			name='read_imu',
-			executable='read_bno055'
+			executable='read_bno085'
 		),
 		# Node(
 		# 	package = 'sensors',

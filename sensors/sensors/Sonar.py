@@ -16,7 +16,7 @@ class SonarNode(Node):
     def __init__(self):
         super().__init__('sonar_node')
         self.sonar_data = self.create_publisher(LidarData, "sonar_data", 10)
-        sekf,create_timer(0.1, self.publish_sonar_data)
+        self.create_timer(0.1, self.publish_sonar_data)
 
     def publish_sonar_data(self):
         msg = LidarData()

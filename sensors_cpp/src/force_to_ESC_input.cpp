@@ -4,12 +4,13 @@
 #include <Eigen/Dense>
 #include <cmath>
 #include <sstream>
+#include "blimp_interfaces/msg/camera_coord.hpp"
 
 class BalloonEscInput : public rclcpp::Node // MODIFY NAME
 {
 public:
-    BalloonEscInput() : Node("balloon_esc_input") // MODIFY NAME
-    {   // Force Coefficients for each motor 
+    BalloonEscInput() : Node("balloon_esc_input"), // MODIFY NAME
+    coord_{640, 360} {   // Force Coefficients for each motor 
         // includes the direction of thrust (x,y,z) that each thruster produces
         // includes the moments arms between the thruster and center of gravity 
         // 1 = left motor, 2 = right motor, 3 = up motor (left-so negative), 4 = down motor
@@ -49,9 +50,20 @@ public:
         // Wanting to solve tau = Q*K*u, for u
         // K_inv = K.inverse();
 
+        this->declare_parameter<int>("x_goal", 640);
+        this->declare_parameter<double>("y_goal", 360);
+        coord_ = {0, 0};
+
+        x_goal_ = this->get_parameter("x_goal").as_int();
+        y_goal_ = this->get_parameter("y_goal").as_double();
+
         // CREATING A SUBSCRIBER TO THE INV_KINE NODE. CartCoord is the interface type forces is the topic and the bind is the callback we need to send the info too
         subscriber_ = this->create_subscription<blimp_interfaces::msg::CartCoord>(
             "forces", 10, std::bind(&BalloonEscInput::callback_force_to_esc, this, std::placeholders::_1));
+
+        // Subscribing to Camera
+        subscriber_camera = this->create_subscription<blimp_interfaces::msg::CameraCoord>(
+            "cam_data", 3, std::bind(&BalloonEscInput::callback_cam_data, this, std::placeholders::_1));
 
         // publisher for the ESCinputs
         publisher_ = this->create_publisher<blimp_interfaces::msg::EscInput>("ESC_balloon_input", 10);
@@ -62,36 +74,49 @@ public:
     }
 
 private:
+    void callback_cam_data(const blimp_interfaces::msg::CameraCoord::SharedPtr msg) {
+        //retriving camera data from the /cam_data topic and storing as a global variable
+        coord_[0] = msg->position[0];
+        coord_[1] = msg->position[1];
+        // haveing a timer start every time this callback is used   
+    }
+
+
     void callback_force_to_esc(const blimp_interfaces::msg::CartCoord::SharedPtr msg) {
         // reading the values of the msg in to a 1 x 6 force vector
-        tau << msg->x+0.05,
+        tau << msg->x+0.14,
                   msg->y,
                   msg->z,
                   msg->theta,
                   msg->phi,
                   msg->psy;
 
+        x_error = x_goal_ - coord_[0];
+        y_error = coord_[1] -  y_goal_;
+
+
         Fy1 = 0, Fy2 = 0, Fy3 = 0;
-        if (tau(2) > 0) {
+        //if (tau(2) > 0) {
+        if (y_error > 0) {
             Fz1 = 0, Fz2 = 0, Fz3 = 1;
             k3 = 0.001112;
-            b3 = -1.748142
+            b3 = -1.748142;
         } else {
             Fz1 = 0, Fz2 = 0, Fz3 = -1;
             k3 = -0.000554;
             b3 = 0.788902;
         }
 
-        if (tau(5) > 0) {
+        if (x_error > 0) {
             Fx1 = 1, Fx2 = -1, Fx3 = 0;
             k1 = 0.001112;
-            b1 = -1.748142
+            b1 = -1.748142;
             k2 = -0.000554;
             b2 = 0.788902;
         } else {
             Fx1 = -1, Fx2 = 1, Fx3 = 0;
             k2 = 0.001112;
-            b2 = -1.748142
+            b2 = -1.748142;
             k1 = -0.000554;
             b1 = 0.788902;
         }
@@ -100,7 +125,7 @@ private:
         ly1 = -0.47, ly2 = 0.47, ly3 = 0.0;
         lz1 = -0.1783, lz2 = -0.1783, lz3 = 0.3039;
 
-        k = Eigen::DiagonalMatrix<double, 3>(k1, k2, k3);
+        K = Eigen::DiagonalMatrix<double, 3>(k1, k2, k3);
 
         B << b1, 
              b2, 
@@ -149,6 +174,10 @@ private:
     double f1, f2, f3, f4;
     float k1, k2, k3;
     float b1, b2, b3;
+    int x_error, y_error;
+    int x_goal_;
+    double y_goal_;
+    std::vector<int> coord_;
     Eigen::DiagonalMatrix<double, 3> K;
     Eigen::DiagonalMatrix<double, 3> K_inv;
     Eigen::Matrix<double, 6,1> tau;
@@ -160,6 +189,7 @@ private:
     
     // pointers for ros2
     rclcpp::Subscription<blimp_interfaces::msg::CartCoord>::SharedPtr subscriber_;
+    rclcpp::Subscription<blimp_interfaces::msg::CameraCoord>::SharedPtr subscriber_camera;
     rclcpp::Publisher<blimp_interfaces::msg::EscInput>::SharedPtr publisher_;
     rclcpp::TimerBase::SharedPtr timer_;
 
