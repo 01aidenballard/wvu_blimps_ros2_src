@@ -85,6 +85,9 @@ ament_target_dependencies(pi_controller
 add_executable(old_cam src/old_cam.cpp)
 ament_target_dependencies(old_cam rclcpp blimp_interfaces OpenCV sensor_msgs)
 
+add_executable(ES_control src/Extremum_Seeking.cpp)
+ament_target_dependencies(ES_control rclcpp blimp_interfaces Eigen3)
+
 install(TARGETS
   detect_cpp
   balloon_server
@@ -93,6 +96,7 @@ install(TARGETS
   F_to_Esc
   pi_controller
   old_cam
+  ES_control
   DESTINATION lib/${PROJECT_NAME}
 )
 

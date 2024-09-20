@@ -25,7 +25,7 @@ public:
 	// setting frame height of py camera
         cap_.set(cv::CAP_PROP_FRAME_HEIGHT, 720); //480
         frame_count_ = 0; 
-        minimum_radius_ = 15; // setting minimum radius that camera detects (eliminating false positives)
+        minimum_radius_ = 3; // setting minimum radius that camera detects (eliminating false positives)
         findGoal = true; // Flag for switching between goal detection and balloon detection, this is used for testing
 
 	// Parameters for HoughLinesP
@@ -100,8 +100,8 @@ public:
         cv::Mat mask_goal;
 	// push for tav
 	//yellow
-        cv::Scalar goal_lower_bound = cv::Scalar(28, 80, 120);
-        cv::Scalar goal_upper_bound = cv::Scalar(36, 255, 255);
+        cv::Scalar goal_lower_bound = cv::Scalar(0, 0, 0);
+        cv::Scalar goal_upper_bound = cv::Scalar(0, 0, 0);
 	//orange
 	//cv::Scalar goal_lower_bound = cv::Scalar(1,120,50);
 	//cv::Scalar goal_upper_bound = cv::Scalar(12,255,255);  
@@ -110,9 +110,9 @@ public:
         // cv::Scalar lower_bound_1 = cv::Scalar(41, 80, 80);
         // cv::Scalar upper_bound_1 = cv::Scalar(56, 255, 255);
 
-	//purple
-       cv::Scalar lower_bound_2 = cv::Scalar(115, 40, 30);
-       cv::Scalar upper_bound_2 = cv::Scalar(150, 255, 255);
+	//red
+       cv::Scalar lower_bound_2 = cv::Scalar(0, 80, 150);
+       cv::Scalar upper_bound_2 = cv::Scalar(15, 255, 255);
 
         cv::inRange(hsv_frame, goal_lower_bound, goal_upper_bound, mask_goal);
 

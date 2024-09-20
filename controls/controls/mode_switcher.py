@@ -29,10 +29,11 @@ class BalloonPI(Node):
 			EscInput, "ESC_Manual_input", self.callback_manual, 10
 		)
 		
-		self.camera_subscriber = self.create_subscription(
-			EscInput, "ESC_balloon_input", self.callback_camera, 10
-		)
-		
+		#self.camera_subscriber = self.create_subscription(
+		#	EscInput, "ESC_balloon_input", self.callback_camera, 10
+		#)
+		self.camera_subscriber = self.create_subscription(EscInput, "ESC_extremum_seeking_input", self.callback_camera, 10)
+
 		#sub to joy for switching the modes either autonmy or manual
 		self.subscriber = self.create_subscription(
 			Joy, "joy", self.callback_switch_mode, 10
