@@ -20,11 +20,7 @@ def generate_launch_description():
 			}]
         ),
         # Launching camera node
-		Node(
-			package='sensors_cpp',
-			executable='old_cam',
-			name='cam_node',
-        ),
+
         # Launching Sonar
 		Node(
 			package='sensors',
@@ -37,68 +33,29 @@ def generate_launch_description():
 			executable='read_lidar',
 			name='lidar',
 		),
-		# Launching PID Controler
-		Node(
+	# Launching Camera
+		Node (
 			package='sensors_cpp',
-			executable='pi_controller',
-			name='balloon_detect_PI',
-			parameters = [{
-				"iheight": 2.0, # Initial Height
-				"kpx": 1.0, # side mototrs - Proportional
-				"kix":  0.0, # side motors - Integral
-				"kpyu": 1.0, # up motor - Proportional
-				"kpyd": 1.0, # down motor - Proportional
-				"kiy":  0.0, # up/down motor - Integral
-				"kpb":  0.0  # barometer - Proportional
-			}]
-        ),
-        # Launching Force to ESC node
-		Node(
-			package='sensors_cpp',
-			executable='F_to_Esc',
-			name='force_to_esc',
-        ),
-        # Launching inverse kinemtic model
-		Node(
-			package='sensors_cpp',
-			executable='dynamic_model',
-			name='inv_kine',
-			parameters = [{
-                            # Mass of Blimp - Negative Mass (from not beingn neutrally bouyant)                
-				"buoyancy": ((0.798) - (0*0.00))*9.81,
-				"rho_air": 1.225 # Air density
-			}]
-        ),
-        # Launching ESC Driver
-		Node(
-			package='controls',
-			name='esc_motor_driver',
-			executable='esc_driver',
-			parameters = [{
-				"MAC":"68:6C:E6:73:04:62"
-			}]
+			executable='old_cam',
+			name='camera',
 		),
+
+        # Launching Force to ESC node
+
+        # Launching inverse kinemtic model
+
+        # Launching ESC Driver
+
         # Launching servo node for open/close net
 		Node(
 			package='controls',
 			name='net_servo',
-			executable='net_servo'
+			executable='net_servo',
 		),
         # Launching barometer
-		Node(
-			package='sensors',
-			name='read_altitude',
-			executable='read_altitude',
-			parameters = [{
-				"sea_level_pressure": 1017.0
-			}]
-		),
+
         # Launching IMU
-		Node(
-			package='sensors',
-			name='read_imu',
-			executable='read_bno085'
-		),
+
 		# Node(
 		# 	package = 'sensors',
 		# 	name = 'record_data',
@@ -135,3 +92,4 @@ def main(args=None):
 
 if __name__ == "__main__":
 	main()
+

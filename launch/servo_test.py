@@ -16,7 +16,7 @@ c = 0
 
 while True:
 
-    pi.set_servo_pulsewidth(14,servofq)
+    pi.set_servo_pulsewidth(17,servofq)
 
     time.sleep(1)
     if servofq == 2500:

@@ -16,7 +16,8 @@ class LED_Modulation(Node):
     def __init__(self):
 		# defining the LED Pin
         self.LED_state = True
-        self.LED_pin = 26
+        self.LED_pin1 = 26
+        self.LED_pin2 = 19
         self.pi = pigpio.pi()
 
         #Initializing the node and nameing it "led" 
@@ -33,10 +34,12 @@ class LED_Modulation(Node):
 
         if self.LED_state is False:
             #GPIO.output(LED_pin, GPIO.HIGH)
-            self.pi.write(self.LED_pin, 1)
+            self.pi.write(self.LED_pin1, 1)
+            self.pi.write(self.LED_pin2, 1)
             self.get_logger().info("LED should be off")
         else:
-            self.pi.write(self.LED_pin, 0)
+            self.pi.write(self.LED_pin1, 0)
+            self.pi.write(self.LED_pin2, 0)
 def main(args=None):
     rclpy.init(args=args)
     node = LED_Modulation()

@@ -13,7 +13,7 @@ public:
     ExtremumSeekingEscInput() 
     : Node("extremum_seeking_esc_input"), 
       coord_old_(std::numeric_limits<int>::quiet_NaN()), 
-      coord_{640, 360},
+      coord_{320, 240},
       obj_function_{2,0},
       esc_message_left{2,0},
       esc_message_right{2,0},
@@ -21,8 +21,8 @@ public:
       hp_out_L{2,0},
       int_L{2,0},
       left_motor_input{2,0},
-      x_goal_(this->declare_parameter<int>("x_goal", 640)), 
-      y_goal_(this->declare_parameter<double>("y_goal", 360)), 
+      x_goal_(this->declare_parameter<int>("x_goal", 320)), 
+      y_goal_(this->declare_parameter<double>("y_goal", 240)), 
       cam_message_{2, 0},
       counter_(0),
       counter2_(0),
@@ -71,11 +71,11 @@ private:
         // Compare current and previous camera messages
         if (counter_ == 0) {
             cam_message_[0] = coord_[0];
-            obj_function_[0] = (-1 * pow(x_error, 2))/1000;
+            obj_function_[0] = (1 * pow(x_error, 2))/500;
             counter_ = 1;
         } else if (counter_ == 1) {
             cam_message_[1] = coord_[0];
-            obj_function_[1] = (-1 * pow(x_error, 2))/1000;
+            obj_function_[1] = (1 * pow(x_error, 2))/500;
             counter_ = 2;
         } else if (counter_ == 2) {
             same_cam_msg_ = (cam_message_[0] == cam_message_[1]);
@@ -168,22 +168,22 @@ private:
         
         // Left Motor //
         // High Pass Filter
-        Ts_ = .005;
-        double hp_cutoff_freq_L = 0.2*3.14*2;
+        //Ts_ = .05;
+        double hp_cutoff_freq_L = 0.1*0.05*3.14*2;
         double hp_alpha_L = (2-Ts_*hp_cutoff_freq_L)/(2+Ts_*hp_cutoff_freq_L);
         RCLCPP_INFO(this->get_logger(), "hp_alpha %f",hp_alpha_L);
         // Demodulation Signal
-        double demod_amp_L = 1;
-        double demod_force_freq_L = 1*3.14*2;
-        double demod_signal_L = demod_amp_L*(sin(demod_force_freq_L*total_time_));  
+        double demod_amp_L = 100; // 50
+        double demod_force_freq_L = 0.05*3.14*2; //.05
+        double demod_signal_L = demod_amp_L*(sin(demod_force_freq_L*total_time_+3.14/3));  
         RCLCPP_INFO(this->get_logger(), "demond signal: %f",demod_signal_L);
         // Mod Signal
-        double mod_amp_L = 0.1;
-        double mod_force_freq_L = 1*3.14*2;
-        double mod_signal_L = mod_amp_L*(sin(mod_force_freq_L*total_time_)); 
+        double mod_amp_L = 100;
+        double mod_force_freq_L = 0.05*3.14*2;
+        double mod_signal_L = mod_amp_L*(sin(mod_force_freq_L*total_time_+3.14/2)); 
         RCLCPP_INFO(this->get_logger(), "mod signal: %f",mod_signal_L);  
         // Gain
-        double gain_L = 0.8;
+        double gain_L = 0.01; //.0001
         // Integrator in Counter;  
 
          if (hp_counter == 0) {

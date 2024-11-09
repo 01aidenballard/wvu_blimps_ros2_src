@@ -4,7 +4,7 @@ import rclpy
 from rclpy.node import Node
 from blimp_interfaces.msg import LidarData
 
-GPIO.set_mode(GPIO.BCM)
+GPIO.setmode(GPIO.BCM)
 
 GPIO_TRIGGER = 4
 GPIO_ECHO = 27
@@ -16,7 +16,7 @@ class SonarNode(Node):
     def __init__(self):
         super().__init__('sonar_node')
         self.sonar_data = self.create_publisher(LidarData, "sonar_data", 10)
-        self.create_timer(0.1, self.publish_sonar_data)
+        self.create_timer(0.5, self.publish_sonar_data)
 
     def publish_sonar_data(self):
         msg = LidarData()
@@ -27,6 +27,7 @@ class SonarNode(Node):
 
         while GPIO.input(GPIO_ECHO) == 0:
             self.StartTime = time.time()
+            #print("GPIO_Echo is 0")
         
         while GPIO.input(GPIO_ECHO) == 1:
             self.StopTime = time.time()
@@ -35,6 +36,8 @@ class SonarNode(Node):
         self.distance = (self.TimeElapsed*34300) / 2
 
         msg.distance = self.distance
+        print(self.distance)
+#        print("Shoulld be collecting data")
 
         self.sonar_data.publish(msg)
 

@@ -55,7 +55,7 @@ class ImuNode(Node): #Creating a Node
 		msg.imu_lin_accel = [accel_x,accel_y,accel_z]
 		msg.imu_gyro = [gyro_x,gyro_y,gyro_z]
 		msg.imu_euler = [roll,pitch,yaw]
-
+		print(msg.imu_euler)
 		self.imu_data.publish(msg)
 		
 	def quat2euler(self, q0, q1, q2, q3):

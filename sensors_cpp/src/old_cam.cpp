@@ -1,6 +1,8 @@
+
 //std::cout << "Detected Goal - Max X: " << max_x << ", Min X: " << min_X << ", Max Y: " << max_y << ", Min Y: "<< min_y< < std::endl;// dependicies and libraires needed for detect_node.cpp
 #include "rclcpp/rclcpp.hpp"
 #include "blimp_interfaces/msg/camera_coord.hpp"
+#include "blimp_interfaces/msg/bool.hpp"
 #include "sensor_msgs/msg/joy.hpp"
 #include "opencv2/opencv.hpp" // inlcluding class for capturing from video files, image sequences or cameras
 #include "vector"
@@ -15,19 +17,24 @@ public:
     {
 	// creating publisher, publishing on the topic "cam_data" 
         cam_data_publisher_ = this->create_publisher<blimp_interfaces::msg::CameraCoord>("cam_data", 3);
+	cam_flag_publisher_ = this->create_publisher<blimp_interfaces::msg::Bool>("cam_flag",3);
 	// subcribsing to the topic "joy"
         subscriber_ = this->create_subscription<sensor_msgs::msg::Joy>(
             "joy", 10, std::bind(&CamNode::callback_read_joy, this, std::placeholders::_1));
+        // Subsribing to net servo topic
+        subscriber_net_servo = this->create_subscription<blimp_interfaces::msg::Bool>(
+            "net_flag", 10, std::bind(&CamNode::callback_read_net, this, std::placeholders::_1));
 	// setting variable cap_ to default constructer VideoCapture, CAP_V4L2 sets the cap to the proper video channel for linux
         cap_ = cv::VideoCapture(0, cv::CAP_V4L2);
 	// setting frame width of pi camera
-        cap_.set(cv::CAP_PROP_FRAME_WIDTH, 1280); //640
+        cap_.set(cv::CAP_PROP_FRAME_WIDTH, 640); //640 1280
 	// setting frame height of py camera
-        cap_.set(cv::CAP_PROP_FRAME_HEIGHT, 720); //480
+        cap_.set(cv::CAP_PROP_FRAME_HEIGHT, 480); //480 720
         frame_count_ = 0; 
-        minimum_radius_ = 3; // setting minimum radius that camera detects (eliminating false positives)
+        minimum_radius_ = 5; // setting minimum radius that camera detects (eliminating false positives)
         findGoal = true; // Flag for switching between goal detection and balloon detection, this is used for testing
-
+	goal_flag = false;
+        net_flag = false;
 	// Parameters for HoughLinesP
         rho = 1; 
         theta = CV_PI / 180;
@@ -51,10 +58,15 @@ public:
     {
         x_button = button->buttons[3];
     }
-
+    void callback_read_net(const blimp_interfaces::msg::Bool &msg)
+    {
+    net_flag = msg.flag;  // Access the 'flag' attribute from the message
+    RCLCPP_INFO(this->get_logger(), "Received net_flag: %s", net_flag ? "true" : "false");
+    }
     void callback_read_image() {
-        if (x_button == 1) {
+        if ((x_button == 1)) {
             cam_mode = !cam_mode;
+	    x_button = 0;
             sleep(1);
             RCLCPP_INFO(this->get_logger(), "Cam Mode has been Switched");
         }
@@ -100,19 +112,19 @@ public:
         cv::Mat mask_goal;
 	// push for tav
 	//yellow
-        cv::Scalar goal_lower_bound = cv::Scalar(0, 0, 0);
-        cv::Scalar goal_upper_bound = cv::Scalar(0, 0, 0);
-	//orange
-	//cv::Scalar goal_lower_bound = cv::Scalar(1,120,50);
-	//cv::Scalar goal_upper_bound = cv::Scalar(12,255,255);  
+        cv::Scalar goal_lower_bound = cv::Scalar(20, 80, 80);
+        cv::Scalar goal_upper_bound = cv::Scalar(35, 255, 255);
+	//red
+	//cv::Scalar goal_lower_bound = cv::Scalar(120,50,50); //0 80 150
+	//cv::Scalar goal_upper_bound = cv::Scalar(145,255,255);  // 15 255 255
 
 	//green
         // cv::Scalar lower_bound_1 = cv::Scalar(41, 80, 80);
         // cv::Scalar upper_bound_1 = cv::Scalar(56, 255, 255);
 
-	//red
-       cv::Scalar lower_bound_2 = cv::Scalar(0, 80, 150);
-       cv::Scalar upper_bound_2 = cv::Scalar(15, 255, 255);
+	//purple
+       cv::Scalar lower_bound_2 = cv::Scalar(115, 80, 80);
+       cv::Scalar upper_bound_2 = cv::Scalar(145, 255, 255);
 
         cv::inRange(hsv_frame, goal_lower_bound, goal_upper_bound, mask_goal);
 
@@ -123,8 +135,9 @@ public:
 	//cv::bitwise_and(frame,frame,masked_frame,mask_2);
 
 	// Balloon Detection
-        if (cam_mode == true) 
+        if ((cam_mode == true) && (net_flag == false))
         {
+		goal_flag = false;
 		//RCLCPP_INFO(this->get_logger(), "balloon on bitch");
 		//green taken out add contour 1 below
                 std::vector<std::vector<cv::Point>>  contours_2, all_contours;
@@ -174,6 +187,10 @@ public:
                         msg.position = {avg_x,avg_y}; // setting the value of the ROS topic message
                         cam_data_publisher_->publish(msg); //publishing the message
                         //RCLCPP_INFO(this->get_logger(), "coords} avg_x: %i, avg_y: %i", avg_x, avg_y);
+                        RCLCPP_INFO(this->get_logger(), "Publishing goal_flag: %d", goal_flag);
+                        blimp_interfaces::msg::Bool flag_msg;
+                        flag_msg.flag = goal_flag;  // Or set based on other conditions
+                        cam_flag_publisher_->publish(flag_msg);
                     }
                     // Clear the detected coordinates for the next 10 frames
                     detected_coords.clear(); // clears the Point list in order to remove oversaturating the averaging values (too many means we will slowly centralize to a fixed point rather than the centers we need)
@@ -184,6 +201,7 @@ public:
 
         else
         { 
+	goal_flag = true;
 	//RCLCPP_INFO(this->get_logger(),"Goal on biotch");
 	// matrix for edge detection
           cv::Mat edges;
@@ -220,7 +238,7 @@ public:
                       min_x = std::min(min_x, point.x);
                       max_y = std::max(max_y, point.y);
                       min_y = std::min(min_y, point.y);
-		      std::cout << "Detected Goal - Max X: " << max_x << ", Min X: " << min_x << ", Max Y: " << max_y << ", Min Y: "<< min_y << std::endl;
+	//	      std::cout << "Detected Goal - Max X: " << max_x << ", Min X: " << min_x << ", Max Y: " << max_y << ", Min Y: "<< min_y << std::endl;
 
 		      //RCLCPP_INFO(this->get_logger(), "min x: %i max x: %i min y: %i max y: %i", min_x, max_x, min_y, max_y);
                   }
@@ -243,6 +261,11 @@ public:
 		  auto msg = blimp_interfaces::msg::CameraCoord();
                   msg.position = {center_x, center_y};
                   cam_data_publisher_->publish(msg);
+                  RCLCPP_INFO(this->get_logger(), "Publishing goal_flag: %d", goal_flag);
+                  blimp_interfaces::msg::Bool flag_msg;
+                  flag_msg.flag = goal_flag;  // Or set based on other conditions
+                  cam_flag_publisher_->publish(flag_msg);
+
     //RCLCPP_INFO(this->get_logger(), "max: %i min: %i", max_x, min_y);
 		
               midpoints.clear(); // removing oversaturation of averaging data
@@ -262,9 +285,11 @@ public:
 
 
     // members 
-    const int minimum_radius = 15; //pixels
+    const int minimum_radius = 5; //pixels
     const int maximum_radius = 300; //pixels
     bool cam_mode;
+    bool goal_flag;
+    bool net_flag;
     int avg_x;
     int avg_y;
     int frame_count = 0;
@@ -273,7 +298,10 @@ public:
     float total_y = 0;
 
     rclcpp::Publisher<blimp_interfaces::msg::CameraCoord>::SharedPtr cam_data_publisher_;
+    rclcpp::Publisher<blimp_interfaces::msg::Bool>::SharedPtr cam_flag_publisher_;
     rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr subscriber_;
+    rclcpp::Subscription<blimp_interfaces::msg::Bool>::SharedPtr subscriber_net_servo;
+
     cv::VideoCapture cap_;
     rclcpp::TimerBase::SharedPtr timer_;
     size_t frame_count_;
