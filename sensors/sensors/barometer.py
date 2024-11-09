@@ -52,6 +52,7 @@ class BarometerNode(Node): #Creating a Node
                         #reading the height from the barometer and subtracting the initial height. 
                         # this proccess will give us the realive height. Using this method balloon should generally start on the floor when ros2 is started.
                         msg.height = float(self.sensor.altitude) - self.height_init
+#                        print(msg.height)
                 except: 
                         # if an error is caught this will print that one is found and hopefully fly to the floor.
                         self.get_logger().info("barometer offffffff whyyyyyyyy")

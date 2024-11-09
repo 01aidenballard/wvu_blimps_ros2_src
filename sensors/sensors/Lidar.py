@@ -20,7 +20,7 @@ class LidarNode(Node):
             self.ser.reset_input_buffer()
             if self.bytes_serial[0] == 0x59 and self.bytes_serial[1] == 0x59: # 0x59 is 'Y'
                 self.distance = self.bytes_serial[2] + self.bytes_serial[3]*256
-                ##print(str(self.distance))
+                print(str(self.distance))
                 msg.distance = float(self.distance)
                 self.ser.reset_input_buffer()
 
@@ -28,7 +28,7 @@ class LidarNode(Node):
                 self.distL = int(self.bytes_serial[2].encode("hex"), 16)
                 self.distH = int(self.bytes_serial[3].encode("hex"), 16)
                 self.distance = self.distL + self.distH*256
-                ##print(str(self.distance))
+                print(str(self.distance))
                 msg.distance = float(self.distance)
                 self.ser.reset_input_buffer()
 
