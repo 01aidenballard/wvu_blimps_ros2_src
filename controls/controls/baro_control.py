@@ -35,21 +35,21 @@ class BaroNode(Node):
 		# checkin if the read height is less than the goal height
 		# if so then the we will calculate an error and the up motor will turn on
 		if height < self.height_goal:
-			msg2.pwm_l = 1050.0
-			msg2.pwm_r = 1050.0
+			msg2.pwm_l = 1500.0
+			msg2.pwm_r = 1500.0
 			# error calulation for the up motor. tune kpb for the desired response
-			msg2.pwm_u = 1050 + abs(height-self.height_goal)*self.kpb
-			msg2.pwm_d = 1050.0
+			msg2.pwm_d = 1500.0 + abs(height-self.height_goal)*self.kpb
+			# msg2.pwm_u = 1050.0
 		# if the bomber is heigher than the goal height do nothing
 		else:
-			msg2.pwm_l = 1050.0
-			msg2.pwm_r = 1050.0
-			msg2.pwm_u = 1050.0
-			msg2.pwm_d = 1050.0
+			msg2.pwm_l = 1500.0
+			msg2.pwm_r = 1500.0
+			# msg2.pwm_u = 1050.0
+			msg2.pwm_d = 1500.0
 		# inputing the pins and sending the msg over the topic /ESC_baro_input
-		msg2.esc_pins = [5,6,13,26]
+		msg2.esc_pins = [5,6,13]
 		self.publisher.publish(msg2)
-		#self.get_logger().info("baro: " + str(height)+ " U: "+ str(msg2.pwm_u))
+		self.get_logger().info("baro: " + str(height)+ " U: "+ str(msg2.pwm_d))
 		
 		
 def main(args=None):

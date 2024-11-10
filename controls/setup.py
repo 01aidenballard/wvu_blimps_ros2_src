@@ -27,7 +27,8 @@ setup(
             "random_walk = controls.random_walk:main",
             "bomber_cntrl = controls.Bomber_Cntrl:main",
             "baro_cntrl = controls.baro_control:main",
-            "mux = controls.bomber_mux:main"
+            "mux = controls.bomber_mux:main",
+            "rudolph_mode_switch = controls.rudolph_mode_switcher:main"
         ],
     },
 )
