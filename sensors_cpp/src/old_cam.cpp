@@ -112,8 +112,11 @@ public:
         cv::Mat mask_goal;
 	// push for tav
 	//yellow
-        cv::Scalar goal_lower_bound = cv::Scalar(20, 80, 80);
-        cv::Scalar goal_upper_bound = cv::Scalar(35, 255, 255);
+        cv::Scalar goal_lower_bound = cv::Scalar(28, 80, 120);
+        cv::Scalar goal_upper_bound = cv::Scalar(36, 255, 255);
+	// orange
+        //cv::Scalar goal_lower_bound = cv::Scalar(1, 120, 50);
+        //cv::Scalar goal_upper_bound = cv::Scalar(12, 255, 255);	
 	//red
 	//cv::Scalar goal_lower_bound = cv::Scalar(120,50,50); //0 80 150
 	//cv::Scalar goal_upper_bound = cv::Scalar(145,255,255);  // 15 255 255
@@ -123,8 +126,8 @@ public:
         // cv::Scalar upper_bound_1 = cv::Scalar(56, 255, 255);
 
 	//purple
-       cv::Scalar lower_bound_2 = cv::Scalar(115, 80, 80);
-       cv::Scalar upper_bound_2 = cv::Scalar(145, 255, 255);
+       cv::Scalar lower_bound_2 = cv::Scalar(115, 40, 30);
+       cv::Scalar upper_bound_2 = cv::Scalar(150, 255, 255);
 
         cv::inRange(hsv_frame, goal_lower_bound, goal_upper_bound, mask_goal);
 
