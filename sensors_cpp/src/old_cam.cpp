@@ -27,9 +27,9 @@ public:
 	// setting variable cap_ to default constructer VideoCapture, CAP_V4L2 sets the cap to the proper video channel for linux
         cap_ = cv::VideoCapture(0, cv::CAP_V4L2);
 	// setting frame width of pi camera
-        cap_.set(cv::CAP_PROP_FRAME_WIDTH, 640); //640 1280
+        cap_.set(cv::CAP_PROP_FRAME_WIDTH, 1280); //640 1280
 	// setting frame height of py camera
-        cap_.set(cv::CAP_PROP_FRAME_HEIGHT, 480); //480 720
+        cap_.set(cv::CAP_PROP_FRAME_HEIGHT, 720); //480 720
         frame_count_ = 0; 
         minimum_radius_ = 5; // setting minimum radius that camera detects (eliminating false positives)
         findGoal = true; // Flag for switching between goal detection and balloon detection, this is used for testing

@@ -78,7 +78,7 @@ private:
             //x is the error from the last camera input
             // y error is the barometer error
             x_error = x_goal_ - coord_[0];
-            y_error = abs(height) - abs(height_goal);
+            y_error = abs((height_goal))-abs(height);
 
             x_int_error_ += x_error;
 
@@ -119,7 +119,7 @@ private:
 
         // Publish the control message
         publisher_->publish(msg2);
-        //RCLCPP_INFO(this->get_logger(), "UD_accel: %f  LR_accel: %f", UD_input, LR_input);
+        RCLCPP_INFO(this->get_logger(), "UD_accel: %f  LR_accel: %f", UD_input, LR_input);
     }
 
     // Node member parammeters

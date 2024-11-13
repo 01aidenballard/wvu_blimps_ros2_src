@@ -27,7 +27,7 @@ class SonarNode(Node):
 
         while GPIO.input(GPIO_ECHO) == 0:
             self.StartTime = time.time()
-            #print("GPIO_Echo is 0")
+#            print("GPIO_Echo is 0")
         
         while GPIO.input(GPIO_ECHO) == 1:
             self.StopTime = time.time()
@@ -37,7 +37,7 @@ class SonarNode(Node):
 
         msg.distance = self.distance
         print(self.distance)
-#        print("Shoulld be collecting data")
+ #       print("Shoulld be collecting data")
 
         self.sonar_data.publish(msg)
 

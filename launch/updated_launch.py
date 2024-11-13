@@ -43,11 +43,11 @@ def generate_launch_description():
 			executable='pi_controller',
 			name='balloon_detect_PI',
 			parameters = [{
-				"iheight": 2.0, # Initial Height
-				"kpx": 1.0, # side mototrs - Proportional
+				"iheight": 1.5, # Initial Height
+				"kpx": 0.0, # side mototrs - Proportional
 				"kix":  0.0, # side motors - Integral
-				"kpyu": 1.0, # up motor - Proportional
-				"kpyd": 1.0, # down motor - Proportional
+				"kpyu": 0.0, # up motor - Proportional
+				"kpyd": 0.0, # down motor - Proportional
 				"kiy":  0.0, # up/down motor - Integral
 				"kpb":  0.0  # barometer - Proportional
 			}]
@@ -65,7 +65,7 @@ def generate_launch_description():
 			name='inv_kine',
 			parameters = [{
                             # Mass of Blimp - Negative Mass (from not beingn neutrally bouyant)                
-				"buoyancy": ((0.798) - (0*0.00))*9.81,
+				"buoyancy": ((0.460386) - (0*0.00))*9.81,
 				"rho_air": 1.225 # Air density
 			}]
         ),

@@ -84,7 +84,7 @@ private:
 
     void callback_force_to_esc(const blimp_interfaces::msg::CartCoord::SharedPtr msg) {
         // reading the values of the msg in to a 1 x 6 force vector
-        tau << msg->x+0.14,
+        tau << msg->x+0.00,
                   msg->y,
                   msg->z,
                   msg->theta,
@@ -156,7 +156,7 @@ private:
         msg2.pwm_r = F(0,0);
         //msg2.pwm_u = F(2,0); //are these correct
         msg2.pwm_d = F(2,0);
-        //RCLCPP_INFO(this->get_logger(), "M1: %f  M2: %f  M3: %f  M4: %f", msg2.pwm_l, msg2.pwm_r, msg2.pwm_u, msg2.pwm_d);
+        RCLCPP_INFO(this->get_logger(), "M1: %f  M2: %f  M3: %f", msg2.pwm_l, msg2.pwm_r, msg2.pwm_d);
         publisher_->publish(msg2);
         //RCLCPP_INFO(this->get_logger(), "M1: %f  M2: %f  M3: %f  M4: %f", F(0), F(1), F(2), F(3));
 

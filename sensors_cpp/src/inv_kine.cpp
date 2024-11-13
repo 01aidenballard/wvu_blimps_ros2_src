@@ -162,7 +162,7 @@ private:
         msg2.phi = tau(4); // moment about y-axis
         msg2.psy = tau(5); // // moment about z-axis
         kine_publisher->publish(msg2);
-        //RCLCPP_INFO(this->get_logger(), "taux: %f  tauy: %f  tauz: %f  tauth: %f  tauxphi: %f  tauxpsy: %f", tau(0), tau(1), tau(2), tau(3), tau(4), tau(5));
+        RCLCPP_INFO(this->get_logger(), "taux: %f  tauy: %f  tauz: %f  tauth: %f  tauxphi: %f  tauxpsy: %f", tau(0), tau(1), tau(2), tau(3), tau(4), tau(5));
         //RCLCPP_INFO(this->get_logger(), "taux: %f  height: %f  height_old: %f", tau(0), height, height_old);
         //RCLCPP_INFO(this->get_logger(), "euler1: %f  euler2: %f  euler3: %f", euler(0), euler(1), euler(2));
         //RCLCPP_INFO(this->get_logger(), "gyro1 : %f  gyro 2: %f  gyro 3: %f", gyro(0), gyro(1), gyro(2));
