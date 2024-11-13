@@ -15,17 +15,23 @@ public: // Defing public class (can be accesed outside of scope)
     DynamicModel() //constructor for dynamic model class
     : Node("dynamic_model"), // ros2 node name
     height{0.0}, 
-    m{0.460386}, // mass [kg]
-    zg{0.178263} // z_directional center of gravity [m]
+    m{0.460386}, // mass [kg] // 400 grams: 0.6039 // 600 grams: 0.72838 
+    zg{0.178263} // z_directional center of gravity [m] // 400 grams: // 600 grams: 0.26738
     {
         this->declare_parameter<double>("rho_air", 1.225); // declaring air density parameter as type double with default value 1.225 [kg/m^3]
+        // 400 grams:
         this->declare_parameter<double>("buoyancy", 0.460386*9.81); // declaring blimp bouyanvy parameter as type double with default parameter equal weight of blimp [N]
+        // 600 grams:
+        // this->declare_parameter<double>("buoyancy", 0.72838*9.81);
 
         rho_air = this->get_parameter("rho_air").as_double(); // creating air density variable with name "rho_air"
         B = this->get_parameter("buoyancy").as_double(); // creating buyancy variable with name "B" 
         W = m * 9.81; // creating Weight variable "W"
         //        a     b      density    Ix         Iy        Iz
-        M_matrix(0.9205,0.3552,rho_air,0.046568,0.087299,0.073692); // Initilizing M_matrix (Mass Matrix)
+        // 400 grams:
+        M_matrix(0.9068,0.37233,rho_air,0.046568,0.087299,0.073692); // Initilizing M_matrix (Mass Matrix)
+        // 600 grams:
+        // M_matrix(1,0.4098,rho_air,0.08034,0.13571,0.10387); // Initilizing M_matrix (Mass Matrix)
 
         D_matrix(); // Initilizing D_matrix (Damping Matrix)
 
