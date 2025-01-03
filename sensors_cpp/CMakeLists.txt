@@ -10,16 +10,18 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(blimp_interfaces REQUIRED)
-#find_package(vector REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(sensor_msgs REQUIRED)
 
+# Include directories
 include_directories(
   include
   ${EIGEN3_INCLUDE_DIRS}
+  ${CMAKE_CURRENT_SOURCE_DIR}/include  # Add httplib.h include directory
 )
 
+# Executables and dependencies
 add_executable(dynamic_model src/inv_kine.cpp)
 ament_target_dependencies(dynamic_model
   rclcpp
@@ -41,11 +43,23 @@ ament_target_dependencies(pi_controller
 )
 
 add_executable(old_cam src/old_cam.cpp)
-ament_target_dependencies(old_cam rclcpp blimp_interfaces OpenCV sensor_msgs)
+ament_target_dependencies(old_cam
+  rclcpp
+  blimp_interfaces
+  OpenCV
+  sensor_msgs
+)
+# Add httplib dependency for old_cam
+target_include_directories(old_cam PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 add_executable(ES_control src/Extremum_Seeking.cpp)
-ament_target_dependencies(ES_control rclcpp blimp_interfaces Eigen3)
+ament_target_dependencies(ES_control
+  rclcpp
+  blimp_interfaces
+  Eigen3
+)
 
+# Install targets
 install(TARGETS
   dynamic_model
   F_to_Esc
