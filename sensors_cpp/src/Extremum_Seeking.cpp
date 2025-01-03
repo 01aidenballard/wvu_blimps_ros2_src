@@ -377,9 +377,9 @@ public:
       int_R_{2, 0},
       hp_out_V_{2, 0},
       int_V_{2, 0},
-      Left_Motor_(1100),
-      Right_Motor_(1100),
-      Vertical_Motor_(1500),
+      Left_Motor_(1050),
+      Right_Motor_(1050),
+      Vertical_Motor_(1050),
       x_goal_(this->declare_parameter<int>("x_goal", 320)),
       y_goal_(this->declare_parameter<double>("y_goal", 240)),
       cam_message_{2, 0},
@@ -442,14 +442,16 @@ private:
         auto msg2 = blimp_interfaces::msg::EscInput();
         if (!std::isnan(Left_Motor_) && !std::isnan(Right_Motor_) && !same_cam_msg_) {
             msg2.esc_pins = {5, 6, 13};
-            msg2.pwm_l = Left_Motor_;
-            msg2.pwm_r = Right_Motor_;
+            //msg2.pwm_l = Left_Motor_;
+            //msg2.pwm_r = Right_Motor_;
+	    msg2.pwm_l = 1050;
+	    msg2.pwm_r = 1050;
             msg2.pwm_d = Vertical_Motor_;
         } else {
             msg2.esc_pins = {5, 6, 13};
-            msg2.pwm_l = 1100;
-            msg2.pwm_r = 1100;
-            msg2.pwm_d = 1500;
+            msg2.pwm_l = 1050;
+            msg2.pwm_r = 1050;
+            msg2.pwm_d = 1050;
         }
 
         if (counter2_ == 0) {
@@ -482,11 +484,11 @@ private:
         // Left Motor
         double mod_signal_L = 100 * sin(0.05 * 3.14 * 2 * total_time_ + 3.14 / 2);
         if (hp_counter_ == 0) {
-            Left_Motor_ = 1100 + mod_signal_L;
+            Left_Motor_ = 1050 + mod_signal_L;
             hp_out_L_[0] = (hp_alpha * obj_function_x_[0]) * mod_signal_L;
             int_L_[0] = gain * hp_out_L_[0] * Ts_;
         } else {
-            Left_Motor_ = 1100 + int_L_[0] + mod_signal_L;
+            Left_Motor_ = 1050 + int_L_[0] + mod_signal_L;
             hp_out_L_[1] = hp_alpha * (hp_out_L_[0] + obj_function_x_[1] - obj_function_x_[0]);
             int_L_[1] = int_L_[0] - gain * hp_out_L_[0];
             hp_out_L_[0] = hp_out_L_[1];
@@ -494,16 +496,16 @@ private:
         }
 
         if (Left_Motor_ > 1500) Left_Motor_ = 1500;
-        if (Left_Motor_ < 1100) Left_Motor_ = 1100;
+        if (Left_Motor_ < 1050) Left_Motor_ = 1050;
 
         // Right Motor
         double mod_signal_R = 100 * cos(0.05 * 3.14 * 2 * total_time_ + 3.14 / 2);
         if (hp_counter_ == 0) {
-            Right_Motor_ = 1100 + mod_signal_R;
+            Right_Motor_ = 1050 + mod_signal_R;
             hp_out_R_[0] = (hp_alpha * obj_function_x_[0]) * mod_signal_R;
             int_R_[0] = gain * hp_out_R_[0] * Ts_;
         } else {
-            Right_Motor_ = 1100 + int_R_[0] + mod_signal_R;
+            Right_Motor_ = 1050 + int_R_[0] + mod_signal_R;
             hp_out_R_[1] = hp_alpha * (hp_out_R_[0] + obj_function_x_[1] - obj_function_x_[0]);
             int_R_[1] = int_R_[0] - gain * hp_out_R_[0];
             hp_out_R_[0] = hp_out_R_[1];
@@ -511,33 +513,33 @@ private:
         }
 
         if (Right_Motor_ > 1500) Right_Motor_ = 1500;
-        if (Right_Motor_ < 1100) Right_Motor_ = 1100;
+        if (Right_Motor_ < 1050) Right_Motor_ = 1050;
 
         // Vertical Motor
-        double mod_signal_V = 100 * sin(0.05 * 3.14 * 2 * total_time_ + 3.14 / 2);
+        double mod_signal_V = 500 * sin(0.05 * 3.14 * 2 * total_time_ + 3.14 / 2);
         if (hp_counter_ == 0) {
-            Vertical_Motor_ = 1500 + mod_signal_V;
+            Vertical_Motor_ = 1050 + mod_signal_V;
             hp_out_V_[0] = (hp_alpha * obj_function_y_[0]) * mod_signal_V;
             int_V_[0] = gain * hp_out_V_[0] * Ts_;
         } else {
-            Vertical_Motor_ = 1500 + int_V_[0] + mod_signal_V;
+            Vertical_Motor_ = 1050 + int_V_[0] + mod_signal_V;
             hp_out_V_[1] = hp_alpha * (hp_out_V_[0] + obj_function_y_[1] - obj_function_y_[0]);
             int_V_[1] = int_V_[0] - gain * hp_out_V_[0];
             hp_out_V_[0] = hp_out_V_[1];
             int_V_[0] = int_V_[1];
         }
 
-        if (Vertical_Motor_ > 2000) Vertical_Motor_ = 2000;
-        if (Vertical_Motor_ < 1500) Vertical_Motor_ = 1500;
+        if (Vertical_Motor_ > 1500) Vertical_Motor_ = 1500;
+        if (Vertical_Motor_ < 1050) Vertical_Motor_ = 1050;
     }
 
     void check_timeout() {
         if ((this->now() - last_callback_time_) > timeout_duration_) {
             auto msg = blimp_interfaces::msg::EscInput();
             msg.esc_pins = {5, 6, 13};
-            msg.pwm_l = 1100;
-            msg.pwm_r = 1100;
-            msg.pwm_d = 1500;
+            msg.pwm_l = 1050;
+            msg.pwm_r = 1050;
+            msg.pwm_d = 1050;
             publisher_->publish(msg);
         }
     }
