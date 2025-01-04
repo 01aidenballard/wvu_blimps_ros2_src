@@ -349,6 +349,229 @@
 //     return 0;
 // }
 
+// Workinng Take 2 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// #include "rclcpp/rclcpp.hpp"
+// #include "blimp_interfaces/msg/cart_coord.hpp"
+// #include "blimp_interfaces/msg/camera_coord.hpp"
+// #include "blimp_interfaces/msg/esc_input.hpp"
+// #include <vector>
+// #include <cmath>
+// #include <limits>
+// #include <sstream>
+// #include <chrono>
+
+// class ExtremumSeekingEscInput : public rclcpp::Node {
+// public:
+//     ExtremumSeekingEscInput()
+//     : Node("extremum_seeking_esc_input"),
+//       coord_old_(std::numeric_limits<int>::quiet_NaN()),
+//       coord_{320, 240},
+//       obj_function_x_{2, 0},
+//       obj_function_y_{2, 0},
+//       esc_message_left_{2, 0},
+//       esc_message_right_{2, 0},
+//       esc_message_vert_{2, 0},
+//       hp_out_L_{2, 0},
+//       int_L_{2, 0},
+//       hp_out_R_{2, 0},
+//       int_R_{2, 0},
+//       hp_out_V_{2, 0},
+//       int_V_{2, 0},
+//       Left_Motor_(1050),
+//       Right_Motor_(1050),
+//       Vertical_Motor_(1050),
+//       x_goal_(this->declare_parameter<int>("x_goal", 320)),
+//       y_goal_(this->declare_parameter<double>("y_goal", 240)),
+//       cam_message_{2, 0},
+//       counter_(0),
+//       counter2_(0),
+//       counter3_(0),
+//       hp_counter_(0),
+//       same_cam_msg_(false),
+//       PWM_initial_Left_(0),
+//       PWM_initial_Right_(0),
+//       total_time_(0),
+//       timeout_duration_(std::chrono::seconds(5)),
+//       last_callback_time_(this->now())
+//     {
+//         subscriber_camera_ = this->create_subscription<blimp_interfaces::msg::CameraCoord>(
+//             "cam_data", 3, 
+//             std::bind(&ExtremumSeekingEscInput::callback_cam_data, this, std::placeholders::_1)
+//         );
+
+//         publisher_ = this->create_publisher<blimp_interfaces::msg::EscInput>("ESC_extremum_seeking_input", 10);
+
+//         timer_ = this->create_wall_timer(
+//             std::chrono::seconds(1), 
+//             std::bind(&ExtremumSeekingEscInput::check_timeout, this)
+//         );
+//     }
+
+// private:
+//     void callback_cam_data(const blimp_interfaces::msg::CameraCoord::SharedPtr msg) {
+//         last_callback_time_ = this->now();
+//         time(&start_);
+//         total_time_ = time(&start_);
+
+//         coord_[0] = msg->position[0];
+//         coord_[1] = msg->position[1];
+
+//         int x_error = x_goal_ - coord_[0];
+//         int y_error = coord_[1] - y_goal_;
+
+//         if (counter_ == 0) {
+//             cam_message_[0] = coord_[0];
+//             obj_function_x_[0] = (1 * pow(x_error, 2)) / 500;
+//             obj_function_y_[0] = (1 * pow(y_error, 2)) / 500;
+//             counter_ = 1;
+//         } else if (counter_ == 1) {
+//             cam_message_[1] = coord_[0];
+//             obj_function_x_[1] = (1 * pow(x_error, 2)) / 500;
+//             obj_function_y_[1] = (1 * pow(y_error, 2)) / 500;
+//             counter_ = 2;
+//         } else if (counter_ == 2) {
+//             same_cam_msg_ = (cam_message_[0] == cam_message_[1]);
+//             cam_message_[0] = cam_message_[1];
+//             obj_function_x_[0] = obj_function_x_[1];
+//             obj_function_y_[0] = obj_function_y_[1];
+//             counter_ = 1;
+//         }
+
+//         process_motor_signals();
+
+//         auto msg2 = blimp_interfaces::msg::EscInput();
+//         if (!std::isnan(Left_Motor_) && !std::isnan(Right_Motor_) && !same_cam_msg_) {
+//             msg2.esc_pins = {5, 6, 13};
+//             //msg2.pwm_l = Left_Motor_;
+//             //msg2.pwm_r = Right_Motor_;
+// 	    msg2.pwm_l = 1050;
+// 	    msg2.pwm_r = 1050;
+//             msg2.pwm_d = Vertical_Motor_;
+//         } else {
+//             msg2.esc_pins = {5, 6, 13};
+//             msg2.pwm_l = 1050;
+//             msg2.pwm_r = 1050;
+//             msg2.pwm_d = 1050;
+//         }
+
+//         if (counter2_ == 0) {
+//             esc_message_left_[0] = msg2.pwm_l;
+//             esc_message_right_[0] = msg2.pwm_r;
+//             esc_message_vert_[0] = msg2.pwm_d;
+//             counter2_ = 1;
+//         } else if (counter2_ == 1) {
+//             esc_message_left_[1] = msg2.pwm_l;
+//             esc_message_right_[1] = msg2.pwm_r;
+//             esc_message_vert_[1] = msg2.pwm_d;
+//             counter2_ = 2;
+//         } else if (counter2_ == 2) {
+//             esc_message_left_[0] = esc_message_left_[1];
+//             esc_message_right_[0] = esc_message_right_[1];
+//             esc_message_vert_[0] = esc_message_vert_[1];
+//             counter2_ = 1;
+//         }
+
+//         publisher_->publish(msg2);
+//         time(&finish_);
+//         Ts_ = difftime(finish_, start_);
+//     }
+
+//     void process_motor_signals() {
+//         double hp_cutoff_freq = 0.1 * 0.05 * 3.14 * 2;
+//         double hp_alpha = (2 - Ts_ * hp_cutoff_freq) / (2 + Ts_ * hp_cutoff_freq);
+//         double gain = 0.0001;
+
+//         // Left Motor
+//         double mod_signal_L = 100 * sin(0.05 * 3.14 * 2 * total_time_ + 3.14 / 2);
+//         if (hp_counter_ == 0) {
+//             Left_Motor_ = 1050 + mod_signal_L;
+//             hp_out_L_[0] = (hp_alpha * obj_function_x_[0]) * mod_signal_L;
+//             int_L_[0] = gain * hp_out_L_[0] * Ts_;
+//         } else {
+//             Left_Motor_ = 1050 + int_L_[0] + mod_signal_L;
+//             hp_out_L_[1] = hp_alpha * (hp_out_L_[0] + obj_function_x_[1] - obj_function_x_[0]);
+//             int_L_[1] = int_L_[0] - gain * hp_out_L_[0];
+//             hp_out_L_[0] = hp_out_L_[1];
+//             int_L_[0] = int_L_[1];
+//         }
+
+//         if (Left_Motor_ > 1500) Left_Motor_ = 1500;
+//         if (Left_Motor_ < 1050) Left_Motor_ = 1050;
+
+//         // Right Motor
+//         double mod_signal_R = 100 * cos(0.05 * 3.14 * 2 * total_time_ + 3.14 / 2);
+//         if (hp_counter_ == 0) {
+//             Right_Motor_ = 1050 + mod_signal_R;
+//             hp_out_R_[0] = (hp_alpha * obj_function_x_[0]) * mod_signal_R;
+//             int_R_[0] = gain * hp_out_R_[0] * Ts_;
+//         } else {
+//             Right_Motor_ = 1050 + int_R_[0] + mod_signal_R;
+//             hp_out_R_[1] = hp_alpha * (hp_out_R_[0] + obj_function_x_[1] - obj_function_x_[0]);
+//             int_R_[1] = int_R_[0] - gain * hp_out_R_[0];
+//             hp_out_R_[0] = hp_out_R_[1];
+//             int_R_[0] = int_R_[1];
+//         }
+
+//         if (Right_Motor_ > 1500) Right_Motor_ = 1500;
+//         if (Right_Motor_ < 1050) Right_Motor_ = 1050;
+
+//         // Vertical Motor
+//         double mod_signal_V = 500 * sin(0.05 * 3.14 * 2 * total_time_ + 3.14 / 2);
+//         if (hp_counter_ == 0) {
+//             Vertical_Motor_ = 1050 + mod_signal_V;
+//             hp_out_V_[0] = (hp_alpha * obj_function_y_[0]) * mod_signal_V;
+//             int_V_[0] = gain * hp_out_V_[0] * Ts_;
+//         } else {
+//             Vertical_Motor_ = 1050 + int_V_[0] + mod_signal_V;
+//             hp_out_V_[1] = hp_alpha * (hp_out_V_[0] + obj_function_y_[1] - obj_function_y_[0]);
+//             int_V_[1] = int_V_[0] - gain * hp_out_V_[0];
+//             hp_out_V_[0] = hp_out_V_[1];
+//             int_V_[0] = int_V_[1];
+//         }
+
+//         if (Vertical_Motor_ > 1500) Vertical_Motor_ = 1500;
+//         if (Vertical_Motor_ < 1050) Vertical_Motor_ = 1050;
+//     }
+
+//     void check_timeout() {
+//         if ((this->now() - last_callback_time_) > timeout_duration_) {
+//             auto msg = blimp_interfaces::msg::EscInput();
+//             msg.esc_pins = {5, 6, 13};
+//             msg.pwm_l = 1050;
+//             msg.pwm_r = 1050;
+//             msg.pwm_d = 1050;
+//             publisher_->publish(msg);
+//         }
+//     }
+
+//     int coord_old_;
+//     std::vector<int> coord_;
+//     std::vector<double> obj_function_x_, obj_function_y_;
+//     std::vector<double> esc_message_left_, esc_message_right_, esc_message_vert_;
+//     std::vector<double> hp_out_L_, int_L_, hp_out_R_, int_R_, hp_out_V_, int_V_;
+//     double Left_Motor_, Right_Motor_, Vertical_Motor_;
+//     double x_goal_, y_goal_;
+//     std::vector<int> cam_message_;
+//     int counter_, counter2_, counter3_, hp_counter_;
+//     bool same_cam_msg_;
+//     double PWM_initial_Left_, PWM_initial_Right_, total_time_;
+//     double Ts_;
+//     time_t start_, finish_;
+//     rclcpp::Duration timeout_duration_;
+//     rclcpp::Time last_callback_time_;
+//     rclcpp::Subscription<blimp_interfaces::msg::CameraCoord>::SharedPtr subscriber_camera_;
+//     rclcpp::Publisher<blimp_interfaces::msg::EscInput>::SharedPtr publisher_;
+//     rclcpp::TimerBase::SharedPtr timer_;
+// };
+
+// int main(int argc, char **argv) {
+//     rclcpp::init(argc, argv);
+//     auto node = std::make_shared<ExtremumSeekingEscInput>();
+//     rclcpp::spin(node);
+//     rclcpp::shutdown();
+//     return 0;
+// }
+
 
 #include "rclcpp/rclcpp.hpp"
 #include "blimp_interfaces/msg/cart_coord.hpp"
@@ -364,6 +587,12 @@ class ExtremumSeekingEscInput : public rclcpp::Node {
 public:
     ExtremumSeekingEscInput()
     : Node("extremum_seeking_esc_input"),
+      hp_cutoff_freq_(this->declare_parameter<double>("hp_cutoff_freq", 0.1)),
+      gain_(this->declare_parameter<double>("gain", 0.0001)),
+      mod_signal_freq_(this->declare_parameter<double>("mod_signal_freq", 0.05)),
+      mod_signal_amplitude_L_(this->declare_parameter<double>("mod_signal_amplitude_L", 100.0)),
+      mod_signal_amplitude_R_(this->declare_parameter<double>("mod_signal_amplitude_R", 100.0)),
+      mod_signal_amplitude_V_(this->declare_parameter<double>("mod_signal_amplitude_V", 500.0)),
       coord_old_(std::numeric_limits<int>::quiet_NaN()),
       coord_{320, 240},
       obj_function_x_{2, 0},
@@ -408,6 +637,46 @@ public:
     }
 
 private:
+    void process_motor_signals() {
+        double hp_alpha = (2 - Ts_ * hp_cutoff_freq_) / (2 + Ts_ * hp_cutoff_freq_);
+
+        // Process Vertical Motor dynamically
+        double mod_signal_V = mod_signal_amplitude_V_ * sin(mod_signal_freq_ * 3.14 * 2 * total_time_ + 3.14 / 2);
+        if (hp_counter_ == 0) {
+            Vertical_Motor_ = 1050 + mod_signal_V;
+            hp_out_V_[0] = (hp_alpha * obj_function_y_[0]) * mod_signal_V;
+            int_V_[0] = gain_ * hp_out_V_[0] * Ts_;
+        } else {
+            Vertical_Motor_ = 1050 + int_V_[0] + mod_signal_V;
+            hp_out_V_[1] = hp_alpha * (hp_out_V_[0] + obj_function_y_[1] - obj_function_y_[0]);
+            int_V_[1] = int_V_[0] - gain_ * hp_out_V_[0];
+            hp_out_V_[0] = hp_out_V_[1];
+            int_V_[0] = int_V_[1];
+        }
+
+        if (Vertical_Motor_ > 1500) Vertical_Motor_ = 1500;
+        if (Vertical_Motor_ < 1050) Vertical_Motor_ = 1050;
+
+        // Publish the PWM signals
+        auto msg2 = blimp_interfaces::msg::EscInput();
+        if (!std::isnan(Left_Motor_) && !std::isnan(Right_Motor_) && !same_cam_msg_) {
+            msg2.esc_pins = {5, 6, 13};
+            // msg2.pwm_l = Left_Motor_; // Commented out
+            // msg2.pwm_r = Right_Motor_; // Commented out
+            msg2.pwm_l = 1050;  // Hardcoded for testing
+            msg2.pwm_r = 1050;  // Hardcoded for testing
+            msg2.pwm_d = Vertical_Motor_;
+            RCLCPP_INFO(this->get_logger(), "PWM Values - Left: 1050, Right: 1050, Vertical: %f", Vertical_Motor_);
+        } else {
+            msg2.esc_pins = {5, 6, 13};
+            msg2.pwm_l = 1050;
+            msg2.pwm_r = 1050;
+            msg2.pwm_d = 1050;
+            RCLCPP_WARN(this->get_logger(), "Fallback PWM - Left: 1050, Right: 1050, Vertical: 1050");
+        }
+        publisher_->publish(msg2);
+    }
+
     void callback_cam_data(const blimp_interfaces::msg::CameraCoord::SharedPtr msg) {
         last_callback_time_ = this->now();
         time(&start_);
@@ -438,99 +707,6 @@ private:
         }
 
         process_motor_signals();
-
-        auto msg2 = blimp_interfaces::msg::EscInput();
-        if (!std::isnan(Left_Motor_) && !std::isnan(Right_Motor_) && !same_cam_msg_) {
-            msg2.esc_pins = {5, 6, 13};
-            //msg2.pwm_l = Left_Motor_;
-            //msg2.pwm_r = Right_Motor_;
-	    msg2.pwm_l = 1050;
-	    msg2.pwm_r = 1050;
-            msg2.pwm_d = Vertical_Motor_;
-        } else {
-            msg2.esc_pins = {5, 6, 13};
-            msg2.pwm_l = 1050;
-            msg2.pwm_r = 1050;
-            msg2.pwm_d = 1050;
-        }
-
-        if (counter2_ == 0) {
-            esc_message_left_[0] = msg2.pwm_l;
-            esc_message_right_[0] = msg2.pwm_r;
-            esc_message_vert_[0] = msg2.pwm_d;
-            counter2_ = 1;
-        } else if (counter2_ == 1) {
-            esc_message_left_[1] = msg2.pwm_l;
-            esc_message_right_[1] = msg2.pwm_r;
-            esc_message_vert_[1] = msg2.pwm_d;
-            counter2_ = 2;
-        } else if (counter2_ == 2) {
-            esc_message_left_[0] = esc_message_left_[1];
-            esc_message_right_[0] = esc_message_right_[1];
-            esc_message_vert_[0] = esc_message_vert_[1];
-            counter2_ = 1;
-        }
-
-        publisher_->publish(msg2);
-        time(&finish_);
-        Ts_ = difftime(finish_, start_);
-    }
-
-    void process_motor_signals() {
-        double hp_cutoff_freq = 0.1 * 0.05 * 3.14 * 2;
-        double hp_alpha = (2 - Ts_ * hp_cutoff_freq) / (2 + Ts_ * hp_cutoff_freq);
-        double gain = 0.0001;
-
-        // Left Motor
-        double mod_signal_L = 100 * sin(0.05 * 3.14 * 2 * total_time_ + 3.14 / 2);
-        if (hp_counter_ == 0) {
-            Left_Motor_ = 1050 + mod_signal_L;
-            hp_out_L_[0] = (hp_alpha * obj_function_x_[0]) * mod_signal_L;
-            int_L_[0] = gain * hp_out_L_[0] * Ts_;
-        } else {
-            Left_Motor_ = 1050 + int_L_[0] + mod_signal_L;
-            hp_out_L_[1] = hp_alpha * (hp_out_L_[0] + obj_function_x_[1] - obj_function_x_[0]);
-            int_L_[1] = int_L_[0] - gain * hp_out_L_[0];
-            hp_out_L_[0] = hp_out_L_[1];
-            int_L_[0] = int_L_[1];
-        }
-
-        if (Left_Motor_ > 1500) Left_Motor_ = 1500;
-        if (Left_Motor_ < 1050) Left_Motor_ = 1050;
-
-        // Right Motor
-        double mod_signal_R = 100 * cos(0.05 * 3.14 * 2 * total_time_ + 3.14 / 2);
-        if (hp_counter_ == 0) {
-            Right_Motor_ = 1050 + mod_signal_R;
-            hp_out_R_[0] = (hp_alpha * obj_function_x_[0]) * mod_signal_R;
-            int_R_[0] = gain * hp_out_R_[0] * Ts_;
-        } else {
-            Right_Motor_ = 1050 + int_R_[0] + mod_signal_R;
-            hp_out_R_[1] = hp_alpha * (hp_out_R_[0] + obj_function_x_[1] - obj_function_x_[0]);
-            int_R_[1] = int_R_[0] - gain * hp_out_R_[0];
-            hp_out_R_[0] = hp_out_R_[1];
-            int_R_[0] = int_R_[1];
-        }
-
-        if (Right_Motor_ > 1500) Right_Motor_ = 1500;
-        if (Right_Motor_ < 1050) Right_Motor_ = 1050;
-
-        // Vertical Motor
-        double mod_signal_V = 500 * sin(0.05 * 3.14 * 2 * total_time_ + 3.14 / 2);
-        if (hp_counter_ == 0) {
-            Vertical_Motor_ = 1050 + mod_signal_V;
-            hp_out_V_[0] = (hp_alpha * obj_function_y_[0]) * mod_signal_V;
-            int_V_[0] = gain * hp_out_V_[0] * Ts_;
-        } else {
-            Vertical_Motor_ = 1050 + int_V_[0] + mod_signal_V;
-            hp_out_V_[1] = hp_alpha * (hp_out_V_[0] + obj_function_y_[1] - obj_function_y_[0]);
-            int_V_[1] = int_V_[0] - gain * hp_out_V_[0];
-            hp_out_V_[0] = hp_out_V_[1];
-            int_V_[0] = int_V_[1];
-        }
-
-        if (Vertical_Motor_ > 1500) Vertical_Motor_ = 1500;
-        if (Vertical_Motor_ < 1050) Vertical_Motor_ = 1050;
     }
 
     void check_timeout() {
@@ -544,6 +720,9 @@ private:
         }
     }
 
+    double hp_cutoff_freq_, gain_;
+    double mod_signal_freq_;
+    double mod_signal_amplitude_L_, mod_signal_amplitude_R_, mod_signal_amplitude_V_;
     int coord_old_;
     std::vector<int> coord_;
     std::vector<double> obj_function_x_, obj_function_y_;
