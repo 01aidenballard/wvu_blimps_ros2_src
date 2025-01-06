@@ -42,15 +42,18 @@ def generate_launch_description():
                     # "hp_cutoff_freq": 0.05,               # High-pass filter cutoff frequency
                     # "gain": 0.0000000001,                     # Gain for the extremum-seeking controller
                     # "mod_signal_freq": 0.1,            # Frequency of modulation signal
-
-                    "hp_cutoff_freq": 0.01,               # High-pass filter cutoff frequency
-                    "gain": 0.000001,                     # Gain for the extremum-seeking controller
-                    "mod_signal_freq": 0.05,            # Frequency of modulation signal
-
+		    
+		    # This for vertical
+                    #"hp_cutoff_freq": 0.05,               # High-pass filter cutoff frequency
+                    #"gain": 0.000001,                     # Gain for the extremum-seeking controller
+                    #"mod_signal_freq": 0.1,            # Frequency of modulation signal
+                    "hp_cutoff_freq": 0.12,               # High-pas>
+                    "gain": 0.0000001,                     # Gain for>
+                    "mod_signal_freq": 0.2,         
                     # Modulation signal amplitudes with multipliers
-                    "mod_signal_amplitude_L": 100.0,  # Left motor amplitude with multiplier
-                    "mod_signal_amplitude_R": 100.0,  # Right motor amplitude with multiplier
-                    "mod_signal_amplitude_V": 200.0   # Vertical motor amplitude with multiplier
+                    "mod_signal_amplitude_L": 0.8,  # Left motor amplitude with multiplier
+                    "mod_signal_amplitude_R": 0.8,  # Right motor amplitude with multiplier
+                    "mod_signal_amplitude_V": 5.0   # Vertical motor amplitude with multiplier
                 }
             ]
         ),
