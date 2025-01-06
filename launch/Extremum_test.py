@@ -8,7 +8,7 @@ def generate_launch_description():
             package='joy',
             executable='game_controller_node',
             name='joy_con',
-            # parameters = [{"autorepeat_rate": 10.0}]
+            parameters = [{"autorepeat_rate": 10.0}]
         ),
         # Manual Control Package Executable
         Node(
@@ -39,14 +39,18 @@ def generate_launch_description():
                     "y_goal": 240.0,  # Goal y-coordinate
 
                     # New parameters for process_motor_signals
-                    "hp_cutoff_freq": 0.1,               # High-pass filter cutoff frequency
-                    "gain": 0.00001,                     # Gain for the extremum-seeking controller
+                    # "hp_cutoff_freq": 0.05,               # High-pass filter cutoff frequency
+                    # "gain": 0.0000000001,                     # Gain for the extremum-seeking controller
+                    # "mod_signal_freq": 0.1,            # Frequency of modulation signal
+
+                    "hp_cutoff_freq": 0.01,               # High-pass filter cutoff frequency
+                    "gain": 0.000001,                     # Gain for the extremum-seeking controller
                     "mod_signal_freq": 0.05,            # Frequency of modulation signal
 
                     # Modulation signal amplitudes with multipliers
                     "mod_signal_amplitude_L": 100.0,  # Left motor amplitude with multiplier
                     "mod_signal_amplitude_R": 100.0,  # Right motor amplitude with multiplier
-                    "mod_signal_amplitude_V": 400.0   # Vertical motor amplitude with multiplier
+                    "mod_signal_amplitude_V": 200.0   # Vertical motor amplitude with multiplier
                 }
             ]
         ),
