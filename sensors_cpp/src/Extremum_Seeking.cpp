@@ -587,12 +587,20 @@ class ExtremumSeekingEscInput : public rclcpp::Node {
 public:
     ExtremumSeekingEscInput()
     : Node("extremum_seeking_esc_input"),
-      hp_cutoff_freq_(this->declare_parameter<double>("hp_cutoff_freq", 0.1)),
-      gain_(this->declare_parameter<double>("gain", 0.0001)),
-      mod_signal_freq_(this->declare_parameter<double>("mod_signal_freq", 0.05)),
-      mod_signal_amplitude_L_(this->declare_parameter<double>("mod_signal_amplitude_L", 100.0)),
-      mod_signal_amplitude_R_(this->declare_parameter<double>("mod_signal_amplitude_R", 100.0)),
-      mod_signal_amplitude_V_(this->declare_parameter<double>("mod_signal_amplitude_V", 100.0)),
+      hp_cutoff_freq_V_(this->declare_parameter<double>("hp_cutoff_freq_V", 0.05)),
+      gain_V_(this->declare_parameter<double>("gain_V", 0.000001)),
+      mod_signal_freq_V_(this->declare_parameter<double>("mod_signal_freq_V", 0.1)),
+      mod_signal_amplitude_V_(this->declare_parameter<double>("mod_signal_amplitude_V", 5.0)),
+      hp_cutoff_freq_LR_(this->declare_parameter<double>("hp_cutoff_freq_LR", 0.12)),
+      gain_LR_(this->declare_parameter<double>("gain_LR", 0.0000001)),
+      mod_signal_freq_LR_(this->declare_parameter<double>("mod_signal_freq_LR", 0.2)),
+      mod_signal_amplitude_L_(this->declare_parameter<double>("mod_signal_amplitude_L", 0.8)),
+      mod_signal_amplitude_R_(this->declare_parameter<double>("mod_signal_amplitude_R", 0.8)),
+      Left_Motor_(1090),
+      Right_Motor_(1090),
+      Vertical_Motor_(1050),
+      x_goal_(this->declare_parameter<int>("x_goal", 320)),
+      y_goal_(this->declare_parameter<double>("y_goal", 240)),
       coord_old_(std::numeric_limits<int>::quiet_NaN()),
       coord_{320, 240},
       obj_function_x_{2, 0},
@@ -606,44 +614,41 @@ public:
       int_R_{2, 0},
       hp_out_V_{2, 0},
       int_V_{2, 0},
-      Left_Motor_(1090),
-      Right_Motor_(1090),
-      Vertical_Motor_(1050),
-      x_goal_(this->declare_parameter<int>("x_goal", 320)),
-      y_goal_(this->declare_parameter<double>("y_goal", 240)),
       cam_message_{2, 0},
       counter_(0),
       counter2_(0),
       counter3_(0),
       hp_counter_(0),
-      same_cam_msg_(false),
       PWM_initial_Left_(0),
       PWM_initial_Right_(0),
       total_time_(0),
+      Ts_(0),
+      same_cam_msg_(false),
       timeout_duration_(std::chrono::seconds(5)),
       last_callback_time_(this->now())
     {
         subscriber_camera_ = this->create_subscription<blimp_interfaces::msg::CameraCoord>(
-            "cam_data", 3, 
+            "cam_data", 3,
             std::bind(&ExtremumSeekingEscInput::callback_cam_data, this, std::placeholders::_1)
         );
 
         publisher_ = this->create_publisher<blimp_interfaces::msg::EscInput>("ESC_extremum_seeking_input", 10);
 
         timer_ = this->create_wall_timer(
-            std::chrono::seconds(1), 
+            std::chrono::seconds(1),
             std::bind(&ExtremumSeekingEscInput::check_timeout, this)
         );
     }
 
 private:
 void process_motor_signals() {
-    double hp_alpha = (2 - Ts_ * hp_cutoff_freq_) / (2 + Ts_ * hp_cutoff_freq_);
+    double hp_alpha_V = (2 - Ts_ * hp_cutoff_freq_V_) / (2 + Ts_ * hp_cutoff_freq_V_);
+    double hp_alpha_LR = (2 - Ts_ * hp_cutoff_freq_LR_) / (2 + Ts_ * hp_cutoff_freq_LR_);
 
     // Calculate modulation signals
-    double mod_signal_V = mod_signal_amplitude_V_ * sin(mod_signal_freq_ * 3.14 * 2 * total_time_ + 3.14 / 2);
-    double mod_signal_L = mod_signal_amplitude_L_ * sin(mod_signal_freq_ * 3.14 * 2 * total_time_ + 3.14 / 2);
-    double mod_signal_R = mod_signal_amplitude_R_ * cos(mod_signal_freq_ * 3.14 * 2 * total_time_ + 3.14 /2);
+    double mod_signal_V = mod_signal_amplitude_V_ * sin(mod_signal_freq_V_ * M_PI * 2 * total_time_ + M_PI / 2);
+    double mod_signal_L = mod_signal_amplitude_L_ * sin(mod_signal_freq_LR_ * M_PI * 2 * total_time_ + M_PI / 2);
+    double mod_signal_R = mod_signal_amplitude_R_ * cos(mod_signal_freq_LR_ * M_PI * 2 * total_time_ + M_PI / 2);
 
     // Calculate y_error for vertical motor control
     double y_error = (coord_[1] - y_goal_) / 480;
@@ -659,12 +664,12 @@ if (y_error > 0) {
     if (hp_counter_ == 0) {
         int_V_[0] = 1050;
         Vertical_Motor_ = int_V_[0] + mod_signal_V;
-        hp_out_V_[0] = (hp_alpha * obj_function_y_[0]) * mod_signal_V;
-        int_V_[0] = gain_ * hp_out_V_[0] * Ts_;
+        hp_out_V_[0] = (hp_alpha_V * obj_function_y_[0]) * mod_signal_V;
+        int_V_[0] = gain_V_ * hp_out_V_[0] * Ts_;
     } else {
         Vertical_Motor_ = Vertical_Motor_ + int_V_[0] + mod_signal_V;
-        hp_out_V_[1] = hp_alpha * (hp_out_V_[0] + obj_function_y_[1] - obj_function_y_[0]);
-        int_V_[1] = int_V_[0] - gain_ * hp_out_V_[0];
+        hp_out_V_[1] = hp_alpha_V * (hp_out_V_[0] + obj_function_y_[1] - obj_function_y_[0]);
+        int_V_[1] = int_V_[0] - gain_V_ * hp_out_V_[0];
         hp_out_V_[0] = hp_out_V_[1];
         int_V_[0] = int_V_[1];
     }
@@ -678,12 +683,12 @@ if (x_error < 0) {
     if (hp_counter_ == 0) {
         int_L_[0] = 1090;
         Left_Motor_ = int_L_[0] + mod_signal_L;
-        hp_out_L_[0] = (hp_alpha * obj_function_x_[0]) * mod_signal_L;
-        int_L_[0] = gain_ * hp_out_L_[0] * Ts_;
+        hp_out_L_[0] = (hp_alpha_LR * obj_function_x_[0]) * mod_signal_L;
+        int_L_[0] = gain_LR_ * hp_out_L_[0] * Ts_;
     } else {
         Left_Motor_ = Left_Motor_ + int_L_[0] + mod_signal_L;
-        hp_out_L_[1] = hp_alpha * (hp_out_L_[0] + obj_function_x_[1] - obj_function_x_[0]);
-        int_L_[1] = int_L_[0] - gain_ * hp_out_L_[0];
+        hp_out_L_[1] = hp_alpha_LR * (hp_out_L_[0] + obj_function_x_[1] - obj_function_x_[0]);
+        int_L_[1] = int_L_[0] - gain_LR_ * hp_out_L_[0];
         hp_out_L_[0] = hp_out_L_[1];
         int_L_[0] = int_L_[1];
     }
@@ -697,12 +702,12 @@ if (x_error > 0) {
     if (hp_counter_ == 0) {
         int_R_[0] = 1090;
         Right_Motor_ = int_R_[0] + mod_signal_R;
-        hp_out_R_[0] = (hp_alpha * obj_function_x_[0]) * mod_signal_R;
-        int_R_[0] = gain_ * hp_out_R_[0] * Ts_;
+        hp_out_R_[0] = (hp_alpha_LR * obj_function_x_[0]) * mod_signal_R;
+        int_R_[0] = gain_LR_ * hp_out_R_[0] * Ts_;
     } else {
         Right_Motor_ = Right_Motor_ + int_R_[0] + mod_signal_R;
-        hp_out_R_[1] = hp_alpha * (hp_out_R_[0] + obj_function_x_[1] - obj_function_x_[0]);
-        int_R_[1] = int_R_[0] - gain_ * hp_out_R_[0];
+        hp_out_R_[1] = hp_alpha_LR * (hp_out_R_[0] + obj_function_x_[1] - obj_function_x_[0]);
+        int_R_[1] = int_R_[0] - gain_LR_ * hp_out_R_[0];
         hp_out_R_[0] = hp_out_R_[1];
         int_R_[0] = int_R_[1];
     }
@@ -764,8 +769,7 @@ void callback_cam_data(const blimp_interfaces::msg::CameraCoord::SharedPtr msg) 
     double x_error = (x_goal_ - coord_[0])/640.0;
     double y_error = (coord_[1] - y_goal_)/480.0;
 
-RCLCPP_INFO(this->get_logger(), "y_error: %f, coord_[1]: %d, y_goal_: %f", y_error, coord_[1], y_goal_);
-
+    RCLCPP_INFO(this->get_logger(), "y_error: %f, coord_[1]: %d, y_goal_: %f", y_error, coord_[1], y_goal_);
 
     if (counter_ == 0) {
         cam_message_[0] = coord_[0];
@@ -790,38 +794,49 @@ RCLCPP_INFO(this->get_logger(), "y_error: %f, coord_[1]: %d, y_goal_: %f", y_err
 }
 
 
-    void check_timeout() {
-        if ((this->now() - last_callback_time_) > timeout_duration_) {
-            auto msg = blimp_interfaces::msg::EscInput();
-            msg.esc_pins = {5, 6, 13};
-            msg.pwm_l = 1050;
-            msg.pwm_r = 1050;
-            msg.pwm_d = 1050;
-            publisher_->publish(msg);
-        }
+void check_timeout() {
+    if ((this->now() - last_callback_time_) > timeout_duration_) {
+        auto msg = blimp_interfaces::msg::EscInput();
+        msg.esc_pins = {5, 6, 13};
+        msg.pwm_l = 1050;
+        msg.pwm_r = 1050;
+        msg.pwm_d = 1050;
+        publisher_->publish(msg);
     }
+}
 
-    double hp_cutoff_freq_, gain_;
-    double mod_signal_freq_;
-    double mod_signal_amplitude_L_, mod_signal_amplitude_R_, mod_signal_amplitude_V_;
-    int coord_old_;
-    std::vector<int> coord_;
-    std::vector<double> obj_function_x_, obj_function_y_;
-    std::vector<double> esc_message_left_, esc_message_right_, esc_message_vert_;
-    std::vector<double> hp_out_L_, int_L_, hp_out_R_, int_R_, hp_out_V_, int_V_;
-    double Left_Motor_, Right_Motor_, Vertical_Motor_;
-    double x_goal_, y_goal_;
-    std::vector<int> cam_message_;
-    int counter_, counter2_, counter3_, hp_counter_;
-    bool same_cam_msg_;
-    double PWM_initial_Left_, PWM_initial_Right_, total_time_;
-    double Ts_;
-    time_t start_, finish_;
-    rclcpp::Duration timeout_duration_;
-    rclcpp::Time last_callback_time_;
-    rclcpp::Subscription<blimp_interfaces::msg::CameraCoord>::SharedPtr subscriber_camera_;
-    rclcpp::Publisher<blimp_interfaces::msg::EscInput>::SharedPtr publisher_;
-    rclcpp::TimerBase::SharedPtr timer_;
+// Parameters for vertical and heading control
+double hp_cutoff_freq_V_, gain_V_, mod_signal_freq_V_, mod_signal_amplitude_V_;
+double hp_cutoff_freq_LR_, gain_LR_, mod_signal_freq_LR_, mod_signal_amplitude_L_, mod_signal_amplitude_R_;
+
+// Motor control variables
+double Left_Motor_, Right_Motor_, Vertical_Motor_;
+double x_goal_, y_goal_;
+
+// State variables
+int coord_old_;
+std::vector<int> coord_;
+std::vector<double> obj_function_x_, obj_function_y_;
+std::vector<double> esc_message_left_, esc_message_right_, esc_message_vert_;
+std::vector<double> hp_out_L_, int_L_, hp_out_R_, int_R_, hp_out_V_, int_V_;
+std::vector<int> cam_message_;
+
+// Counters
+int counter_, counter2_, counter3_, hp_counter_;
+
+// PWM initial values
+double PWM_initial_Left_, PWM_initial_Right_;
+
+// Timing variables
+double total_time_, Ts_;
+bool same_cam_msg_;
+
+// ROS-specific members
+rclcpp::Subscription<blimp_interfaces::msg::CameraCoord>::SharedPtr subscriber_camera_;
+rclcpp::Publisher<blimp_interfaces::msg::EscInput>::SharedPtr publisher_;
+rclcpp::TimerBase::SharedPtr timer_;
+rclcpp::Duration timeout_duration_;
+rclcpp::Time last_callback_time_;
 };
 
 int main(int argc, char **argv) {

@@ -3,14 +3,12 @@ from launch_ros.actions import Node
 
 def generate_launch_description():
     return LaunchDescription([
-        # Outside dist packages
         Node(
             package='joy',
             executable='game_controller_node',
             name='joy_con',
-            parameters = [{"autorepeat_rate": 10.0}]
+            parameters=[{"autorepeat_rate": 10.0}]
         ),
-        # Manual Control Package Executable
         Node(
             package='manual_control',
             executable='joy_to_esc',
@@ -27,33 +25,27 @@ def generate_launch_description():
             executable='old_cam',
             name='old_cam_node',
         ),
-        # Control Package Executables
         Node(
             package='sensors_cpp',
             executable='ES_control',
             name='Extremum',
             parameters=[
                 {
-                    # Original parameters for extremum seeking
                     "x_goal": 320,  # Goal x-coordinate
                     "y_goal": 240.0,  # Goal y-coordinate
 
-                    # New parameters for process_motor_signals
-                    # "hp_cutoff_freq": 0.05,               # High-pass filter cutoff frequency
-                    # "gain": 0.0000000001,                     # Gain for the extremum-seeking controller
-                    # "mod_signal_freq": 0.1,            # Frequency of modulation signal
-		    
-		    # This for vertical
-                    #"hp_cutoff_freq": 0.05,               # High-pass filter cutoff frequency
-                    #"gain": 0.000001,                     # Gain for the extremum-seeking controller
-                    #"mod_signal_freq": 0.1,            # Frequency of modulation signal
-                    "hp_cutoff_freq": 0.12,               # High-pas>
-                    "gain": 0.0000001,                     # Gain for>
-                    "mod_signal_freq": 0.2,         
-                    # Modulation signal amplitudes with multipliers
-                    "mod_signal_amplitude_L": 0.8,  # Left motor amplitude with multiplier
-                    "mod_signal_amplitude_R": 0.8,  # Right motor amplitude with multiplier
-                    "mod_signal_amplitude_V": 5.0   # Vertical motor amplitude with multiplier
+                    # Parameters for vertical control
+                    "hp_cutoff_freq_V": 0.05,    # High-pass filter cutoff frequency
+                    "gain_V": 0.000001,        # Gain for the vertical extremum-seeking controller
+                    "mod_signal_freq_V": 0.1,   # Frequency of modulation signal for vertical motor
+                    "mod_signal_amplitude_V": 5.0,  # Amplitude of modulation signal for vertical motor
+
+                    # Parameters for heading control (left/right motors)
+                    "hp_cutoff_freq_LR": 0.12,  # High-pass filter cutoff frequency
+                    "gain_LR": 0.0000001,       # Gain for the heading extremum-seeking controller
+                    "mod_signal_freq_LR": 0.2, # Frequency of modulation signal for left/right motors
+                    "mod_signal_amplitude_L": 0.8,  # Amplitude of modulation signal for left motor
+                    "mod_signal_amplitude_R": 0.8   # Amplitude of modulation signal for right motor
                 }
             ]
         ),
@@ -61,11 +53,7 @@ def generate_launch_description():
             package='controls',
             name='esc_motor_driver',
             executable='esc_driver',
-            parameters=[
-                {
-                    "MAC": "68:6C:E6:73:04:62"
-                }
-            ]
+            parameters=[{"MAC": "68:6C:E6:73:04:62"}]
         ),
         Node(
             package='controls',
