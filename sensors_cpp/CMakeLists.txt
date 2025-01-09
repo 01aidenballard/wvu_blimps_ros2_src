@@ -6,7 +6,7 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wno-class-memaccess)
 endif()
 
-# find dependencies
+# Find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(blimp_interfaces REQUIRED)
@@ -52,6 +52,17 @@ ament_target_dependencies(old_cam
 # Add httplib dependency for old_cam
 target_include_directories(old_cam PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
+# Add modulated_light_camera executable
+add_executable(modulated_light_camera src/modulated_light_camera.cpp)
+ament_target_dependencies(modulated_light_camera
+  rclcpp
+  blimp_interfaces
+  OpenCV
+  sensor_msgs
+)
+# Add httplib dependency for modulated_light_camera
+target_include_directories(modulated_light_camera PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
 add_executable(ES_control src/Extremum_Seeking.cpp)
 ament_target_dependencies(ES_control
   rclcpp
@@ -65,8 +76,10 @@ install(TARGETS
   F_to_Esc
   pi_controller
   old_cam
+  modulated_light_camera  # Install new executable
   ES_control
   DESTINATION lib/${PROJECT_NAME}
 )
 
 ament_package()
+
