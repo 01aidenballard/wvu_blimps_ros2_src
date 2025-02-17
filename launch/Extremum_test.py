@@ -22,8 +22,8 @@ def generate_launch_description():
         ),
         Node(
             package='sensors_cpp',
-            executable='old_cam',
-            name='old_cam_node',
+            executable='modulated_light_camera',
+            name='mod_cam',
         ),
         Node(
             package='sensors_cpp',
@@ -44,8 +44,8 @@ def generate_launch_description():
                     "hp_cutoff_freq_LR": 0.12,  # High-pass filter cutoff frequency
                     "gain_LR": 0.0000001,       # Gain for the heading extremum-seeking controller
                     "mod_signal_freq_LR": 0.2, # Frequency of modulation signal for left/right motors
-                    "mod_signal_amplitude_L": 0.8,  # Amplitude of modulation signal for left motor
-                    "mod_signal_amplitude_R": 0.8   # Amplitude of modulation signal for right motor
+                    "mod_signal_amplitude_L": 1.8,  # Amplitude of modulation signal for left motor
+                    "mod_signal_amplitude_R": 1.8   # Amplitude of modulation signal for right motor
                 }
             ]
         ),
