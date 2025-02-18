@@ -9,10 +9,10 @@ def generate_launch_description():
             name='mod_cam',
             parameters=[
                 {
-                    "camera_width": 640,
-                    "camera_height": 480,
+                    "camera_width": 640, #1280
+                    "camera_height": 480, #720
                     "fps": 20,
-                    "lower_freq": 5.0,
+                    "lower_freq": 2.0,
                     "upper_freq": 8.0
                 }
             ]

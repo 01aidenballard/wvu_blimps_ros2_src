@@ -332,6 +332,16 @@ public:
         cv::Scalar lower_red(0, 81, 201);
         cv::Scalar upper_red(179, 200, 255);
         cv::inRange(hsv_frame, lower_red, upper_red, mask_goal);
+
+        // Convert to Grayscale
+        // cv::Mat gray_frame, mask_goal;
+        // cv::cvtColor(frame, gray_frame, cv::COLOR_BGR2GRAY);
+
+        // Adaptive Thresholding to extract bright regions dynamically
+        //cv::Mat binary_mask;
+        //cv::adaptiveThreshold(gray_frame, mask_goal, 255, 
+        //                  cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY, 11, 2);
+
     
         // Update intensity buffer
         double avg_intensity = cv::mean(mask_goal)[0] / 255.0;
