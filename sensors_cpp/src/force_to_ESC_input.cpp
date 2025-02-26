@@ -50,8 +50,8 @@ public:
         // Wanting to solve tau = Q*K*u, for u
         // K_inv = K.inverse();
 
-        this->declare_parameter<int>("x_goal", 640);
-        this->declare_parameter<double>("y_goal", 360);
+        this->declare_parameter<int>("x_goal", 320);
+        this->declare_parameter<double>("y_goal", 240);
         coord_ = {0, 0};
 
         x_goal_ = this->get_parameter("x_goal").as_int();
@@ -78,12 +78,14 @@ private:
         //retriving camera data from the /cam_data topic and storing as a global variable
         coord_[0] = msg->position[0];
         coord_[1] = msg->position[1];
+        //LCPP_INFO(this->get_logger(), "Camera data received: x = %d, y = %d", coord_[0], coord_[1]);
         // haveing a timer start every time this callback is used   
     }
 
 
     void callback_force_to_esc(const blimp_interfaces::msg::CartCoord::SharedPtr msg) {
         // reading the values of the msg in to a 1 x 6 force vector
+        //RCLCPP_INFO(this->get_logger(), "Received force message: x = %f, y = %f, z = %f, theta = %f, phi = %f, psy = %f",msg->x, msg->y, msg->z, msg->theta, msg->phi, msg->psy);
         tau << msg->x+0.00,
                   msg->y,
                   msg->z,
@@ -93,38 +95,27 @@ private:
 
         x_error = x_goal_ - coord_[0];
         y_error = coord_[1] -  y_goal_;
+        RCLCPP_INFO(this->get_logger(), "Computed errors: x_error = %d, y_error = %d", x_error, y_error);
 
+        // This is all for Park 180 with 4 inch prop
+        k1 = 0.00061032;
+        k2 = 0.00061032;
+        k3 = 0.00061032;
+        
+        b1 = -0.6436411;
+        b2 = -0.6436411;
+        b3 = -0.6436411;
 
-        Fy1 = 0, Fy2 = 0, Fy3 = 0;
-        //if (tau(2) > 0) {
-        if (y_error > 0) {
-            Fz1 = 0, Fz2 = 0, Fz3 = 1;
-            k3 = 0.001112;
-            b3 = -1.748142;
-        } else {
-            Fz1 = 0, Fz2 = 0, Fz3 = -1;
-            k3 = -0.000554;
-            b3 = 0.788902;
-        }
-
-        if (x_error > 0) {
-            Fx1 = 1, Fx2 = -1, Fx3 = 0;
-            k1 = 0.001112;
-            b1 = -1.748142;
-            k2 = -0.000554;
-            b2 = 0.788902;
-        } else {
-            Fx1 = -1, Fx2 = 1, Fx3 = 0;
-            k2 = 0.001112;
-            b2 = -1.748142;
-            k1 = -0.000554;
-            b1 = 0.788902;
-        }
 
         // 400 grams:
+        Fx1 = 1, Fx2 = 1, Fx3 = 0;
+        Fy1 = 0, Fy2 = 0, Fy3 = 0;
+        Fz1 = 0, Fz2 = 0, Fz3 = -1;
         lx1 = 0.0, lx2 = 0.0, lx3 = 0.0;
         ly1 = -0.461, ly2 = 0.461, ly3 = 0.0;
         lz1 = -0.175, lz2 = -0.175, lz3 = 0.178;
+
+        //RCLCPP_INFO(this->get_logger(), "Thrust force selection: Fx1 = %f, Fx2 = %f, Fx3 = %f, Fz3 = %f", Fx1, Fx2, Fx3, Fz3);
 
         // 600 grams: 
         //lx1 = 0.0, lx2 = 0.0, lx3 = 0.0;
@@ -132,6 +123,8 @@ private:
         //lz1 = -0.258, lz2 = -0.258, lz3 = 0.257;
 
         K = Eigen::DiagonalMatrix<double, 3>(k1, k2, k3);
+
+        //RCLCPP_INFO(this->get_logger(), "K matrix: [%f, %f, %f], B vector: [%f, %f, %f]", k1, k2, k3, b1, b2, b3);
 
         B << b1, 
              b2, 
@@ -144,11 +137,21 @@ private:
                 Fx1*lz1-Fz1*lx1, Fx2*lz2-Fz2*lx2, Fx3*lz3-Fz3*lx3,
                 Fy1*lx1-Fx1*ly1, Fy2*lx2-Fx2*ly2, Fy3*lx3-Fx3*ly3;
 
+                //RCLCPP_INFO(this->get_logger(), "Q matrix computed.");
+
         T = Q.transpose()*Q;
+
+        if (T.determinant() == 0) {
+            RCLCPP_ERROR(this->get_logger(), "Matrix T is singular, cannot compute inverse.");
+            return;
+        }
+
         Qp = T.inverse()*Q.transpose();
         // Taking Inverse of Thrust Coefficents
         // Wanting to solve tau = Q*K*u, for u
         K_inv = K.inverse();
+
+        //RCLCPP_INFO(this->get_logger(), "Successfully computed Q pseudo-inverse and K inverse.");
     }
 
     void callback_timer() {
@@ -158,11 +161,20 @@ private:
         //assighning the msg and values to the msg then publishing it
         auto msg2 = blimp_interfaces::msg::EscInput();
         msg2.esc_pins = {5,6,13};
-        msg2.pwm_l = F(1,0); 
-        msg2.pwm_r = F(0,0);
+
+        if (x_error < 0) {
+            msg2.pwm_l = F(1,0);
+        } else {
+            msg2.pwm_l = 0;
+        }
+        if (x_error > 0) {
+            msg2.pwm_r= F(0,0);
+        } else {
+            msg2.pwm_r= 0;
+        }
         //msg2.pwm_u = F(2,0); //are these correct
         msg2.pwm_d = F(2,0);
-        RCLCPP_INFO(this->get_logger(), "M1: %f  M2: %f  M3: %f", msg2.pwm_l, msg2.pwm_r, msg2.pwm_d);
+        //RCLCPP_INFO(this->get_logger(), "M1: %f  M2: %f  M3: %f", msg2.pwm_l, msg2.pwm_r, msg2.pwm_d);
         publisher_->publish(msg2);
         //RCLCPP_INFO(this->get_logger(), "M1: %f  M2: %f  M3: %f  M4: %f", F(0), F(1), F(2), F(3));
 

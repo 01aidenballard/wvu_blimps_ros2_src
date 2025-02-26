@@ -28,7 +28,9 @@ setup(
             "bomber_cntrl = controls.Bomber_Cntrl:main",
             "baro_cntrl = controls.baro_control:main",
             "mux = controls.bomber_mux:main",
-            "rudolph_mode_switch = controls.rudolph_mode_switcher:main"
+            "rudolph_mode_switch = controls.rudolph_mode_switcher:main",
+            "mode_switch_PID = controls.mode_switcher_PID:main"
+
         ],
     },
 )

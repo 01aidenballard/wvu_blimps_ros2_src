@@ -17,8 +17,8 @@ public:
         this->declare_parameter<double>("kpyu", 0.0);
         this->declare_parameter<double>("kpyd", 0.0);
         this->declare_parameter<double>("kiy", 0.0);
-        this->declare_parameter<int>("x_goal", 640);
-        this->declare_parameter<double>("y_goal", 360);
+        this->declare_parameter<int>("x_goal", 360);
+        this->declare_parameter<double>("y_goal", 240);
         this->declare_parameter<double>("kpb", 0.0);
         coord_ = {0, 0};
         coord_old = {1, 1};
@@ -86,7 +86,7 @@ private:
             // LR_input is yaw accel UD input is z accel
             LR_input = (x_goal_ - 50)*kpx_;
             UD_input = y_error * kpb_;
-	        RCLCPP_INFO(this->get_logger(), "IT'S BARO TIME! height: %f goal_height %f", height, height_goal);
+	        //RCLCPP_INFO(this->get_logger(), "IT'S BARO TIME! height: %f goal_height %f", height, height_goal);
 
         } else {
             // calc error from cam
@@ -95,14 +95,15 @@ private:
 
             x_int_error_ += x_error;
             y_int_error_ += y_error;
-	        RCLCPP_INFO(this->get_logger(), "ew stinky auto mode");
+	        //RCLCPP_INFO(this->get_logger(), "ew stinky auto mode");
 
             //determining the yaw and z accelerations
             LR_input = x_error * kpx_ + x_int_error_ * kix_;
+            LR_input = abs(LR_input);
             if (y_error < 0) {
                 UD_input = y_error * kpyu_ + y_int_error_ * kiy_;
             } else {
-                UD_input = y_error * kpyd_ + y_int_error_ * kiy_;
+                UD_input = 0;
             }
            
         }
@@ -119,7 +120,7 @@ private:
 
         // Publish the control message
         publisher_->publish(msg2);
-        RCLCPP_INFO(this->get_logger(), "UD_accel: %f  LR_accel: %f", UD_input, LR_input);
+        //RCLCPP_INFO(this->get_logger(), "UD_accel: %f  LR_accel: %f", UD_input, LR_input);
     }
 
     // Node member parammeters

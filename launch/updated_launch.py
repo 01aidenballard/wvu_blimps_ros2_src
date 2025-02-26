@@ -20,23 +20,32 @@ def generate_launch_description():
 			}]
         ),
         # Launching camera node
-		Node(
-			package='sensors_cpp',
-			executable='old_cam',
-			name='cam_node',
+        Node(
+            package='sensors_cpp',
+            executable='modulated_light_camera',
+            name='mod_cam',
+            parameters=[
+                {
+                    "camera_width": 640, #1280
+                    "camera_height": 480, #720
+                    "fps": 20,
+                    "lower_freq": 2.0,
+                    "upper_freq": 8.0
+                }
+            ]
         ),
-        # Launching Sonar
-		Node(
-			package='sensors',
-			executable='read_sonar',
-			name='sonar',
-        ),
+    #    # Launching Sonar
+	#	Node(
+	#		package='sensors',
+	#		executable='read_sonar',
+	#		name='sonar',
+    #   ),
         # Launching Lidar
-		Node (
-			package='sensors',
-			executable='read_lidar',
-			name='lidar',
-		),
+	#	Node (
+	#		package='sensors',
+	#		executable='read_lidar',
+	#		name='lidar',
+	#	),
 		# Launching PID Controler
 		Node(
 			package='sensors_cpp',
@@ -44,9 +53,9 @@ def generate_launch_description():
 			name='balloon_detect_PI',
 			parameters = [{
 				"iheight": 1.5, # Initial Height
-				"kpx": 0.0, # side mototrs - Proportional
+				"kpx": 0.001, # side mototrs - Proportional
 				"kix":  0.0, # side motors - Integral
-				"kpyu": 0.0, # up motor - Proportional
+				"kpyu": 0.001, # up motor - Proportional
 				"kpyd": 0.0, # down motor - Proportional
 				"kiy":  0.0, # up/down motor - Integral
 				"kpb":  0.0  # barometer - Proportional
@@ -78,27 +87,27 @@ def generate_launch_description():
 				"MAC":"68:6C:E6:73:04:62"
 			}]
 		),
-        # Launching servo node for open/close net
-		Node(
-			package='controls',
-			name='net_servo',
-			executable='net_servo'
-		),
+   #     # Launching servo node for open/close net
+	#	Node(
+#			package='controls',
+#			name='net_servo',
+#			executable='net_servo'
+#		),
         # Launching barometer
-		Node(
-			package='sensors',
-			name='read_altitude',
-			executable='read_altitude',
-			parameters = [{
-				"sea_level_pressure": 1017.0
-			}]
-		),
-        # Launching IMU
-		Node(
-			package='sensors',
-			name='read_imu',
-			executable='read_bno085'
-		),
+#		Node(
+#			package='sensors',
+#			name='read_altitude',
+#			executable='read_altitude',
+#			parameters = [{
+#				"sea_level_pressure": 1017.0
+#			}]
+#		),
+#        # Launching IMU
+#		Node(
+#			package='sensors',
+#			name='read_imu',
+#			executable='read_bno085'
+#		),
 		# Node(
 		# 	package = 'sensors',
 		# 	name = 'record_data',
@@ -121,14 +130,14 @@ def generate_launch_description():
         # Launching Mode switchter to switch between manual and autonomous
 		Node(
 			package='controls',
-			executable='mode_switch',
+			executable='mode_switch_PID',
 			name='mode_switcher',
-        ),
-		Node(
-			package ='sensors',
-			executable='LED_modulation',
-			name='LED',
-		)
+        )
+#		Node(
+#			package ='sensors',
+#			executable='LED_modulation',
+#			name='LED',
+#		)
 	])
 def main(args=None):
 	generate_launch_description()

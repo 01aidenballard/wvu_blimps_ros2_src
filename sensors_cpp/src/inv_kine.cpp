@@ -15,7 +15,7 @@ public: // Defing public class (can be accesed outside of scope)
     DynamicModel() //constructor for dynamic model class
     : Node("dynamic_model"), // ros2 node name
     height{0.0}, 
-    m{0.460386}, // mass [kg] // 400 grams: 0.6039 // 600 grams: 0.72838 
+    m{0.460386}, // mass [kg] // 400 grams: 0.46 // 600 grams: 0.72838 
     zg{0.178263} // z_directional center of gravity [m] // 400 grams: // 600 grams: 0.26738
     {
         this->declare_parameter<double>("rho_air", 1.225); // declaring air density parameter as type double with default value 1.225 [kg/m^3]
@@ -29,7 +29,7 @@ public: // Defing public class (can be accesed outside of scope)
         W = m * 9.81; // creating Weight variable "W"
         //        a     b      density    Ix         Iy        Iz
         // 400 grams:
-        M_matrix(0.9068,0.37233,rho_air,0.046568,0.087299,0.073692); // Initilizing M_matrix (Mass Matrix)
+        M_matrix(0.918,0.37233,rho_air,0.046568,0.0737,0.0873); // Initilizing M_matrix (Mass Matrix)
         // 600 grams:
         // M_matrix(1,0.4098,rho_air,0.08034,0.13571,0.10387); // Initilizing M_matrix (Mass Matrix)
 
@@ -65,7 +65,7 @@ public: // Defing public class (can be accesed outside of scope)
         double kprime = (e * e * e * e * (beta0 - alpha0)) / ((2 - e * e) * (2 * e * e - (2 - e * e) * (beta0 - alpha0)));
         double k1 = alpha0 / (2 - alpha0);
         double k2 = beta0 / (2 - beta0);
-        double Izh = (4/5) * M_PI * rho * a * b * b * (a * a + b * b);
+        double Izh = (4/15) * M_PI * rho * a * b * b * (a * a + b * b);
         mx_prime = m + k1 * m;
         my_prime = m + k2 * m;
         mz_prime = m + k2 * m;
@@ -142,12 +142,12 @@ private:
         accel << msg->x,msg->y,msg->z,msg->theta,msg->phi,msg->psy; // creating acceleration vector [6x1] using msg which comes from PI controller
 
         // Coriolis matrix
-        C << 0, 0, 0, 0, -(mz_prime * vz) - (my_prime * vy - m * zg * gyro(0)), 0,
-            0, 0, 0, -(mz_prime * vz), 0, -(mx_prime * vx - m * zg * gyro(1)),
-            0, 0, 0, -(my_prime * vy - m * zg * gyro(0)), -(mx_prime * vx + m * zg * gyro(1)), 0,
-            0, -(mz_prime * vz), -(my_prime * vy - m * zg * gyro(0)), 0, -(Iz_prime_ * gyro(2)), -(m * zg * vx + Iy_prime_ * gyro(1)),
-            -(mz_prime * vz), 0, -(mx_prime * vx - m * zg * gyro(1)), -(Iz_prime_ * gyro(2)), 0, -(m * zg * vy - Ix_prime_ * gyro(0)),
-            -(my_prime * vy - m * zg * gyro(0)), -(mx_prime * vx + m * zg * gyro(1)), 0, -(m * zg * vx - Iy_prime_ * gyro(1)), -(m * zg * vy + Ix_prime_ * gyro(0)), 0;
+        C << 0, 0, 0, 0, -(-mz_prime*vz), -(my_prime*vy - m*zg*gyro(0)),
+            0, 0, 0, -(mz_prime*vz), 0, -(-mx_prime*vx - m*zg*gyro(1)),
+            0, 0, 0, -(-my_prime*vy - m*zg*gyro(0)), -(mx_prime*vx + m*zg*gyro(1)), 0,
+            0, -(-mz_prime*vz), -(my_prime*vy - m*zg*gyro(0)), 0, -(-Iz_prime_*gyro(2)), -(m*zg*vx + Iy_prime_ * gyro(1)),
+            -(mz_prime*vz), 0, -(-mx_prime*vx - m*zg*gyro(1)), -(Iz_prime_*gyro(2)), 0, -(m*zg*vy - Ix_prime_*gyro(0)),
+            -(-my_prime*vy - m*zg*gyro(0)), -(mx_prime*vx + m*zg*gyro(1)), 0, -(-m*zg*vx - Iy_prime_*gyro(1)), -(-m*zg*vy + Ix_prime_*gyro(0)), 0;
         
         // Restoring Forces matrix
         g << (W - B) * sin(euler(1)),
@@ -168,7 +168,7 @@ private:
         msg2.phi = tau(4); // moment about y-axis
         msg2.psy = tau(5); // // moment about z-axis
         kine_publisher->publish(msg2);
-        RCLCPP_INFO(this->get_logger(), "taux: %f  tauy: %f  tauz: %f  tauth: %f  tauxphi: %f  tauxpsy: %f", tau(0), tau(1), tau(2), tau(3), tau(4), tau(5));
+        //RCLCPP_INFO(this->get_logger(), "taux: %f  tauy: %f  tauz: %f  tauth: %f  tauxphi: %f  tauxpsy: %f", tau(0), tau(1), tau(2), tau(3), tau(4), tau(5));
         //RCLCPP_INFO(this->get_logger(), "taux: %f  height: %f  height_old: %f", tau(0), height, height_old);
         //RCLCPP_INFO(this->get_logger(), "euler1: %f  euler2: %f  euler3: %f", euler(0), euler(1), euler(2));
         //RCLCPP_INFO(this->get_logger(), "gyro1 : %f  gyro 2: %f  gyro 3: %f", gyro(0), gyro(1), gyro(2));
