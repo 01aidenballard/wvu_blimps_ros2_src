@@ -12,42 +12,42 @@ def generate_launch_description():
 		# Launching stick input to motor input node
 		Node(
 			package='manual_control',
-			executable='joy_to_esc',
-			name='joy_to_esc',
+			executable='joy_to_esc_rudolph',
+			name='joy_to_esc_rudolph',
 			parameters = [{
 				"Klm": 1.0,
 				"Krm": 1.0,
 			}]
         ),
-        # Launching ESC Driver
+        # # Launching ESC Driver
 		Node(
 			package='controls',
 			name='esc_motor_driver',
-			executable='esc_driver',
+			executable='esc_driver_rudolph',
 			parameters = [{
-				"MAC":"68:6C:E6:84:3D:AA" # Black Controller
+				"MAC":"68:6C:E6:73:04:62" # White Controller
 			}]
 		),
-        # Barometer Control Node:
-		Node(
-			package='controls',
-			name='baro_cntrl',
-			executable='baro_cntrl',
-			parameters = [{
-				"kpb": 150.0,
-				"height": 1.4,
-			}]
-		),
-        # Launching barometer
-		Node(
-			package='sensors',
-			name='read_altitude',
-			executable='read_altitude',
-			parameters = [{
-				"sea_level_pressure": 1016.0
-			}]
-		),
-        # Launching Mode switchter to switch between manual and autonomous
+         # Barometer Control Node:
+		 Node(
+		 	package='controls',
+		 	name='baro_cntrl',
+		 	executable='baro_cntrl_rudolph',
+		 	parameters = [{
+		 		"kpb": 150.0,
+		 		"height": 1.4,
+		 	}]
+		 ),
+         # Launching barometer
+		 Node(
+		 	package='sensors',
+		 	name='read_altitude',
+		 	executable='read_altitude',
+		 	parameters = [{
+		 		"sea_level_pressure": 1016.0
+		 	}]
+		 ),
+        # # Launching Mode switchter to switch between manual and autonomous
 		Node(
 			package='controls',
 			executable='rudolph_mode_switch',
@@ -57,7 +57,8 @@ def generate_launch_description():
 			package ='sensors',
 			executable='LED_modulation',
 			name='LED',
-		)
+			output='screen',
+		),
 	])
 def main(args=None):
 	generate_launch_description()

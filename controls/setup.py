@@ -21,12 +21,14 @@ setup(
     entry_points={
         'console_scripts': [
             "esc_driver = controls.esc_driver:main",
+            "esc_driver_rudolph = controls.esc_driver_rudolph:main",
             "balloon_detect_control = controls.balloon_pi:main",
             "mode_switch = controls.mode_switcher:main",
             "net_servo = controls.net_servo:main",
             "random_walk = controls.random_walk:main",
             "bomber_cntrl = controls.Bomber_Cntrl:main",
             "baro_cntrl = controls.baro_control:main",
+            "baro_cntrl_rudolph = controls.baro_control_rudolph:main",
             "mux = controls.bomber_mux:main",
             "rudolph_mode_switch = controls.rudolph_mode_switcher:main",
             "mode_switch_PID = controls.mode_switcher_PID:main"

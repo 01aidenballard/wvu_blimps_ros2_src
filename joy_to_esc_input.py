@@ -135,6 +135,7 @@ class FixAxesNode(Node):
         self.ESC_pin1 = 5  # Left Motor Pin
         self.ESC_pin2 = 6  # Right Motor Pin
         self.ESC_pin3 = 13 # Vertical Motor Pin
+        self.ESC_pin4 = 26 # Adiitonal Motor Pin
 
         # Initializing the node
         super().__init__("joy_to_esc")
